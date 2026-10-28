@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6.3 Итоговый проект — DevOps-маршрут</title>
+<meta name="description" content="Урок 6.3: Итоговый проект">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c6)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-6">← 6. Продвинутый CI/CD</a>
+    <div class="sidebar-art"><svg class="art art-ship" viewBox="0 0 240 140" role="img" aria-label="Безопасная поставка" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path class="flow" d="M14 70 H78"/>
+<path class="flow" d="M162 70 H226"/>
+<rect class="dim" x="14" y="58" width="14" height="24" rx="3"/>
+<rect class="dim" x="212" y="58" width="14" height="24" rx="3"/>
+<path class="shield" d="M120 18 L158 32 V66 C158 94 140 110 120 120 C100 110 82 94 82 66 V32 Z"/>
+<path class="check" d="M103 68 L116 81 L139 56"/>
+<rect class="dim" x="186" y="28" width="22" height="16" rx="3"/><path class="dim" d="M191 28 V22 A6 6 0 0 1 203 22 V28"/>
+<text class="lbl" x="18" y="134">trivy · sign · argocd sync</text>
+</svg></div>
+    <div class="lesson-number">lesson 6.3 · ship</div>
+    <h1 class="lesson-title">Итоговый проект</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Зачем нужен итоговый проект</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Критерии выбора open-source проекта</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Докеризация сервисов, где её ещё нет</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Модульные тесты бизнес-логики</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Helm-чарт на несколько сервисов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Порядок готовности зависимостей: база данных раньше сервисов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">GitLab Environments: именованные целевые окружения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Четырёхстадийный пайплайн: build → test → staging → prod</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Чем prod отличается от staging не только по названию</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Документация: README и журнал решений</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Итоговый проект как проект для портфолио</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Чек-лист зрелости: что должно быть в проекте</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Как рассказывать об этом проекте</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Ориентиры по рынку</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Что учить дальше</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Все предыдущие уроки изучали отдельные кусочки DevOps по отдельности: контейнеризация (3.1), базовый CI/CD (3.2), Docker Compose (4.1), облако и инфраструктура кодом (4.2–4.4), наблюдаемость (4.5), Kubernetes (5.1–5.2), Helm и Kustomize (5.3), GitOps (5.4), CI/CD в кластере (6.1), безопасность конвейера (6.2). Итоговый проект — не новая технология, а проверка того, что все эти кусочки складываются в единый рабочий процесс на настоящем проекте, а не на примере, написанном специально для урока.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Микросервисная архитектура</strong> — приложение, разделённое на несколько независимо разворачиваемых сервисов, а не один большой монолит.</li>
+<li><strong>Unit-тест (модульный тест)</strong> — тест, проверяющий одну изолированную часть кода (функцию, класс), без обращения к реальной базе данных или сети.</li>
+<li><strong>GitLab Environment</strong> — именованное целевое окружение (например, staging или production) в GitLab CI/CD, к которому привязываются деплой-джобы.</li>
+<li><strong>Protected environment</strong> — окружение, деплой в которое разрешён только определённым пользователям или веткам.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Зачем нужен итоговый проект</h2><div class="prose"><p><em>Аналогия:</em> пройти курс вождения по отдельным упражнениям на закрытой площадке (парковка, разворот, змейка) — это одно. Проехать через весь город в реальном потоке машин, где всё это должно сработать вместе и в нужный момент — совсем другое.</p>
+<p>Каждый предыдущий урок изолированно тренировал один навык на заранее подготовленном примере. Итоговый проект убирает эту подготовленность: нужно взять чужой, не адаптированный под учебный курс проект и самостоятельно решить, где и что из уже изученного арсенала применить — это гораздо ближе к тому, с чем реально сталкивается DevOps-инженер на новой работе.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Критерии выбора open-source проекта</h2><div class="prose"><p><em>Аналогия:</em> для тренировки по вождению в потоке нужен не пустой пригород, а район с достаточным количеством перекрёстков, светофоров и другого транспорта — иначе тренировка не даст нужного опыта.</p>
+<p>Хороший ориентир — проект, где есть хотя бы три сервиса, база данных и фронтенд. Например, демо-магазины, на которых сами разработчики показывают микросервисы: Google Online Boutique, OpenTelemetry Demo, eShop от Microsoft. Можно взять и свой магазин из уроков 2.5–6.1, добавив к нему фронтенд и пару сервисов. Такой набор — не случайная планка: он гарантирует, что придётся иметь дело с межсервисным взаимодействием (а не одним изолированным приложением, как в уроке 5.1), с постоянным хранилищем данных (аналогично 5.2), и с как минимум двумя разными типами контейнеров (backend и frontend), у которых обычно разные Dockerfile и порты.</p>
+<p><img loading="lazy" src="../assets/diagrams/do14-criteria.webp" alt="" /></p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Докеризация сервисов, где её ещё нет</h2><div class="prose"><p><em>Аналогия:</em> если в выбранном доме не хватает розеток под конкретную технику — их приходится доустанавливать самостоятельно, а не выбрасывать саму технику.</p>
+<pre><code class="language-dockerfile">FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+COPY . .
+EXPOSE 3000
+CMD [&quot;node&quot;, &quot;server.js&quot;]
+</code></pre>
+<p>Не каждый open-source проект имеет готовые Dockerfile для всех своих сервисов — иногда автор ожидал запуска напрямую на машине разработчика. В таком случае Dockerfile пишется по тем же принципам, что и в уроке 3.1: минимальный базовый образ, слои, которые редко меняются (установка зависимостей), ставятся раньше часто меняющихся слоёв (сам код).</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Модульные тесты бизнес-логики</h2><div class="prose"><p><em>Аналогия:</em> модульный тест проверяет отдельную деталь ещё до того, как она попадёт в сборку всего автомобиля — в отличие от смоук-тестов, которые проверяют уже собранный автомобиль целиком на ходу.</p>
+<pre><code class="language-python">from decimal import Decimal
+
+def test_discount_is_applied_to_order_total():
+    order = Order(lines=[OrderLine(price=Decimal(&quot;1000.00&quot;), qty=2)], discount_pct=10)
+    assert order.total == Decimal(&quot;1800.00&quot;)
+</code></pre>
+<p>В отличие от смоук-тестов из <a href="../lessons/5-2.html#s-9">5.2 Kubernetes в работе</a>, §9 (которые проверяют уже развёрнутое приложение целиком через HTTP), модульные тесты проверяют одну функцию или класс изолированно, без реальной сети и базы данных — если у выбранного проекта нет тестов для ключевой бизнес-логики, их стоит добавить, чтобы стадия <code>test</code> в пайплайне проверяла не только сборку, но и корректность кода.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Helm-чарт на несколько сервисов</h2><div class="prose"><p><em>Аналогия:</em> один Helm-чарт из урока 5.3 был мебельным конструктором на один шкаф. Здесь конструктор больше: одна инструкция описывает сразу несколько предметов мебели для одной комнаты — стол, стулья, полки — но все по-прежнему собираются одной командой.</p>
+<pre><code>mychart/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── frontend-deployment.yaml
+    ├── frontend-service.yaml
+    ├── backend-deployment.yaml
+    ├── backend-service.yaml
+    ├── db-statefulset.yaml
+    └── db-service.yaml
+</code></pre>
+<p>Принцип из урока 5.3 не меняется — values.yaml задаёт параметры, templates/ содержит шаблоны с плейсхолдерами — но теперь в одном чарте описываются манифесты сразу для всех сервисов приложения: фронтенда, каждого бэкенд-микросервиса и базы данных. Один <code>helm install</code> поднимает всё приложение целиком, а не по частям вручную.</p>
+<p><img loading="lazy" src="../assets/diagrams/do14-helmmulti.webp" alt="" /></p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Порядок готовности зависимостей: база данных раньше сервисов</h2><div class="prose"><p><em>Аналогия:</em> открывать кассу магазина раньше, чем на склад завезли товар, бессмысленно — покупатели придут к пустым полкам.</p>
+<pre><code class="language-yaml">spec:
+  containers:
+    - name: backend
+      image: myapp/backend:1.0
+      # readinessProbe не даст поду backend
+      # считаться готовым, пока БД недоступна
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+</code></pre>
+<p>Backend-сервисы обычно зависят от базы данных: если backend стартует раньше, чем база готова принимать соединения, первые запросы будут падать с ошибками подключения. <code>readinessProbe</code>, проверяющий собственный <code>/health</code>-эндпоинт (который сам, в свою очередь, проверяет соединение с базой), не даёт Kubernetes считать под backend готовым принимать трафик, пока зависимость действительно не доступна.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>GitLab Environments: именованные целевые окружения</h2><div class="prose"><p><em>Аналогия:</em> если пайплайн из урока 6.1 просто выполнял команды деплоя, то GitLab Environment — это подписанная табличка на двери «Staging» или «Production», которая помогает GitLab (и человеку) не перепутать, куда именно сейчас идёт выкладка.</p>
+<pre><code class="language-yaml">staging:
+  stage: staging
+  script:
+    - helm upgrade --install myapp ./mychart --namespace staging -f values-staging.yaml
+  environment:
+    name: staging
+    url: https://staging.example.com
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+</code></pre>
+<p>Ключ <code>environment</code> связывает job с конкретным именованным окружением — GitLab начинает отслеживать историю деплоев именно в это окружение отдельно, показывает текущую развёрнутую версию в интерфейсе и позволяет настраивать для него отдельные права доступа (кто может деплоить именно в <code>production</code>, а не в любое окружение вообще).</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Четырёхстадийный пайплайн: build → test → staging → prod</h2><div class="prose"><p><em>Аналогия:</em> четыре контрольные точки перед выпуском продукции: сборка, контроль качества, тестовый склад (staging) и настоящая витрина магазина (production), куда товар попадает только после того, как всё остальное подтвердило готовность.</p>
+<pre><code class="language-yaml">stages:
+  - build
+  - test
+  - staging
+  - prod
+
+prod:
+  stage: prod
+  script:
+    - helm upgrade --install myapp ./mychart --namespace production -f values-prod.yaml
+  environment:
+    name: production
+    url: https://myapp.example.com
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: manual
+</code></pre>
+<p><code>build</code> и <code>test</code> работают так же, как в уроке <a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>. <code>staging</code> обновляется автоматически каждым коммитом в основную ветку, <code>prod</code> — только по тегу релиза и по кнопке. Это два разных, полностью независимых окружения: разные namespace и разные <code>values-*.yaml</code> с разными настройками, например, разным количеством реплик или разным доменом. Если проект выкатывается через Argo CD (<a href="../lessons/5-4.html">5.4 GitOps и Argo CD</a>), стадии <code>staging</code> и <code>prod</code> не вызывают <code>helm</code> сами, а коммитят новый тег образа в репозиторий конфигурации.</p>
+<p><img loading="lazy" src="../assets/diagrams/do14-fourstage.webp" alt="" /></p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Чем prod отличается от staging не только по названию</h2><div class="prose"><p><em>Аналогия:</em> пропуск на склад для сотрудников и пропуск в зал для покупателей могут вести физически в соседние двери, но выдаются они по разным правилам и разным людям.</p>
+<pre><code class="language-yaml"># values-prod.yaml (фрагмент)
+replicaCount: 3
+resources:
+  limits:
+    cpu: &quot;1&quot;
+    memory: &quot;1Gi&quot;
+</code></pre>
+<p>Помимо namespace, <code>values-prod.yaml</code> для продакшна обычно отличается от <code>values-staging.yaml</code> по существу: больше реплик для отказоустойчивости, более строгие лимиты ресурсов, реальный домен вместо тестового. В реальных проектах environment <code>production</code> в GitLab дополнительно часто настраивают как <strong>protected</strong> — деплоить в него может не любой участник команды, а только те, кому явно выдано право.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Документация: README и журнал решений</h2><div class="prose"><p><em>Аналогия:</em> бортовой журнал корабля: не только «куда приплыли», но и почему выбрали этот курс, где штормило и что сделали бы иначе.</p>
+<p>Проект без документации для читателя не существует. Нужны два документа:</p>
+<p><strong>README</strong> — для того, кто впервые открыл репозиторий: что это за система, схема архитектуры, как запустить одной-двумя командами, где смотреть метрики. Подробно о нём — в §11.</p>
+<p><strong>Журнал архитектурных решений (ADR, Architecture Decision Records)</strong> — короткие файлы в папке <code>docs/adr/</code>, по одному на каждое заметное решение:</p>
+<pre><code class="language-markdown"># 0003. Argo CD вместо helm upgrade из пайплайна
+
+## Контекст
+Пайплайну нужен был доступ администратора к кластеру; ручные правки в кластере никто не замечал.
+
+## Решение
+Выкатка через Argo CD, пайплайн только коммитит тег образа в репозиторий конфигурации.
+
+## Последствия
++ у CI нет доступа к кластеру, дрейф виден в интерфейсе Argo CD
+− ещё один компонент, который надо обновлять и мониторить
+</code></pre>
+<p>Через полгода никто не помнит, почему выбрали Kustomize, а не Helm, или зачем база вынесена из кластера. ADR отвечает на этот вопрос за минуту — и на собеседовании превращается в готовый рассказ о компромиссах, которые ты принимала осознанно. Скриншоты дашбордов, интерфейса Argo CD и зелёного пайплайна кладут в <code>docs/</code> и показывают в README.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Итоговый проект как проект для портфолио</h2><div class="prose"><p><em>Аналогия:</em> учебную задачу сдают проверяющему, который знает условие. Проект в портфолио читает незнакомый человек, у которого пять минут и десять таких же вкладок открыто.</p>
+<p>Разница между «сделал учебный проект» и «есть проект, который показывают» — в упаковке. Формальный чек-лист закрывает первое; для второго нужно ещё несколько вещей.</p>
+<p><img loading="lazy" src="../assets/diagrams/do14-capstone-map.svg" alt="" /></p>
+<p><strong>README, написанный для чужого человека.</strong> Первые три абзаца должны отвечать: что это за система, как она устроена, как её запустить. Не «итоговый проект курса», а «микросервисное приложение, развёрнутое в Kubernetes с полным циклом доставки».</p>
+<p><strong>Схема архитектуры картинкой.</strong> Один рисунок экономит читателю пять минут чтения. Достаточно простой схемы: сервисы, база, вход трафика, куда идут метрики.</p>
+<p><strong>Числа вместо прилагательных.</strong> Это главное отличие. Не «настроен быстрый CI/CD», а:</p>
+<pre><code>Время от коммита до staging: 6 минут
+Время от коммита до продакшена: 6 минут + ручное подтверждение
+Потери запросов при обновлении под нагрузкой: 0 из 12 000
+Время восстановления после отключения узла: 45 секунд
+Подъём всего стека в чистом кластере: 8 минут, одна команда
+Восстановление базы из резервной копии: 3 минуты, потеря до 24 часов данных
+</code></pre>
+<p>Каждое из этих чисел получается в практике предыдущих уроков. Их надо просто записывать по ходу дела, а не восстанавливать в конце.</p>
+<p><strong>Инструкция по восстановлению.</strong> Раздел «что делать, если отказал компонент X» показывает, что вы думали об эксплуатации, а не только о запуске. Это то, что отличает инженера от человека, прошедшего курс.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Один проект лучше пяти</summary><div class="callout-body"><p>Пять маленьких репозиториев с учебными примерами читаются как пять учебных примеров. Один проект, доведённый до состояния, в котором его не стыдно эксплуатировать, — это разговор на сорок минут собеседования. Причём разговор, где вопросы задаёте не только вам: любая деталь такого проекта тянет за собой обсуждение реальных компромиссов.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Чек-лист зрелости: что должно быть в проекте</h2><div class="prose"><p>Пройдитесь по списку честно. Каждый непройденный пункт — либо задача, либо осознанно принятое решение, которое надо уметь объяснить.</p>
+<p><strong>Приложение</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Многоступенчатая сборка образа, запуск не от root, минимальный базовый образ</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Корректная обработка <code>SIGTERM</code> — выкладка не рвёт запросы</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Эндпоинты <code>/healthz</code> и <code>/readyz</code>, различающиеся по смыслу</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Настройки из переменных окружения, секреты не в коде</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Структурированные логи в stdout, метрики в формате Prometheus</li>
+</ul>
+<p><strong>Кластер</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Пробы, <code>requests</code>/<code>limits</code> у всех подов</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> База в StatefulSet со своим томом</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Отдельный ServiceAccount с минимальными правами</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Сетевые политики: доступ к базе только у тех, кому он нужен</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Ingress с TLS, сертификат продлевается сам</li>
+</ul>
+<p><strong>Доставка</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Конвейер: тесты, сборка, проверки безопасности, выкладка</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Основная проверка укладывается в 10 минут</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Выкладка идемпотентна и откатывается автоматически при неудаче</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Продакшн — по ручному подтверждению</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Ключей от кластера в системе сборки нет</li>
+</ul>
+<p><strong>Эксплуатация</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Метрики, логи и дашборд с четырьмя золотыми сигналами</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Хотя бы одно осмысленное правило оповещения</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Резервное копирование по расписанию <strong>и проверенное восстановление</strong></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Весь кластер поднимается из репозитория с нуля</li>
+</ul>
+<p><strong>Безопасность</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Проверка на секреты в коде — блокирующая</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Сканирование зависимостей и образа</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Секреты в git только в зашифрованном виде</li>
+</ul>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Самый частый пропущенный пункт</summary><div class="callout-body"><p>Резервное копирование, которое ни разу не восстанавливали. Настроенный <code>pg_dump</code> создаёт ощущение защищённости, но копия, из которой не пробовали восстановиться, — это не резервная копия, а файл. Проверка восстановления занимает полчаса и даёт вам фразу, которую можно говорить вслух.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Как рассказывать об этом проекте</h2><div class="prose"><p><em>Аналогия:</em> список технологий в резюме — это перечень инструментов в ящике. Работодателя интересует, что вы ими построили и что при этом сломали.</p>
+<p><strong>Схема ответа, которая работает:</strong> контекст → задача → решение → <strong>число</strong> → что бы сделал иначе.</p>
+<blockquote>
+<p><em>«Взял открытый проект из четырёх сервисов без контейнеризации. Довёл до полного цикла: сборка, тесты, проверки безопасности, выкладка в Kubernetes через ArgoCD. От коммита до staging — шесть минут, обновление под нагрузкой без потерь запросов. Что бы сделал иначе — сразу разнёс код и конфигурацию по разным репозиториям, переделывать потом было дороже.»</em></p>
+</blockquote>
+<p>Последний пункт важнее, чем кажется. Готовность назвать собственную ошибку читается как опыт: человек, у которого всё получилось идеально с первого раза, либо не делал, либо не заметил.</p>
+<p><strong>К каким уточняющим вопросам готовиться.</strong> Они предсказуемы, и на каждый в курсе есть ответ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Вопрос</th>
+<th>Где разбиралось</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Как устроен откат?</td>
+<td>5.3 (<code>rollback</code>), 5.4 (<code>git revert</code>)</td>
+</tr>
+<tr>
+<td>Что происходит при выкладке с текущими запросами?</td>
+<td>3.1 (SIGTERM), 5.1 (пробы)</td>
+</tr>
+<tr>
+<td>Почему база в StatefulSet, а не в Deployment?</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td>Как приложение узнаёт пароль от базы?</td>
+<td>5.4, 6.2</td>
+</tr>
+<tr>
+<td>Что вы делаете, когда под в CrashLoopBackOff?</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td>Как поймёте, что продакшн сломался?</td>
+<td>4.5 (оповещения)</td>
+</tr>
+<tr>
+<td>Кто может выложить в прод?</td>
+<td>6.1 (защищённые окружения)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Чего не делать:</strong> не выдавать прочитанное за сделанное. Проверяется это одним уточняющим вопросом, и провал такой проверки перечёркивает всё остальное. Честное «читал, но руками не делал» стоит несравнимо дороже.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ориентиры по рынку</h2><div class="prose"><p>Требования в вакансиях DevOps-инженера сейчас устроены довольно однообразно, и курс закрывает их основной объём.</p>
+<p><strong>Что просят практически всегда:</strong> Linux и сети, Docker, Kubernetes, CI/CD, Git, один язык для автоматизации (обычно Python или Bash), инфраструктура как код (Terraform, Ansible), мониторинг (Prometheus, Grafana).</p>
+<p><strong>Что просят часто:</strong> GitOps (ArgoCD), Helm, облачные платформы, базовый DevSecOps, работа с логами.</p>
+<p><strong>Что отличает старшие позиции:</strong> не длина списка технологий, а способность объяснить компромиссы, спроектировать процесс с нуля и отвечать за надёжность в числах.</p>
+<p><strong>Особенности российского рынка:</strong> заметная доля отечественных облаков (Yandex Cloud, VK Cloud, Selectel), запрос на импортозамещение отдельных компонентов, требования регуляторов у части работодателей. Английский чаще нужен для чтения документации, чем для разговора.</p>
+<p><strong>Особенности удалённых вакансий:</strong> разговорный английский становится обязательным, ценится опыт асинхронной работы и письменная коммуникация. Требования по стеку при этом ровно те же.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Про пробелы в требованиях</summary><div class="callout-body"><p>Ни один кандидат не закрывает список полностью — они и составляются с запасом. Разумная тактика: уверенно знать основу (Linux, сети, контейнеры, Kubernetes, CI/CD) и честно говорить про остальное. «С этим не работал, но разбирался с похожим — расскажу, как подошёл бы» звучит лучше, чем натянутый пересказ документации.</p>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Что учить дальше</h2><div class="prose"><p>Курс заканчивается, но карта не заканчивается. Три направления, в которые обычно расходятся дальше:</p>
+<p><strong>Надёжность (SRE).</strong> Бюджеты ошибок, целевые уровни обслуживания, разборы инцидентов без поиска виноватых, нагрузочное тестирование, планирование ёмкости. Естественное продолжение линии 4.5.</p>
+<p><strong>Платформенная инженерия.</strong> Внутренние платформы, которые дают разработчикам самообслуживание: шаблоны сервисов, каталоги, автоматическое создание окружений. Продолжение линии 5.3–6.1.</p>
+<p><strong>Углублённая эксплуатация.</strong> Service mesh, OpenTelemetry и сквозная трассировка, наблюдаемость на основе eBPF, управление затратами в облаке.</p>
+<p>Полезно также вернуться назад и углубить основу: сеть на уровне разбора трафика, Linux на уровне производительности и системных вызовов, базы данных на уровне планов запросов. Именно эти темы отличают того, кто чинит сложные проблемы, от того, кто перезапускает под и надеется.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Что делать с курсом дальше</summary><div class="callout-body"><p>Заметки и тренажёры остаются рабочим справочником. Перед собеседованием имеет смысл прогнать тренажёры по нужным урокам — вопросы там собраны из того, что действительно спрашивают. А раздел «Если запомнить только главное» в каждой заметке читается за пятнадцать минут и восстанавливает картину целиком.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Итоговый проект не вводит новую технологию — он проверяет, что все изученные раньше практики складываются в единый рабочий процесс на чужом, неадаптированном проекте.</li>
+<li>Ориентир «хотя бы 3 сервиса + БД + фронтенд» гарантирует межсервисное взаимодействие, постоянное хранилище и минимум два разных типа контейнеров.</li>
+<li>Docker для сервисов без него пишется по тем же принципам, что и в уроке 3.1.</li>
+<li>Модульные тесты проверяют код изолированно, в отличие от смоук-тестов, проверяющих уже развёрнутое приложение.</li>
+<li>Один Helm-чарт может описывать сразу несколько сервисов приложения, разворачиваемых одной командой install.</li>
+<li>readinessProbe не даёт поду считаться готовым, пока его зависимости (например, БД) недоступны.</li>
+<li>GitLab Environment привязывает job к именованному целевому окружению и позволяет ограничивать права деплоя именно в него.</li>
+<li>staging обновляется автоматически из основной ветки, prod — вручную по тегу; это независимые окружения с разными values и разным уровнем защиты.</li>
+<li><strong>Портфолио отличается от учебного проекта упаковкой:</strong> README для незнакомого человека, схема архитектуры картинкой, инструкция по восстановлению — и главное, <strong>числа вместо прилагательных</strong>.</li>
+<li>Числа записывают по ходу практики, а не восстанавливают в конце: время выкладки, потери запросов, время восстановления, время подъёма с нуля.</li>
+<li><strong>Один доведённый проект лучше пяти учебных примеров</strong> — он даёт разговор на сорок минут, а не строчку в резюме.</li>
+<li>Самый частый пропущенный пункт чек-листа — резервная копия, из которой ни разу не восстанавливались. Это не резервная копия, а файл.</li>
+<li>Схема рассказа о проекте: контекст → задача → решение → <strong>число</strong> → что бы сделал иначе. Последний пункт читается как опыт.</li>
+<li><strong>Выдавать прочитанное за сделанное нельзя</strong> — проверяется одним уточняющим вопросом. Честное «читал, но руками не делал» стоит дороже.</li>
+<li>Никто не закрывает список требований полностью, он и составляется с запасом. Уверенно знать основу, честно говорить про остальное.</li>
+<li>Дальше расходятся в три стороны: надёжность (SRE), платформенная инженерия, углублённая эксплуатация. Плюс возврат к основе — сеть, Linux, базы данных на глубину.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Этот урок и есть <a href="../projects/p3.html">P3</a>: чек-лист проекта лежит на его странице, а здесь — объяснения, зачем каждый пункт.</li>
+</ul>
+</div></details><article class="task" data-task="5510d37a13"><h3>Задание 1 — выбор проекта</h3><p>Выбери open-source проект из нескольких сервисов с базой по критериям §2 и опиши его архитектуру схемой.<br />
+<strong>Проверка:</strong> в <code>README.md</code> есть схема сервисов, их порты, зависимости и порядок запуска.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5510d37a13"> Сделала руками и проверила</label></article><article class="task" data-task="ffea2c9f4e"><h3>Задание 2 — контейнеризация и тесты</h3><p>Напиши Dockerfile для каждого сервиса без готового образа, добавь модульные тесты бизнес-логики.<br />
+<strong>Проверка:</strong> <code>docker compose up</code> поднимает весь проект локально; тесты запускаются одной командой.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ffea2c9f4e"> Сделала руками и проверила</label></article><article class="task" data-task="1b3e3f86fd"><h3>Задание 3 — Helm и GitOps</h3><p>Собери чарт для всех сервисов с зависимостью от базы, миграциями в PreSync-хуке и разворачивай через Argo CD из отдельного репозитория конфигурации.<br />
+<strong>Проверка:</strong> на чистом кластере одно Application поднимает весь проект в <code>Healthy</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1b3e3f86fd"> Сделала руками и проверила</label></article><article class="task" data-task="6f05c76e70"><h3>Задание 4 — полный пайплайн</h3><p>Четыре стадии build → test → staging → prod, сканирование образов и секретов, ручное подтверждение продакшена, уведомления.<br />
+<strong>Проверка:</strong> изменение в коде проходит путь до продакшена без единой ручной команды, кроме кнопки подтверждения.</p>
+<label class="task-done"><input type="checkbox" data-task-check="6f05c76e70"> Сделала руками и проверила</label></article><article class="task" data-task="83982b0146"><h3>Задание 5 — наблюдаемость и отчёт</h3><p>Подключи kube-prometheus-stack, дашборд четырёх золотых сигналов, алерты в Telegram и runbook. Напиши README и 3–5 записей журнала решений (ADR) по §10.<br />
+<strong>Проверка:</strong> чек-лист зрелости §12 закрыт; проект можно рассказать за 5 минут по §13.</p>
+<label class="task-done"><input type="checkbox" data-task-check="83982b0146"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a></li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a></li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a></li>
+<li><a href="../lessons/5-3.html">5.3 Helm и Kustomize</a></li>
+<li><a href="../lessons/5-4.html">5.4 GitOps и Argo CD</a></li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a></li>
+<li><a href="../lessons/6-2.html">6.2 DevSecOps</a></li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Google SRE Book: https://sre.google/books/</li>
+<li>The Twelve-Factor App: https://12factor.net/ru/</li>
+<li>Требования вакансий DevOps/SRE, российский и удалённый рынок, 2026</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="6-2.html">← 6.2 DevSecOps: безопасность в конвейере</a><span></span></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "6-3", "number": "6.3", "title": "Итоговый проект", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["5510d37a13", "ffea2c9f4e", "1b3e3f86fd", "6f05c76e70", "83982b0146"], "quiz": [{"id": "541bd20d8a", "q": "Зачем итоговый проект делают на чужом open-source проекте, а не на учебном примере?", "options": ["Так проще", "Чтобы применить изученное в условиях, близких к реальной работе: неадаптированный код, несколько сервисов, база", "Чтобы не писать код", "Это требование GitHub"], "answer": [1], "why": "<p>на новой работе тебе не дадут код, подготовленный под твои знания.<\/p>\n"}, {"id": "a61795e523", "q": "Как гарантировать, что сервисы не принимают трафик раньше, чем доступна база?", "options": ["Запускать их с задержкой <code>sleep 60<\/code>", "readinessProbe, проверяющая соединение с базой, плюс повторы подключения в приложении", "Запускать базу последней", "Никак"], "answer": [1], "why": "<p>Kubernetes не отправит трафик на под, пока проба готовности не пройдёт.<\/p>\n"}, {"id": "bd3993801e", "q": "Чем production обычно отличается от staging, кроме названия? Выбери все.", "options": ["Число реплик и ресурсы", "Домен и секреты", "Права на выкатку (protected environment)", "Код приложения"], "answer": [0, 1, 2], "why": "<p>код и образ одинаковые — различаются только настройки и правила доступа.<\/p>\n"}, {"id": "6e7ea09b54", "q": "Что такое ADR?", "options": ["Формат логов", "Короткая запись архитектурного решения: контекст, решение и его последствия", "Инструмент деплоя", "Тип теста"], "answer": [1], "why": "<p>через полгода никто не помнит, почему выбрали Kustomize, а не Helm. ADR отвечает за минуту.<\/p>\n"}, {"id": "ffb026e3cd", "q": "Какие строки делают README проекта в портфолио сильнее? Выбери все.", "options": ["«Время от коммита до staging: 6 минут»", "«Потери запросов при обновлении под нагрузкой: 0 из 12 000»", "«Настроен быстрый и надёжный CI/CD»", "«Восстановление базы из бэкапа: 3 минуты»"], "answer": [0, 1, 3], "why": "<p>числа вместо прилагательных — то, что отличает проект от учебного задания.<\/p>\n"}, {"id": "fddf94d227", "q": "Какой пункт чек-листа зрелости чаще всего оказывается пропущен?", "options": ["Dockerfile", "Резервная копия, из которой ни разу не восстанавливались", "README", "Пайплайн"], "answer": [1], "why": "<p>бэкап, который не разворачивали, — не бэкап, а просто файл.<\/p>\n"}, {"id": "114e392736", "q": "Как лучше рассказывать о проекте на собеседовании?", "options": ["Перечислить все технологии", "Контекст → задача → решение → число → что бы сделала иначе", "Показать код с первой строки", "Рассказать только о трудностях"], "answer": [1], "why": "<p>такой рассказ показывает инженерное мышление и осознанные компромиссы, а не список слов из резюме.<\/p>\n"}], "cards": [{"id": "503b12e247", "q": "Расскажите о своём проекте.", "a": "<p>Структура: какую задачу решали, архитектура, что сделала лично ты, какие инструменты и почему именно они, какая проблема была самой сложной и как её решила, что бы улучшила. Конкретика и цифры важнее перечисления технологий.<\/p>\n"}, {"id": "6aa0030178", "q": "Почему выбрали Helm, а не Kustomize (или наоборот)?", "a": "<p>Обосновать для своего случая: несколько сервисов с общими параметрами, зависимости, история релизов — в пользу Helm; простые различия окружений без шаблонов — в пользу Kustomize. Важно показать, что выбор осознанный.<\/p>\n"}, {"id": "9e57b7cea3", "q": "Чем staging отличается от prod в вашем проекте?", "a": "<p>Данными, масштабом, секретами, внешними интеграциями, способом запуска выкатки (автоматически или вручную), уровнем алертов. Цель — чтобы staging был максимально похож на prod по конфигурации.<\/p>\n"}, {"id": "e370ea7161", "q": "Как гарантируете порядок запуска: база раньше сервисов?", "a": "<p>Readiness-пробы у базы, init-контейнеры или повторы подключения в приложении, миграции отдельной задачей (PreSync-хук), sync waves в Argo CD.<\/p>\n"}, {"id": "d698d5693a", "q": "Что бы вы улучшили в проекте, будь у вас ещё месяц?", "a": "<p>Честный список: например, canary-выкладка, SLO с алертами на бюджет ошибок, подпись образов, бэкапы базы с регулярной проверкой восстановления, нагрузочное тестирование. Показывает понимание зрелых практик.<\/p>\n"}], "next": null}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

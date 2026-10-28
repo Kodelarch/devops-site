@@ -1,0 +1,52 @@
+<svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <pattern id="sr1" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1c2733" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1000" height="440" fill="#0e1620"/>
+  <rect width="1000" height="440" fill="url(#sr1)" opacity="0.5"/>
+
+  <text x="40" y="46" font-size="26" font-weight="700" fill="#dce6ec">Кто за что отвечает</text>
+  <text x="40" y="72" font-size="15" fill="#8a9aa8">«Мы в облаке, значит бэкапы и безопасность — их забота» — заблуждение, которое дорого обходится.</text>
+
+  <text x="40" y="112" font-size="14" font-weight="650" fill="#8a9aa8">Чем выше уровень услуги, тем меньше зона твоей ответственности — но она никогда не пустая</text>
+
+  <rect x="40" y="130" width="290" height="230" rx="9" fill="#16202b" stroke="#2a3742" stroke-width="2"/>
+  <text x="185" y="156" font-size="15" font-weight="700" fill="#dce6ec" text-anchor="middle">IaaS</text>
+  <text x="185" y="176" font-size="12" fill="#8a9aa8" text-anchor="middle">виртуальная машина</text>
+  <rect x="60" y="188" width="250" height="118" rx="6" fill="#2a2418" stroke="#e08a4f"/>
+  <text x="185" y="210" font-size="12" fill="#e08a4f" text-anchor="middle">твоё:</text>
+  <text x="185" y="230" font-size="11.5" fill="#dce6ec" text-anchor="middle">ОС и её обновления</text>
+  <text x="185" y="250" font-size="11.5" fill="#dce6ec" text-anchor="middle">приложение, конфиги</text>
+  <text x="185" y="270" font-size="11.5" fill="#dce6ec" text-anchor="middle">файрвол, доступы</text>
+  <text x="185" y="290" font-size="11.5" fill="#dce6ec" text-anchor="middle">данные и бэкапы</text>
+  <rect x="60" y="314" width="250" height="34" rx="6" fill="#152b2a" stroke="#6bbdb6"/>
+  <text x="185" y="336" font-size="11.5" fill="#6bbdb6" text-anchor="middle">облако: железо, гипервизор, сеть ДЦ</text>
+
+  <rect x="352" y="130" width="290" height="230" rx="9" fill="#16202b" stroke="#2a3742" stroke-width="2"/>
+  <text x="497" y="156" font-size="15" font-weight="700" fill="#dce6ec" text-anchor="middle">PaaS</text>
+  <text x="497" y="176" font-size="12" fill="#8a9aa8" text-anchor="middle">управляемая база данных</text>
+  <rect x="372" y="188" width="250" height="78" rx="6" fill="#2a2418" stroke="#e08a4f"/>
+  <text x="497" y="210" font-size="12" fill="#e08a4f" text-anchor="middle">твоё:</text>
+  <text x="497" y="230" font-size="11.5" fill="#dce6ec" text-anchor="middle">схема, запросы, индексы</text>
+  <text x="497" y="250" font-size="11.5" fill="#dce6ec" text-anchor="middle">доступы и данные</text>
+  <rect x="372" y="274" width="250" height="74" rx="6" fill="#152b2a" stroke="#6bbdb6"/>
+  <text x="497" y="296" font-size="11.5" fill="#6bbdb6" text-anchor="middle">облако: ОС, обновления СУБД,</text>
+  <text x="497" y="316" font-size="11.5" fill="#6bbdb6" text-anchor="middle">репликация, автоматические</text>
+  <text x="497" y="336" font-size="11.5" fill="#6bbdb6" text-anchor="middle">резервные копии</text>
+
+  <rect x="664" y="130" width="296" height="230" rx="9" fill="#16202b" stroke="#2a3742" stroke-width="2"/>
+  <text x="812" y="156" font-size="15" font-weight="700" fill="#dce6ec" text-anchor="middle">SaaS</text>
+  <text x="812" y="176" font-size="12" fill="#8a9aa8" text-anchor="middle">готовый сервис</text>
+  <rect x="684" y="188" width="256" height="58" rx="6" fill="#2a2418" stroke="#e08a4f"/>
+  <text x="812" y="210" font-size="12" fill="#e08a4f" text-anchor="middle">твоё:</text>
+  <text x="812" y="232" font-size="11.5" fill="#dce6ec" text-anchor="middle">данные, доступы, настройки</text>
+  <rect x="684" y="254" width="256" height="94" rx="6" fill="#152b2a" stroke="#6bbdb6"/>
+  <text x="812" y="286" font-size="11.5" fill="#6bbdb6" text-anchor="middle">облако: практически всё</text>
+  <text x="812" y="310" font-size="11.5" fill="#6bbdb6" text-anchor="middle">остальное</text>
+
+  <rect x="40" y="376" width="920" height="52" rx="9" fill="#101d2a" stroke="#e0574f" stroke-width="1.5"/>
+  <text x="62" y="400" font-size="14" font-weight="650" fill="#e0574f">Что остаётся твоим всегда, на любом уровне</text>
+  <text x="62" y="420" font-size="13.5" fill="#dce6ec">Сами данные, права доступа к ним и правильность настроек. Открытое наружу хранилище — это не уязвимость облака, а твоя конфигурация.</text>
+</svg>

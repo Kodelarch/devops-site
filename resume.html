@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что я умею — DevOps-маршрут</title>
+<meta name="description" content="Резюме из прогресса курса">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="static/style.css?v=5261b884a0">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="resume">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="index.html" data-nav="index lesson">курс</a>
+    <a href="roadmap.html" data-nav="roadmap">карта</a>
+    <a href="cards.html" data-nav="cards">карточки</a>
+    <a href="lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<main class="narrow cv-page">
+  <div class="page-kicker no-print">cat ~/resume.md</div>
+  <h1 class="no-print">Что я умею</h1>
+  <p class="lead no-print">Резюме собирается само из твоего прогресса: навыки — из пройденных уроков, проекты — из чек-листов портфолио. Подправь шапку и сохрани в PDF или скопируй текстом для hh.ru.</p>
+  <div id="resume"></div>
+</main>
+<nav class="bottomnav" aria-label="Разделы"><a href="index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"groups": ["Linux и сети", "Программирование", "Базы данных", "Контейнеры и CI/CD", "Инфраструктура как код и облако", "Kubernetes", "Наблюдаемость и надёжность", "Безопасность", "Инструменты и процессы"], "skills": {"0-1": [["Инструменты и процессы", "Git: ветки, merge/rebase, разрешение конфликтов, работа через merge request"]], "1-1": [["Linux и сети", "Администрирование Linux (Ubuntu): права, пользователи, процессы и сигналы, systemd, journald"], ["Linux и сети", "SSH по ключам, пакетные менеджеры, cron, logrotate, разбор «сервис не работает»"]], "1-2": [["Linux и сети", "Сети: TCP/IP, DNS, HTTP/HTTPS и TLS, маршрутизация, файрвол (nftables/ufw)"], ["Linux и сети", "nginx: reverse proxy, диагностика сети (ss, dig, curl, tcpdump)"]], "1-3": [["Программирование", "Bash-скрипты для администрирования: строгий режим, getopts, trap, shellcheck"]], "1-4": [["Наблюдаемость и надёжность", "Prometheus и PromQL, Grafana, Alertmanager; перцентили и кардинальность метрик"], ["Наблюдаемость и надёжность", "SLI/SLO и бюджет ошибок, golden signals, разбор логов nginx в терминале"]], "2-1": [["Программирование", "Python: типы данных, функции, исключения, работа с файлами, виртуальные окружения"]], "2-2": [["Программирование", "Python для автоматизации: парсинг логов и конфигов, JSON, регулярные выражения, дата и время, обход зависимостей"]], "2-3": [["Программирование", "Параллельность в Python: asyncio, процессы, concurrent.futures, повторы с backoff"]], "2-4": [["Программирование", "Архитектура приложения и тесты: pytest, фикстуры, моки, ruff, структура проекта"]], "2-5": [["Программирование", "Бэкенд-сервис на Python (Flask): слоистая архитектура, DI, тесты эндпоинтов, 12-factor, health-check и метрики"]], "2-6": [["Базы данных", "SQL (PostgreSQL): выборки, фильтрация, сортировка"]], "2-7": [["Базы данных", "SQL: JOIN всех видов и подзапросы"]], "2-8": [["Базы данных", "Индексы и EXPLAIN ANALYZE: поиск медленных запросов"]], "2-9": [["Базы данных", "Агрегация: GROUP BY, HAVING, оконные функции"]], "2-10": [["Базы данных", "Транзакции, уровни изоляции, блокировки и SELECT … FOR UPDATE"]], "2-11": [["Базы данных", "Продвинутый SQL: триггеры, функции PL/pgSQL, рекурсивные CTE, оконные функции, основы DWH"]], "3-1": [["Контейнеры и CI/CD", "Docker: Dockerfile, многоэтапная сборка, кеш слоёв, тома и сети, безопасность образов"]], "3-2": [["Контейнеры и CI/CD", "GitLab CI/CD: стадии, rules, артефакты и кеш, сборка и публикация образов"]], "4-1": [["Контейнеры и CI/CD", "Docker Compose: многосервисные приложения, healthcheck, окружения; Docker Swarm"]], "4-2": [["Инфраструктура как код и облако", "Облака (Yandex Cloud, AWS): VPC и группы безопасности, IAM, объектное хранилище, управляемые БД, балансировщики, контроль затрат"]], "4-3": [["Инфраструктура как код и облако", "Ansible: плейбуки, роли, шаблоны Jinja2, handlers, Vault, идемпотентность"]], "4-4": [["Инфраструктура как код и облако", "Terraform: провайдеры, модули, remote state, plan/apply в CI"]], "4-5": [["Наблюдаемость и надёжность", "Наблюдаемость в продакшене: Prometheus, Grafana как код, Loki, OpenTelemetry, алертинг"]], "5-1": [["Kubernetes", "Kubernetes: Pod, Deployment, Service, Ingress, ConfigMap/Secret, пробы, ресурсы"]], "5-2": [["Kubernetes", "Kubernetes в работе: k3s, cert-manager, StatefulSet и PVC, RBAC, NetworkPolicy, HPA, Gateway API"]], "5-3": [["Kubernetes", "Helm (чарты, values, шаблоны) и Kustomize (base + overlays)"]], "5-4": [["Kubernetes", "GitOps с Argo CD: синхронизация, self-heal, управление секретами"]], "6-1": [["Контейнеры и CI/CD", "CI/CD в Kubernetes: раннер в кластере, сборка без Docker-демона, окружения, стратегии выкладки (rolling, blue-green, canary)"]], "6-2": [["Безопасность", "DevSecOps: поиск секретов, OIDC в CI, SCA и SAST, сканирование образов и IaC, SBOM и подпись образов"]], "6-3": [["Контейнеры и CI/CD", "Итоговый проект: докеризация open-source сервисов, Helm-чарт на несколько сервисов, пайплайн build → test → staging → prod, журнал архитектурных решений"]]}, "tools": {"0-1": ["Git"], "1-1": ["Linux"], "1-2": ["Linux"], "1-3": ["Bash"], "1-4": ["Prometheus, Grafana"], "2-1": ["Python"], "2-2": ["Python"], "2-3": ["Python"], "2-4": ["Python"], "2-5": ["Python"], "2-6": ["PostgreSQL"], "2-7": ["PostgreSQL"], "2-8": ["PostgreSQL"], "2-9": ["PostgreSQL"], "2-10": ["PostgreSQL"], "2-11": ["PostgreSQL"], "3-1": ["Docker"], "3-2": ["Gitlab-ci"], "4-1": ["Docker"], "4-2": ["Облака"], "4-3": ["Ansible"], "4-4": ["Terraform", "Облака"], "4-5": ["Prometheus", "Grafana", "Loki"], "5-1": ["Kubernetes"], "5-2": ["Kubernetes", "k3s"], "5-3": ["Helm", "Kustomize"], "5-4": ["Argo CD", "Kubernetes", "Gitops"], "6-1": ["Gitlab-ci", "Kubernetes", "Helm"], "6-2": ["Trivy", "Vault", "Gitlab-ci"], "6-3": ["Kubernetes", "Helm", "Gitlab-ci"]}, "projects": [{"slug": "m1", "title": "M1 — Скрипт подготовки нового сервера", "summary": "Bash-скрипт, который за одну команду превращает свежую Ubuntu в аккуратно настроенный сервер: пользователь для работы, SSH только по ключу, файрвол, автообновления безопасности, UTC, синхронизация времени. Повторный запуск ничего не ломает, а результат проверяется отдельным скриптом.", "repo": ""}, {"slug": "m2", "title": "M2 — certwatch: утилита проверки сертификатов", "summary": "Консольная утилита на Python: берёт список доменов, проверяет, когда истекает TLS-сертификат каждого, и печатает таблицу или JSON. По коду выхода её удобно ставить в cron или в пайплайн: «всё хорошо», «скоро истекает», «уже истёк или недоступен». Утилита ставится через `pip` и запускается в Docker.", "repo": ""}, {"slug": "m3", "title": "M3 — Telegram-бот для алертов", "summary": "Небольшой сервис, который принимает уведомления от Alertmanager по webhook и отправляет их в Telegram в человеческом виде: с эмодзи по важности, коротким описанием, ссылкой на runbook и отдельным сообщением, когда проблема решена. Сервис собирается в образ, сам отдаёт метрики и проверки здоровья.", "repo": ""}, {"slug": "m4", "title": "M4 — Универсальный Helm-чарт с публикацией", "summary": "Переиспользуемый Helm-чарт для типового веб-сервиса: Deployment с пробами, Service, Ingress, HPA, PodDisruptionBudget, ServiceMonitor — всё включается и настраивается через values. Чарт проверяется линтерами и тестовой установкой в кластер kind прямо в GitHub Actions и публикуется в OCI-реестр с версией.", "repo": ""}, {"slug": "p1", "title": "P1 — Сервис на одном сервере", "summary": "Виртуальная машина с Linux, на которой в Docker Compose работают приложение, PostgreSQL и nginx с HTTPS. Изменения в коде проходят через GitLab CI и сами выкатываются на сервер. Бэкапы базы делаются по расписанию и проверяются восстановлением, простой мониторинг присылает уведомления.", "repo": ""}, {"slug": "p2", "title": "P2 — Инфраструктура кодом в облаке", "summary": "То же приложение из [[P1-Server-Basics]], но инфраструктура больше не настраивается руками. Terraform создаёт в облаке сеть в двух зонах, машины и хранилище, Ansible настраивает машины, а стек мониторинга с логами и алертами разворачивается вместе с приложением. Весь стенд поднимается с нуля одной последовательностью команд и одной же уничтожается.", "repo": ""}, {"slug": "p3", "title": "P3 — Kubernetes и GitOps (итоговый проект)", "summary": "Приложение работает в кластере Kubernetes. Его чарт и все настройки окружений лежат в отдельном репозитории конфигурации, а Argo CD сам выкатывает изменения. Пайплайн приложения тестирует код, собирает образ, сканирует его на уязвимости и секреты и коммитит новый тег в репозиторий конфигурации — доступа к кластеру у него нет. Мониторинг, логи и алерты устанавливаются в кластер тоже через GitOps.", "repo": ""}]}</script>
+<script defer src="course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="static/fx.js?v=5261b884a0"></script>
+<script defer src="static/explain.js?v=5261b884a0"></script>
+<script defer src="static/app.js?v=5261b884a0"></script>
+<script defer src="static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="static/pybox.js?v=5261b884a0"></script>
+<script defer src="static/roadmap.js?v=5261b884a0"></script>
+<script defer src="static/games.js?v=5261b884a0"></script>
+<script defer src="static/search.js?v=5261b884a0"></script>
+<script defer src="static/term.js?v=5261b884a0"></script>
+<script defer src="static/cluster.js?v=5261b884a0"></script>
+<script defer src="static/incident.js?v=5261b884a0"></script>
+<script defer src="static/interview.js?v=5261b884a0"></script>
+<script defer src="static/lint.js?v=5261b884a0"></script>
+<script defer src="static/resume.js?v=5261b884a0"></script>
+<script defer src="static/reader.js?v=5261b884a0"></script>
+<script defer src="static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

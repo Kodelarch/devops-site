@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.5 Бэкенд-сервис на Python — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.5: Бэкенд-сервис на Python">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.5 · code</div>
+    <h1 class="lesson-title">Бэкенд-сервис на Python</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Flask и минимальный веб-сервер</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Слоистая архитектура в вебе</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Мапперы между слоями</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Потокобезопасное хранилище</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Dependency Injection на практике</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Бизнес-правило в домене: оформление заказа</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Контракт эндпоинта: что именно летает по сети</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Тестирование эндпоинтов без реального сервера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Конфигурация через переменные окружения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Как это запускают на самом деле</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Health-check, метрики и логи</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Корректное завершение и 12-factor</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Это первый настоящий веб-сервис в программе — то, что дальше придётся контейнеризировать (<a href="../lessons/3-1.html">3.1 Docker</a>), выкатывать (<a href="../lessons/3-2.html">3.2 CI-CD</a>) и мониторить (<a href="../lessons/4-5.html">4.5 Наблюдаемость</a>). Архитектура здесь та же слоистая идея, что в <a href="../lessons/2-4.html">2.4 Архитектура и тесты</a>, только интерфейсный слой — не терминал, а HTTP.</p>
+<p>Сквозной пример — API магазина на учебной базе из SQL-уроков: каталог товаров и оформление заказа с проверкой остатков на складе. Этот же сервис потом станет основой проектов в портфолио.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>REST API</strong> — способ общаться с сервером через HTTP-запросы (GET/POST/...), где каждый запрос независим от предыдущих.</li>
+<li><strong>DI (Dependency Injection)</strong> — вместо того чтобы класс сам создавал себе зависимости внутри, их «впрыскивают» снаружи — это упрощает подмену и тестирование.</li>
+<li><strong>Потокобезопасная коллекция</strong> — структура данных, которая не ломается, если к ней одновременно обращаются несколько запросов.</li>
+<li><strong>Идемпотентность запроса</strong> — повтор того же запроса не меняет результат: второе нажатие «Оплатить» не должно списать деньги дважды.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Flask и минимальный веб-сервер</h2><div class="prose"><p><em>Аналогия:</em> Flask — это ресепшн: он не решает сам ничего по существу, а только принимает запрос, передаёт его нужному отделу (твоему коду) и возвращает готовый ответ.</p>
+<pre><code class="language-python">from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route(&quot;/products/&lt;int:product_id&gt;&quot;, methods=[&quot;GET&quot;])
+def get_product(product_id):
+    product = catalog.get(product_id)
+    if product is None:
+        return jsonify(error=&quot;product_not_found&quot;), 404
+    return jsonify(id=product.id, title=product.title, price=str(product.price))
+
+app.run(port=5000)
+</code></pre>
+<p>Строка <code>@app.route(&quot;/products/&lt;int:product_id&gt;&quot;, methods=[&quot;GET&quot;])</code> над функцией — это <strong>декоратор</strong>: конструкция с символом <code>@</code> перед именем, которая «оборачивает» следующую за ней функцию дополнительным поведением, не меняя её код внутри. Здесь декоратор регистрирует функцию <code>get_product</code> как обработчик для конкретного пути и метода — то есть говорит Flask: «когда придёт GET-запрос на такой-то адрес, вызови именно эту функцию». <code>&lt;int:product_id&gt;</code> в пути — часть, которая может быть любым целым числом и автоматически передаётся в функцию как аргумент с тем же именем. Запрос <code>/products/abc</code> Flask сам отклонит с кодом 404, до твоего кода дело не дойдёт. Один <code>@app.route</code> — один «отдел ресепшна»: конкретный путь + метод (POST/GET) ведут к конкретной функции.</p>
+<p>Цену отдаём строкой <code>str(product.price)</code>: деньги хранятся в <code>Decimal</code> (<a href="../lessons/2-9.html#s-15">2.9 Агрегация</a>, §15), а JSON знает только числа с плавающей точкой — передать цену как <code>float</code> значит рискнуть копейками.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Слоистая архитектура в вебе</h2><div class="prose"><p><em>Аналогия:</em> та же идея, что в <a href="../lessons/2-4.html#s-1">2.4 Архитектура и тесты</a>, §1, только слой интерфейса — не таблица в терминале, а JSON по HTTP.</p>
+<ul>
+<li><strong>web</strong> — модели запроса и ответа, роуты, мапперы «внутреннее представление ↔ то, что видит клиент».</li>
+<li><strong>domain</strong> — правила магазина: можно ли продать столько товара, как считается сумма заказа, что такое «заказ».</li>
+<li><strong>datasource</strong> — хранилище товаров и заказов: сначала в памяти, потом PostgreSQL.</li>
+<li><strong>di</strong> — граф зависимостей: кто из кого создаётся.</li>
+</ul>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Почему не смешать всё в одном файле</summary><div class="callout-body"><p>Если завтра понадобится хранить данные не в памяти, а в базе данных — при слоистой архитектуре меняется только datasource-слой. Domain и web не заметят разницы, потому что работают через интерфейс, а не напрямую с конкретной реализацией.</p>
+</div></details></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Мапперы между слоями</h2><div class="prose"><p><em>Аналогия:</em> маппер — переводчик между двумя людьми, говорящими на разных языках, но об одном и том же: модель для веба и модель для домена описывают один и тот же товар, но в разном виде.</p>
+<pre><code class="language-python">@dataclass
+class Product:                    # домен: всё, что нужно правилам магазина
+    id: int
+    store_id: int
+    title: str
+    price: Decimal
+    stock: int
+    purchase_price: Decimal       # закупочная цена — клиенту её показывать нельзя
+
+def to_web(p: Product) -&gt; dict:
+    return {&quot;id&quot;: p.id, &quot;title&quot;: p.title, &quot;price&quot;: str(p.price), &quot;in_stock&quot;: p.stock &gt; 0}
+</code></pre>
+<p>Кажется избыточным, пока поля совпадают, но модели неизбежно расходятся. Веб-модель <strong>прячет</strong> внутреннее (закупочную цену, точный остаток — конкурентам незачем знать, сколько у тебя видеокарт), <strong>упрощает</strong> (вместо числа — флаг «в наличии») и <strong>сохраняет совместимость</strong>: домен можно переделать как угодно, а клиенты продолжат получать тот же JSON.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Потокобезопасное хранилище</h2><div class="prose"><p><em>Аналогия:</em> если несколько посетителей одновременно тянутся к последнему товару на полке, нужен порядок — иначе его «купят» двое.</p>
+<p>Это та же гонка, что разбиралась на уровне базы в <a href="../lessons/2-10.html#s-4">2.10 Транзакции</a>, §4, только внутри процесса Python:</p>
+<pre><code class="language-python">from threading import Lock
+
+class InMemoryStock:
+    def __init__(self, stock: dict[int, int]):
+        self._stock = dict(stock)
+        self._lock = Lock()
+
+    def reserve(self, product_id: int, qty: int) -&gt; bool:
+        with self._lock:
+            available = self._stock.get(product_id, 0)
+            if available &lt; qty:
+                return False
+            self._stock[product_id] = available - qty
+            return True
+</code></pre>
+<p><code>Lock</code> гарантирует, что проверку остатка и списание выполняет только один запрос за раз — иначе два одновременных запроса оба увидят «осталось 1» и оба спишут (race condition, см. словарик <a href="../lessons/2-3.html">2.3 Параллельность</a>). Конструкция <code>with self._lock: ...</code> — это <strong>менеджер контекста</strong>: она автоматически «захватывает» блокировку перед выполнением кода внутри отступа и гарантированно «отпускает» её обратно после — даже если внутри блока произойдёт ошибка. Без <code>with</code> пришлось бы вручную писать <code>lock.acquire()</code> в начале и не забывать <code>lock.release()</code> в конце (в том числе на всех путях выхода из функции, включая случаи с исключениями) — <code>with</code> берёт эту аккуратность на себя.</p>
+<p><img loading="lazy" src="../assets/diagrams/app1-backend-lock.webp" alt="" /></p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Dependency Injection на практике</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы кофемашина сама выращивала себе кофейные зёрна, их ей просто привозят — так её проще заменить или протестировать без реального завода зёрен.</p>
+<pre><code class="language-python">class Container:
+    def __init__(self, settings):
+        self.stock = InMemoryStock(settings.initial_stock)   # singleton — один на всё приложение
+        self.catalog = ProductRepository(settings.db_url)
+        self.orders = OrderService(self.catalog, self.stock)
+</code></pre>
+<p>Класс <code>OrderService</code> не создаёт себе хранилище и каталог сам — он получает их готовыми снаружи. Это позволяет в тестах подставить «поддельный» каталог из трёх товаров вместо настоящей базы, а в продакшене заменить <code>InMemoryStock</code> на хранилище в PostgreSQL, не трогая ни строчки в <code>OrderService</code>.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Бизнес-правило в домене: оформление заказа</h2><div class="prose"><p><em>Аналогия:</em> кассир не решает сам, можно ли продать товар со скидкой и что делать, если товара не хватает, — это правила магазина. Его дело — правильно их применить.</p>
+<pre><code class="language-python">class OutOfStock(Exception):
+    def __init__(self, product_id):
+        super().__init__(f&quot;товара {product_id} нет в нужном количестве&quot;)
+        self.product_id = product_id
+
+class OrderService:
+    def __init__(self, catalog, stock):
+        self.catalog = catalog
+        self.stock = stock
+
+    def place_order(self, customer_id: int, items: list[tuple[int, int]]) -&gt; Order:
+        lines = []
+        for product_id, qty in sorted(items):            # единый порядок — без взаимных блокировок
+            product = self.catalog.get(product_id)
+            if product is None:
+                raise ProductNotFound(product_id)
+            if not self.stock.reserve(product_id, qty):
+                raise OutOfStock(product_id)
+            lines.append(OrderLine(product, qty))
+        return Order(customer_id=customer_id, lines=lines)
+</code></pre>
+<p>Домен говорит на языке магазина: «товар не найден», «нет в нужном количестве». Он не знает про HTTP-коды — превращать <code>OutOfStock</code> в ответ <code>409</code> будет веб-слой (§7). <code>sorted(items)</code> — то же правило единого порядка захвата ресурсов, что спасало от deadlock в <a href="../lessons/2-10.html#s-10">2.10 Транзакции</a>, §10.</p>
+<p>В этом упрощённом примере уже зарезервированные товары не возвращаются, если на третьем товаре не хватило остатка. В настоящем сервисе весь заказ оформляют одной транзакцией базы: либо всё, либо ничего (атомарность из <a href="../lessons/2-10.html#s-2">2.10 Транзакции</a>, §2).</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>Контракт эндпоинта: что именно летает по сети</h2><div class="prose"><p><em>Аналогия:</em> контракт API — как меню в кафе: клиент не обязан знать, как готовится блюдо внутри кухни, но обязан точно знать, что написать в заказе и что получит на тарелке.</p>
+<p>Запрос на оформление заказа (<code>POST /orders</code>):</p>
+<pre><code class="language-json">{
+  &quot;customer_id&quot;: 1,
+  &quot;items&quot;: [{&quot;product_id&quot;: 3, &quot;qty&quot;: 1}, {&quot;product_id&quot;: 12, &quot;qty&quot;: 2}]
+}
+</code></pre>
+<p>Успешный ответ (<code>201 Created</code>):</p>
+<pre><code class="language-json">{
+  &quot;order_id&quot;: 1042,
+  &quot;total&quot;: &quot;57570.00&quot;,
+  &quot;status&quot;: &quot;created&quot;
+}
+</code></pre>
+<p>Ответ с ошибкой (<code>409 Conflict</code>) — товара не хватает:</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;out_of_stock&quot;,
+  &quot;message&quot;: &quot;Товара 3 нет в нужном количестве&quot;
+}
+</code></pre>
+<p>Некорректный запрос (<code>400 Bad Request</code>):</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;invalid_request&quot;,
+  &quot;message&quot;: &quot;Нужен непустой список items с product_id и qty &gt; 0&quot;
+}
+</code></pre>
+<p>Код статуса — тоже часть контракта, не только тело ответа: <code>201</code> — «создано», <code>400</code> — «клиент прислал что-то некорректное», <code>404</code> — «такого ресурса нет», <code>409</code> — «запрос корректный, но противоречит текущему состоянию». Клиент (браузер, другой сервис, тестовый скрипт) должен уметь отличить эти случаи, даже не читая тело ответа.</p>
+<p><img loading="lazy" src="../assets/diagrams/app1-backend-contract.webp" alt="" /></p>
+<pre><code class="language-python">@app.route(&quot;/orders&quot;, methods=[&quot;POST&quot;])
+def create_order():
+    body = request.get_json(silent=True) or {}
+    items = body.get(&quot;items&quot;)
+    if not items or any(i.get(&quot;qty&quot;, 0) &lt;= 0 for i in items):
+        return jsonify(error=&quot;invalid_request&quot;,
+                       message=&quot;Нужен непустой список items с product_id и qty &gt; 0&quot;), 400
+
+    try:
+        order = container.orders.place_order(
+            body[&quot;customer_id&quot;], [(i[&quot;product_id&quot;], i[&quot;qty&quot;]) for i in items])
+    except ProductNotFound as e:
+        return jsonify(error=&quot;product_not_found&quot;, message=str(e)), 404
+    except OutOfStock as e:
+        return jsonify(error=&quot;out_of_stock&quot;, message=str(e)), 409
+
+    return jsonify(order_id=order.id, total=str(order.total), status=&quot;created&quot;), 201
+</code></pre>
+<p>Важная деталь: валидация формы запроса происходит <strong>до</strong> обращения к домену — веб-слой отсекает заведомо некорректные запросы, и домен вообще не узнаёт о существовании плохих данных. А исключения домена веб-слой переводит в HTTP-коды. Это ровно тот же принцип, что и в §8 урока <a href="../lessons/2-2.html">2.2 Python для автоматизации</a> («проверяй конкретные ошибки и сообщай о них понятно»), только теперь на уровне HTTP-статусов, а не <code>stderr</code>.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Повторное нажатие</summary><div class="callout-body"><p>Пользователь нажал «Оформить», ответ задержался, он нажал ещё раз — и получил два заказа. Защита — <strong>ключ идемпотентности</strong>: клиент генерирует уникальный идентификатор операции и шлёт его в заголовке <code>Idempotency-Key</code>, а сервер, увидев уже обработанный ключ, возвращает прежний ответ вместо создания нового заказа. Об этом спрашивают на собеседованиях про API и про повторы запросов (<a href="../lessons/2-3.html#s-11">2.3 Параллельность</a>, §11).</p>
+</div></details></div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Тестирование эндпоинтов без реального сервера</h2><div class="prose"><p><em>Аналогия:</em> тестовый клиент Flask — как тренажёр для пилотов: имитирует настоящий запрос к серверу, но без реальной сети, портов и запущенного процесса.</p>
+<pre><code class="language-python">import pytest
+from app import create_app
+
+@pytest.fixture
+def client():
+    app = create_app(initial_stock={3: 1})      # на складе одна видеокарта
+    app.config[&quot;TESTING&quot;] = True
+    with app.test_client() as client:
+        yield client
+
+def test_second_order_for_last_item_returns_409(client):
+    order = {&quot;customer_id&quot;: 1, &quot;items&quot;: [{&quot;product_id&quot;: 3, &quot;qty&quot;: 1}]}
+    assert client.post(&quot;/orders&quot;, json=order).status_code == 201
+    response = client.post(&quot;/orders&quot;, json=order)
+    assert response.status_code == 409
+    assert response.get_json()[&quot;error&quot;] == &quot;out_of_stock&quot;
+</code></pre>
+<p><code>@pytest.fixture</code> — ещё один декоратор, но теперь из библиотеки для тестирования <code>pytest</code>: он помечает функцию <code>client</code> как «подготовку», которую можно переиспользовать в разных тестах — достаточно указать имя <code>client</code> аргументом самой тестовой функции, и pytest сам подставит туда результат. Слово <code>yield</code> внутри <code>client()</code> работает как временная «пауза»: код до <code>yield</code> выполняется как подготовка (создание тестового клиента), само значение отдаётся тесту, а после того как тест закончится, выполнение вернётся в эту же функцию и продолжится с кода после <code>yield</code> — удобно для автоматической уборки ресурсов после теста.</p>
+<p><code>create_app(...)</code> — <strong>фабрика приложения</strong>: функция, которая собирает приложение с нужными настройками. Благодаря DI из §5 тест сам задаёт остатки на складе и не зависит от базы. Такой тест проверяет ровно контракт из §7 (код статуса + тело ответа), не поднимая реальный сервер на порту и не делая настоящих сетевых запросов — быстро и надёжно запускается в CI/CD (<a href="../lessons/3-2.html">3.2 CI-CD</a>).</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Конфигурация через переменные окружения</h2><div class="prose"><p><em>Аналогия:</em> хардкодить порт или адрес базы данных прямо в коде — как приклеить адрес доставки скотчем на коробку с товаром: работает, пока не нужно отправить точно такую же коробку по другому адресу.</p>
+<pre><code class="language-python">import os
+
+PORT = int(os.environ.get(&quot;APP_PORT&quot;, 5000))
+DEBUG = os.environ.get(&quot;APP_DEBUG&quot;, &quot;false&quot;).lower() == &quot;true&quot;
+
+app.run(port=PORT, debug=DEBUG)
+</code></pre>
+<p>Значение по умолчанию (<code>5000</code>, <code>&quot;false&quot;</code>) позволяет коду работать локально без единой настройки, а переменные окружения — переопределить это же поведение в контейнере или на сервере, не трогая код. Это ровно тот механизм, которым Docker (3.1) и CI/CD-пайплайны (3.2) обычно передают приложению настройки конкретного окружения (dev/staging/prod).</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Секреты в переменных окружения — не панацея</summary><div class="callout-body"><p>Переменные окружения годятся для настроек, но пароли через них передавать неидеально: они видны в <code>docker inspect</code>, в <code>/proc/&lt;pid&gt;/environ</code>, попадают в дампы при падении и в логи CI, если кто-то напечатает окружение при отладке. Для секретов есть отдельные механизмы — Docker secrets, Kubernetes Secrets, Vault (<a href="../lessons/6-2.html">6.2 DevSecOps</a>). На этом этапе достаточно запомнить правило: <code>.env</code> <strong>никогда</strong> не коммитится (<a href="../lessons/0-1.html#s-5">0.1 Git</a>, §5), а в репозитории лежит <code>.env.example</code> с именами переменных и пустыми значениями.</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Как это запускают на самом деле</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-backend-prod-server.svg" alt="" /><br />
+<em>Аналогия:</em> <code>app.run()</code> — учебный автомобиль на автодроме. Ездит, но выезжать на нём в город не стоит.</p>
+<p>При запуске Flask печатает предупреждение, которое почти все пропускают: <strong><code>WARNING: This is a development server. Do not use it in a production deployment.</code></strong> Это не формальность. Отладочный сервер обрабатывает один запрос за раз, не переживает падений и не умеет ничего из того, что нужно под нагрузкой.</p>
+<p>В работе запускают через <strong>WSGI-сервер</strong> — чаще всего <code>gunicorn</code>:</p>
+<pre><code class="language-bash">pip install gunicorn
+gunicorn --workers 4 --bind 0.0.0.0:8000 --timeout 30 app:app
+</code></pre>
+<p><code>--workers</code> — сколько процессов обрабатывают запросы параллельно. Мастер-процесс следит за ними и поднимает упавшие. Ориентир для начала — <code>2 × число ядер + 1</code>, дальше подбирается замерами. <code>app:app</code> означает «в модуле <code>app</code> взять объект <code>app</code>».</p>
+<p>Обрати внимание, что это ровно та же история, что в <a href="../lessons/2-3.html">2.3 Параллельность</a>: воркеры — отдельные процессы, потому что у каждого свой GIL. Отсюда же следствие, о которое спотыкаются: <strong>глобальные переменные не разделяются между воркерами</strong>. Хранилище остатков из §4, живущее в памяти процесса, при четырёх воркерах превратится в четыре независимых хранилища, и запрос попадёт то в одно, то в другое. Общее состояние выносят наружу — в Redis или базу.</p>
+<p>Полная цепочка на боевом сервере: клиент → <strong>nginx</strong> (TLS, статика, таймауты — <a href="../lessons/1-2.html#s-11">1.2 Сети</a>, §11) → <strong>gunicorn</strong> (воркеры) → <strong>твой код</strong>. Сам Flask ничего про эту обвязку не знает, и в этом смысл.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Flask или FastAPI</summary><div class="callout-body"><p>Flask остаётся отличным учебным и рабочим инструментом, но в вакансиях 2026 года заметно чаще встречается <strong>FastAPI</strong>: он асинхронный (полезно там, где сервис в основном ждёт — см. <a href="../lessons/2-3.html">2.3 Параллельность</a>), валидирует запросы через <code>pydantic</code> вместо ручных проверок из §7 и сам генерирует документацию API. Запускается он не через <code>gunicorn</code> напрямую, а через ASGI-сервер <code>uvicorn</code>. Идеи слоёв, контракта и конфигурации при этом ровно те же — переучиваться придётся только на синтаксис.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Health-check, метрики и логи</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-backend-observability.svg" alt="" /><br />
+<em>Аналогия:</em> сервис в контейнере — как пациент под наблюдением: он должен уметь сам ответить «я жив», «я готов работать» и отдать показания приборов. Иначе за него это никто не сделает.</p>
+<p><strong>Два разных эндпоинта проверки:</strong></p>
+<pre><code class="language-python">@app.get(&quot;/healthz&quot;)
+def healthz():
+    &quot;&quot;&quot;Процесс жив. Ничего не проверяем — иначе перезапуски пойдут по кругу.&quot;&quot;&quot;
+    return {&quot;status&quot;: &quot;ok&quot;}, 200
+
+
+@app.get(&quot;/readyz&quot;)
+def readyz():
+    &quot;&quot;&quot;Готов ли принимать трафик: проверяем зависимости.&quot;&quot;&quot;
+    try:
+        db.execute(&quot;SELECT 1&quot;)
+    except Exception as e:
+        app.logger.warning(&quot;readiness failed: %s&quot;, e)
+        return {&quot;status&quot;: &quot;not ready&quot;, &quot;reason&quot;: &quot;database&quot;}, 503
+    return {&quot;status&quot;: &quot;ready&quot;}, 200
+</code></pre>
+<p>Разница между ними — типовой вопрос на собеседовании. Отвалилась база: <code>/healthz</code> обязан отвечать <code>200</code>, потому что процесс жив и перезапуск ничему не поможет; <code>/readyz</code> обязан вернуть <code>503</code>, потому что слать сюда трафик сейчас бессмысленно. Если перепутать и проверять базу в <code>/healthz</code>, оркестратор начнёт бесконечно перезапускать здоровое приложение из-за проблемы на стороне базы. Подробнее про пробы — в <a href="../lessons/5-1.html">5.1 Kubernetes</a>.</p>
+<p><strong>Метрики для Prometheus</strong> — прямое продолжение <a href="../lessons/1-4.html">1.4 Метрики и логи</a>:</p>
+<pre><code class="language-python">from prometheus_flask_exporter import PrometheusMetrics
+
+metrics = PrometheusMetrics(app)     # добавляет /metrics автоматически
+</code></pre>
+<p>Библиотека сама начнёт считать число запросов (counter) и время ответа (histogram) с разбивкой по эндпоинту и коду ответа. Отсюда же берутся перцентили и golden signals, о которых шла речь в уроке 1.4. Важно помнить про кардинальность: разбивка по пути годится, пока путей десятки; класть в метку идентификатор игры из <code>/game/&lt;uuid&gt;</code> — верный способ положить Prometheus.</p>
+<p><strong>Логи — в stdout, а не в файл.</strong> В контейнере файл никто не читает; сбором занимается среда — journald, Docker, Loki. Формат — JSON, чтобы логи можно было фильтровать по полям, а не регулярками:</p>
+<pre><code class="language-python">import logging, json, sys, uuid
+from flask import g, request
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            &quot;ts&quot;: self.formatTime(record),
+            &quot;level&quot;: record.levelname,
+            &quot;msg&quot;: record.getMessage(),
+            &quot;request_id&quot;: getattr(g, &quot;request_id&quot;, None),
+        }, ensure_ascii=False)
+
+@app.before_request
+def add_request_id():
+    g.request_id = request.headers.get(&quot;X-Request-ID&quot;, str(uuid.uuid4()))
+</code></pre>
+<p><strong>Идентификатор запроса</strong> (<code>request_id</code>) — то, что превращает разрозненные строки в историю. Он приходит с запросом или генерируется, пробрасывается во все логи обработки и передаётся дальше при обращении к другим сервисам. Когда пользователь жалуется, по одному идентификатору поднимается вся цепочка через все сервисы. Без этого в логах на сотню запросов в секунду разобраться невозможно.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Корректное завершение и 12-factor</h2><div class="prose"><p><em>Аналогия:</em> когда смену закрывают, кассир не бросает покупателя посреди оплаты — он дообслуживает текущего и не пускает новых.</p>
+<p>При обновлении или остановке контейнера процесс получает <code>SIGTERM</code> (<a href="../lessons/1-1.html#s-5">1.1 Linux</a>, §5), а через некоторое время — <code>SIGKILL</code>. Если приложение не обрабатывает первый сигнал, все запросы в работе оборвутся ошибкой у пользователей.</p>
+<p><strong>Graceful shutdown</strong> означает: перестать принимать новые запросы, дообработать текущие, закрыть соединения с базой, выйти. <code>gunicorn</code> умеет это сам, но у него есть таймаут (<code>--graceful-timeout</code>), и код не должен держать долгие операции дольше него.</p>
+<pre><code class="language-python">import signal
+
+def handle_sigterm(signum, frame):
+    app.logger.info(&quot;SIGTERM received, shutting down gracefully&quot;)
+    storage.flush()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_sigterm)
+</code></pre>
+<p>Отдельная деталь для контейнеров: сигнал получает процесс с PID 1. Если приложение запущено через шелл-обёртку, сигнал придёт шеллу, а не приложению — отсюда правило про <code>exec</code> в скриптах запуска, к которому вернёмся в <a href="../lessons/3-1.html">3.1 Docker</a>.</p>
+<p><strong>12-factor app</strong> — свод принципов для сервисов, которые предстоит контейнеризировать. Из двенадцати практически важны шесть, и большинство уже встретились:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Принцип</th>
+<th>Что означает</th>
+<th>Где было</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Конфигурация в окружении</td>
+<td>никаких настроек в коде</td>
+<td>§9</td>
+</tr>
+<tr>
+<td>Логи в stdout</td>
+<td>приложение не управляет хранением логов</td>
+<td>§11</td>
+</tr>
+<tr>
+<td>Портируемость</td>
+<td>сервис сам слушает порт, не полагаясь на веб-сервер снаружи</td>
+<td>§10</td>
+</tr>
+<tr>
+<td>Отсутствие состояния</td>
+<td>процесс ничего не хранит в себе, состояние — во внешнем хранилище</td>
+<td>§10, про воркеры</td>
+</tr>
+<tr>
+<td>Явные зависимости</td>
+<td>всё перечислено в <code>requirements.txt</code></td>
+<td><a href="../lessons/2-1.html#s-17">2.1 Python</a>, §17</td>
+</tr>
+<tr>
+<td>Одноразовость процессов</td>
+<td>быстрый старт, корректное завершение по SIGTERM</td>
+<td>этот раздел</td>
+</tr>
+</tbody>
+</table></div>
+<p>Именно соблюдение этих правил делает приложение пригодным для Docker и Kubernetes. Нарушение любого из них всплывёт в следующих уроках в виде конкретной поломки, а не абстрактной претензии к архитектуре.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>14</b>/18 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Flask-роут = путь + метод → конкретная функция-обработчик.</li>
+<li>Слоистая архитектура здесь та же идея, что в <a href="../lessons/2-4.html">2.4 Архитектура и тесты</a> — просто «терминал» заменяется на «HTTP». Мапперы прячут внутренние поля от клиента.</li>
+<li><code>Lock</code> защищает общие данные от одновременного повреждения несколькими запросами.</li>
+<li>DI — зависимости передаются снаружи, а не создаются классом самим для себя.</li>
+<li>Бизнес-правила (остатки, сумма заказа) живут в домене и говорят на языке магазина; веб-слой переводит исключения домена в коды 400/404/409. Повторные запросы защищают ключом идемпотентности.</li>
+<li><code>app.run()</code> — отладочный сервер. В работе запускают через <code>gunicorn</code> с несколькими воркерами за nginx.</li>
+<li>Воркеры — отдельные процессы: глобальные переменные между ними не разделяются, общее состояние выносят в Redis или базу.</li>
+<li><code>/healthz</code> отвечает всегда (жив ли процесс), <code>/readyz</code> проверяет зависимости (готов ли к трафику). Перепутать — получить цикл перезапусков.</li>
+<li><code>/metrics</code> для Prometheus; в метки не кладут идентификаторы — кардинальность.</li>
+<li>Логи в stdout, в JSON, с <code>request_id</code> — иначе цепочку одного запроса не восстановить.</li>
+<li><code>SIGTERM</code> надо обрабатывать: дообслужить текущие запросы и выйти, иначе при каждом деплое пользователи получают ошибки.</li>
+<li>12-factor: конфиг в окружении, логи в stdout, отсутствие состояния, корректное завершение — именно это делает сервис пригодным для Docker и Kubernetes.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>15</b>/18 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Все задания урока — раздел «Приложение» в <a href="../projects/p1.html">P1</a>. Чтобы не начинать с нуля, возьми стартовый каркас <code>shop-api</code> (ссылка на странице <a href="../projects/p1.html">P1</a>): в нём уже есть health-check, конфигурация из окружения и тесты.</li>
+</ul>
+</div></details><article class="task" data-task="b366756fc2"><h3>Задание 1 — API с health-check</h3><p>Сделай Flask- или FastAPI-сервис с эндпоинтами <code>/healthz</code> (жив ли процесс) и <code>/readyz</code> (доступна ли база) и одним рабочим ресурсом с CRUD.<br />
+<strong>Проверка:</strong> при остановленной базе <code>/healthz</code> отвечает 200, а <code>/readyz</code> — 503.</p>
+<label class="task-done"><input type="checkbox" data-task-check="b366756fc2"> Сделала руками и проверила</label></article><article class="task" data-task="b3a63e14c7"><h3>Задание 2 — конфигурация из окружения</h3><p>Все настройки (порт, строка подключения к базе, уровень логов) — из переменных окружения с проверкой при старте. Нет обязательной переменной — сервис не стартует и пишет, какой.<br />
+<strong>Проверка:</strong> <code>env -i python app.py</code> падает с понятным сообщением; в коде нет ни одного пароля.</p>
+<label class="task-done"><input type="checkbox" data-task-check="b3a63e14c7"> Сделала руками и проверила</label></article><article class="task" data-task="723ad430d5"><h3>Задание 3 — тесты эндпоинтов</h3><p>Напиши тесты через тестовый клиент: успешный ответ, ошибка валидации (400/422), несуществующий ресурс (404).<br />
+<strong>Проверка:</strong> тесты не поднимают реальный сервер и проходят в CI.</p>
+<label class="task-done"><input type="checkbox" data-task-check="723ad430d5"> Сделала руками и проверила</label></article><article class="task" data-task="c7c679ab7b"><h3>Задание 4 — продакшен-запуск</h3><p>Запусти сервис через gunicorn (или uvicorn) с несколькими воркерами за nginx, логи — JSON в stdout.<br />
+<strong>Проверка:</strong> <code>kill -TERM</code> главного процесса завершает работу без обрыва идущих запросов (проверь медленным эндпоинтом с <code>sleep</code>).</p>
+<label class="task-done"><input type="checkbox" data-task-check="c7c679ab7b"> Сделала руками и проверила</label></article><article class="task" data-task="fc13626bab"><h3>Задание 5 — контейнер</h3><p>Упакуй сервис в Docker-образ по правилам из <a href="../lessons/3-1.html">3.1 Docker</a> и <a href="../lessons/6-2.html">6.2 DevSecOps</a>: slim-база, не root, <code>HEALTHCHECK</code>.<br />
+<strong>Проверка:</strong> <code>docker inspect</code> показывает <code>healthy</code>, <code>docker stop</code> завершает контейнер быстрее 10 секунд (SIGTERM обработан).</p>
+<label class="task-done"><input type="checkbox" data-task-check="fc13626bab"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>16</b>/18 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>17</b>/18 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>18</b>/18 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-4.html">2.4 Архитектура и тесты</a> — те же слои без HTTP</li>
+<li><a href="../lessons/2-3.html">2.3 Параллельность</a> — GIL, из-за которого воркеры это процессы</li>
+<li><a href="../lessons/1-4.html">1.4 Метрики и логи</a> — куда уходят метрики отсюда</li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a> — контейнеризация этого сервиса</li>
+<li><a href="../lessons/5-1.html">5.1 Kubernetes</a> — пробы, которые читают healthz и readyz</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>The Twelve-Factor App: https://12factor.net/ru/</li>
+<li>The Twelve-Factor App: https://12factor.net/ru/</li>
+<li>Документация gunicorn: https://docs.gunicorn.org/</li>
+<li>Flask: развёртывание в продакшене: https://flask.palletsprojects.com/en/stable/deploying/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-4.html">← 2.4 Архитектура приложения и тесты</a><a class="lesson-jump" href="2-6.html">2.6 SQL: первые запросы →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-5", "number": "2.5", "title": "Бэкенд-сервис на Python", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["b366756fc2", "b3a63e14c7", "723ad430d5", "c7c679ab7b", "fc13626bab"], "quiz": [{"id": "63c09dbaa2", "q": "Какой код ответа вернуть, если товара не хватает на складе, а запрос корректный?", "options": ["400 Bad Request", "404 Not Found", "409 Conflict", "500 Internal Server Error"], "answer": [2], "why": "<p>запрос составлен правильно, но противоречит текущему состоянию ресурса — это конфликт.<\/p>\n"}, {"id": "a8d08be9b6", "q": "Чем <code>/healthz<\/code> отличается от <code>/readyz<\/code>?", "options": ["healthz — «процесс жив», readyz — «готов принимать трафик, зависимости доступны»", "Это одно и то же", "healthz проверяет базу, readyz — нет", "readyz нужен только в разработке"], "answer": [0], "why": "<p>при провале liveness процесс перезапускают, при провале readiness — только временно убирают из балансировки.<\/p>\n"}, {"id": "77d18d5302", "q": "Почему нельзя запускать продакшен на <code>app.run()<\/code> Flask?", "options": ["Он не поддерживает JSON", "Это отладочный сервер: один запрос за раз, нет устойчивости к падениям", "Он работает только на Windows", "Он не умеет слушать порт"], "answer": [1], "why": "<p>в продакшене используют WSGI/ASGI-сервер (gunicorn, uvicorn) с несколькими воркерами за nginx.<\/p>\n"}, {"id": "106d6319d4", "q": "Хранилище остатков живёт в памяти процесса, а gunicorn запущен с 4 воркерами. Что произойдёт?", "options": ["Ничего особенного", "У каждого воркера будет своё независимое хранилище, и данные разойдутся", "gunicorn объединит память воркеров", "Приложение не запустится"], "answer": [1], "why": "<p>воркеры — отдельные процессы. Общее состояние выносят в базу или Redis.<\/p>\n"}, {"id": "8853160f1b", "q": "Что должно происходить, когда приложение получает SIGTERM?", "options": ["Мгновенно завершиться", "Перестать принимать новые запросы, дообработать текущие, закрыть соединения и выйти", "Перезапуститься", "Игнорировать сигнал"], "answer": [1], "why": "<p>если не уложиться в период ожидания, через несколько секунд придёт SIGKILL, и запросы оборвутся.<\/p>\n"}, {"id": "450d47d318", "q": "Где хранить настройки приложения по принципам 12-factor?", "options": ["Прямо в коде", "В переменных окружения", "В отдельной ветке git", "В комментариях"], "answer": [1], "why": "<p>так один и тот же образ работает в dev, staging и prod, а различаются только переменные. Секреты — отдельно, через хранилище секретов.<\/p>\n"}, {"id": "340e1cd1b6", "q": "Как защитить API от двойного заказа при повторном нажатии кнопки?", "options": ["Запретить пользователю нажимать кнопку", "Принимать ключ идемпотентности и при повторе возвращать прежний ответ", "Увеличить таймаут", "Перезапускать сервер после каждого заказа"], "answer": [1], "why": "<p>сервер узнаёт уже обработанный ключ и не создаёт второй заказ.<\/p>\n"}], "cards": [{"id": "efbe33e765", "q": "Что такое 12-factor app?", "a": "<p>Набор принципов для облачных приложений: конфигурация в окружении, логи в stdout, процессы без состояния, зависимости явно объявлены, быстрый старт и корректное завершение, одинаковые окружения от dev до prod.<\/p>\n"}, {"id": "04733e68ad", "q": "Чем liveness отличается от readiness?", "a": "<p>Liveness отвечает «жив ли процесс» — при провале его перезапускают. Readiness — «готов ли принимать трафик» — при провале его временно убирают из балансировки, не перезапуская.<\/p>\n"}, {"id": "aa5e96bb87", "q": "Почему dev-сервер Flask нельзя использовать в продакшене?", "a": "<p>Он однопоточный, не рассчитан на нагрузку и безопасность. Используют WSGI/ASGI-сервер (gunicorn, uvicorn) с несколькими воркерами за обратным прокси.<\/p>\n"}, {"id": "25f659ef06", "q": "Что должно происходить при SIGTERM?", "a": "<p>Перестать принимать новые запросы, дообработать текущие, закрыть соединения с базой и выйти до того, как придёт SIGKILL.<\/p>\n"}, {"id": "eccb0a8d17", "q": "Почему логи пишут в stdout, а не в файл?", "a": "<p>Платформа (Docker, systemd, Kubernetes) сама собирает stdout, ротирует и отправляет в систему логов. Приложению не нужно знать, где они хранятся.<\/p>\n"}, {"id": "611def6432", "q": "Чем PUT отличается от PATCH и POST?", "a": "<p>POST создаёт ресурс (не идемпотентен), PUT заменяет ресурс целиком (идемпотентен), PATCH изменяет его частично.<\/p>\n"}, {"id": "51744e6271", "q": "Что такое Dependency Injection?", "a": "<p>Зависимости (база, клиенты внешних API) передаются объекту снаружи, а не создаются внутри. Позволяет подменять их в тестах и менять реализацию без правки логики.<\/p>\n"}], "next": "2-6"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

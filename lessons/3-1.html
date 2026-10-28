@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3.1 Docker — DevOps-маршрут</title>
+<meta name="description" content="Урок 3.1: Docker">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c3)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-3">← 3. Docker и CI/CD</a>
+    <div class="sidebar-art"><svg class="art art-build" viewBox="0 0 240 140" role="img" aria-label="Контейнеры на конвейере" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<text class="lbl stage s1" x="22" y="24">build</text>
+<text class="lbl stage s2" x="102" y="24">test</text>
+<text class="lbl stage s3" x="176" y="24">deploy</text>
+<path class="dim" d="M20 32 H220" stroke-dasharray="2 6"/>
+<g class="belt">
+  <g class="box"><rect x="-70" y="58" width="44" height="32" rx="3"/><path class="dim" d="M-59 62 V86 M-48 62 V86 M-37 62 V86"/></g>
+  <g class="box"><rect x="10" y="58" width="44" height="32" rx="3"/><path class="dim" d="M21 62 V86 M32 62 V86 M43 62 V86"/></g>
+  <g class="box"><rect x="90" y="58" width="44" height="32" rx="3"/><path class="dim" d="M101 62 V86 M112 62 V86 M123 62 V86"/></g>
+  <g class="box"><rect x="170" y="58" width="44" height="32" rx="3"/><path class="dim" d="M181 62 V86 M192 62 V86 M203 62 V86"/></g>
+</g>
+<path d="M12 96 H228"/>
+<circle class="dim wheel" cx="30" cy="106" r="7"/><circle class="dim wheel" cx="120" cy="106" r="7"/><circle class="dim wheel" cx="210" cy="106" r="7"/>
+<text class="lbl" x="20" y="134">docker build · push</text>
+</svg></div>
+    <div class="lesson-number">lesson 3.1 · build</div>
+    <h1 class="lesson-title">Docker</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Контейнер — не виртуальная машина</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Докер-образ и контейнер — в чём разница</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Из чего состоит образ: слои</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Жизненный цикл контейнера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Заглянуть внутрь и изменить контейнер на лету</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">nginx: обратный прокси перед приложением</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Приложение за прокси: как nginx разговаривает с кодом</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Свой Dockerfile: собрать и запустить сервис</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Монтирование конфигурации: volume вместо пересборки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Проверка Dockerfile и образа: hadolint и Dockle</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Docker Compose: несколько контейнеров как единое целое</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Multi-stage build: инструменты сборки не едут в прод</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Кеш слоёв: порядок инструкций</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">CMD, ENTRYPOINT и кто такой PID 1</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Пользователь, теги и уязвимости</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Данные: тома против bind mount</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Контейнеризация — сегодня стандартный способ доставки и запуска приложений в индустрии. Практически любая вакансия DevOps требует уверенного владения Docker: не абстрактно «знаю, что это», а руками — собрать образ, отладить контейнер, проверить его на безопасность, поднять несколько сервисов вместе.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Докер-образ (image)</strong> — «упаковка» приложения и всех его зависимостей, неизменяемый шаблон, из которого создаются контейнеры.</li>
+<li><strong>Контейнер (container)</strong> — запущенный экземпляр образа, «ожившая» упаковка — то, что реально работает и потребляет ресурсы.</li>
+<li><strong>Dockerfile</strong> — текстовый рецепт, по которому Docker собирает образ шаг за шагом.</li>
+<li><strong>Слой (layer)</strong> — одно изменение файловой системы, зафиксированное одной инструкцией Dockerfile; слои накладываются друг на друга поверх базового.</li>
+<li><strong>Реверс-прокси (reverse proxy)</strong> — сервер, принимающий запросы снаружи и перенаправляющий их дальше, к реальному приложению, оставаясь для клиента единственной видимой точкой входа.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Контейнер — не виртуальная машина</h2><div class="prose"><p><em>Аналогия:</em> виртуальная машина — это как построить для каждого жильца отдельный дом с собственным фундаментом, стенами и коммуникациями. Контейнер — как отдельная квартира в одном большом доме: у каждого своя дверь, свои вещи, но фундамент и инженерные системы дома — общие.</p>
+<p>Предшественниками контейнеров были именно виртуальные машины: они тоже изолируют приложение от внешней среды, но для этого эмулируют целое отдельное «железо» и запускают полноценную операционную систему поверх него. Контейнер разделяет с хостом ядро операционной системы и изолирует только то, что реально нужно приложению (файловую систему, процессы, сеть) — поэтому контейнеры:</p>
+<ul>
+<li>потребляют кратно меньше ресурсов, чем VM;</li>
+<li>запускаются за секунды, а не за минуты;</li>
+<li>легко переносятся между машинами (тот же образ работает одинаково и на ноутбуке разработчика, и на сервере).</li>
+</ul>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Почему это важно на реальной работе</summary><div class="callout-body"><p>Главное преимущество контейнеризации — изоляция зависимостей и единая простая точка запуска ПО: «работает у меня на машине» перестаёт быть проблемой, потому что окружение приложения — часть самого образа, а не окружения хоста.</p>
+</div></details>
+<p><img loading="lazy" src="../assets/diagrams/do5-vmvscontainer.webp" alt="" /></p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Докер-образ и контейнер — в чём разница</h2><div class="prose"><p><em>Аналогия:</em> образ — это класс в программировании, контейнер — конкретный объект, созданный из этого класса. Из одного образа можно запустить сколько угодно независимых контейнеров.</p>
+<pre><code class="language-bash">docker pull nginx           # скачать готовый образ из реестра (Docker Hub)
+docker images               # посмотреть список образов на машине
+docker run -d nginx         # создать и запустить контейнер на основе образа
+docker ps                   # посмотреть список запущенных контейнеров
+</code></pre>
+<p><code>docker run</code> создаёт <strong>новый</strong> контейнер при каждом вызове — если вызвать эту команду трижды, получится три независимых контейнера из одного и того же образа, каждый со своим состоянием и процессами.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Из чего состоит образ: слои</h2><div class="prose"><p><em>Аналогия:</em> образ — это стопка прозрачных калек, наложенных друг на друга: нижняя калька — базовая операционная система, каждая следующая — одно конкретное изменение (установили пакет, скопировали файл). Итоговая картинка — сумма всех калек сразу.</p>
+<pre><code class="language-dockerfile">FROM ubuntu:24.04
+RUN apt-get update &amp;&amp; apt-get install -y nginx
+COPY ./site /var/www/html
+CMD [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]
+</code></pre>
+<p>Каждая инструкция <code>Dockerfile</code> (<code>FROM</code>, <code>RUN</code>, <code>COPY</code>, ...) создаёт отдельный слой. Слои кэшируются: если ничего не изменилось выше по файлу, Docker при пересборке переиспользует уже готовый слой, не выполняя его заново — поэтому Docker собирает образ быстро при мелких правках.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Практическое правило</summary><div class="callout-body"><p>Избегай множественных отдельных вызовов <code>RUN</code> там, где можно объединить команды через <code>&amp;&amp;</code> в один вызов — каждый <code>RUN</code> создаёт свой слой, и лишние слои увеличивают итоговый размер образа и число промежуточных кэш-точек без реальной пользы.</p>
+</div></details>
+<p><img loading="lazy" src="../assets/diagrams/do5-layers.webp" alt="" /></p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Жизненный цикл контейнера</h2><div class="prose"><p><em>Аналогия:</em> контейнер — как телевизор: можно включить, выключить, перезагрузить, заглянуть «внутрь» через сервисное меню — при этом сам телевизор (образ) не меняется от этих действий.</p>
+<pre><code class="language-bash">docker run -d --name web -p 8080:80 nginx:1.27   # запустить, порт 80 контейнера доступен на 8080 хоста
+docker ps                                         # проверить, что контейнер работает
+docker logs -f web                                # вывод контейнера в реальном времени
+docker inspect web                                # подробная информация: IP, порты, тома, переменные
+docker stop web                                   # остановить (SIGTERM, через 10 секунд — SIGKILL)
+docker start web                                  # запустить тот же контейнер снова
+docker rm web                                     # удалить контейнер (образ остаётся)
+</code></pre>
+<p><code>-p 8080:80</code> означает «порт 80 внутри контейнера доступен на порту 8080 хост-машины» — без этого проброса порт контейнера остаётся видимым только изнутри docker-сети. Под капотом это DNAT-правило из <a href="../lessons/1-2.html#s-10">1.2 Сети</a>, §10. <code>--name web</code> даёт контейнеру имя, чтобы не копировать длинный идентификатор в каждую команду. <code>docker inspect</code> возвращает JSON с полным описанием контейнера — оттуда же можно узнать его внутренний IP-адрес в docker-сети и смонтированные тома.</p>
+<p><code>docker stop</code> сначала посылает главному процессу контейнера SIGTERM и ждёт, а через 10 секунд добивает SIGKILL — ровно порядок из <a href="../lessons/1-1.html#s-5">1.1 Linux</a>, §5. Почему контейнер иногда не реагирует на SIGTERM, разобрано в §14.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Заглянуть внутрь и изменить контейнер на лету</h2><div class="prose"><p><em>Аналогия:</em> <code>docker exec</code> — как зайти внутрь работающей квартиры через отдельный чёрный ход, не выселяя жильца — можно посмотреть, что там происходит, или что-то поправить, пока контейнер продолжает работать.</p>
+<pre><code class="language-bash">docker exec -it web sh                                # оболочка внутри контейнера
+docker exec web cat /etc/nginx/conf.d/default.conf    # прочитать файл внутри контейнера
+docker cp ./default.conf web:/etc/nginx/conf.d/        # скопировать файл с хоста внутрь
+docker exec web nginx -t &amp;&amp; docker exec web nginx -s reload   # проверить и перечитать конфиг
+</code></pre>
+<p>Флаги <code>-it</code> у <code>docker exec</code> — это сразу два флага вместе: <code>-i</code> (interactive) держит открытым ввод, а <code>-t</code> (tty) выделяет псевдотерминал, благодаря которому вывод команды внутри контейнера выглядит и ведёт себя как в обычном терминале — без них интерактивная оболочка была бы почти неюзабельна. В минимальных образах <code>bash</code> часто нет, поэтому запускают <code>sh</code>.</p>
+<p><code>docker cp</code> копирует файлы между хостом и контейнером в любом направлении, не требуя пересборки образа — удобно для быстрой отладки конфигурации, но такие изменения теряются при удалении контейнера. Всё, что должно жить дольше одного эксперимента, попадает в Dockerfile (§8) или монтируется снаружи (§9).</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>nginx: обратный прокси перед приложением</h2><div class="prose"><p><em>Аналогия:</em> nginx — как секретарь в приёмной большого офиса: он не выполняет саму работу, а принимает посетителей (запросы) и направляет их точно в нужный кабинет (в конкретное внутреннее приложение), оставаясь единственным, кого видит посетитель снаружи.</p>
+<p>У nginx один главный процесс (master) и несколько рабочих (worker). Master читает и проверяет конфигурацию, управляет worker-процессами; worker-ы непосредственно обрабатывают входящие запросы. Подробно nginx разбирался в <a href="../lessons/1-2.html#s-11">1.2 Сети</a>, §11 — здесь он работает в контейнере перед приложением:</p>
+<pre><code class="language-nginx"># nginx/default.conf
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://app:8000;          # имя сервиса из docker-сети (§11)
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location = /nginx_status {
+        stub_status;                         # счётчики соединений самого nginx
+        allow 127.0.0.1;
+        deny all;
+    }
+}
+</code></pre>
+<p><code>proxy_pass</code> — ключевая инструкция реверс-прокси: клиент обращается к nginx на порту 80, а nginx перенаправляет запрос дальше на приложение (здесь — на <code>app:8000</code>), полностью скрывая эту деталь от клиента. <code>stub_status</code> отдаёт счётчики активных соединений и запросов — их потом забирает экспортер для мониторинга (<a href="../lessons/4-5.html#s-4">4.5 Наблюдаемость</a>, §4). Доступ к странице статуса закрыт для всех, кроме самой машины: внутренние счётчики незачем показывать интернету.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Приложение за прокси: как nginx разговаривает с кодом</h2><div class="prose"><p><em>Аналогия:</em> nginx — переводчик на входе в здание. Он отлично говорит с посетителями, но чтобы передать их просьбу во внутренний отдел, нужен язык, который понимает и отдел.</p>
+<p>Между nginx и приложением всегда есть протокол — и от него зависит, как приложение запускается:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Протокол</th>
+<th>Кто так работает</th>
+<th>Директива nginx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HTTP</strong></td>
+<td>Python (gunicorn, uvicorn), Node.js, Go, Java</td>
+<td><code>proxy_pass</code></td>
+</tr>
+<tr>
+<td><strong>FastCGI</strong></td>
+<td>PHP (php-fpm), программы на C через <code>libfcgi</code></td>
+<td><code>fastcgi_pass</code></td>
+</tr>
+<tr>
+<td><strong>uWSGI</strong></td>
+<td>старые Python-проекты на uWSGI</td>
+<td><code>uwsgi_pass</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Сегодня почти все новые сервисы говорят обычным HTTP: приложение само слушает порт, а nginx проксирует на него запросы. Python-сервис из <a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> запускается через WSGI-сервер <code>gunicorn</code> (§10 того урока):</p>
+<pre><code class="language-bash">gunicorn --workers 4 --bind 0.0.0.0:8000 &quot;app:create_app()&quot;
+</code></pre>
+<p>Важно <code>0.0.0.0</code>, а не <code>127.0.0.1</code>: внутри контейнера <code>127.0.0.1</code> — это сам контейнер, и nginx из соседнего контейнера до такого адреса не достучится. Это самая частая причина ошибки <code>502 Bad Gateway</code> при первом запуске связки.</p>
+<p>FastCGI стоит узнавать в лицо: он встретится в любой инфраструктуре с PHP. Там nginx не проксирует HTTP, а передаёт запрос процессу <code>php-fpm</code> через <code>fastcgi_pass</code> — идея та же, меняется только язык общения.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Свой Dockerfile: собрать и запустить сервис</h2><div class="prose"><p><em>Аналогия:</em> Dockerfile — рецепт: что взять за основу, что докупить, что положить внутрь и как подавать. По одному рецепту на любой кухне получается одно и то же блюдо.</p>
+<pre><code class="language-dockerfile">FROM python:3.13-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ ./src/
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+CMD [&quot;gunicorn&quot;, &quot;--workers&quot;, &quot;4&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;, &quot;src.app:create_app()&quot;]
+</code></pre>
+<p>Базовый образ <code>python:3.13-slim</code> — официальный Python на урезанном Debian: всё нужное для запуска, ничего лишнего. Сначала копируется только <code>requirements.txt</code> и ставятся зависимости, а код — потом: почему именно в таком порядке, разобрано в §13. <code>--no-cache-dir</code> не оставляет в образе кеш pip. <code>PYTHONUNBUFFERED=1</code> заставляет Python писать в stdout сразу, без буферизации, — иначе логи в <code>docker logs</code> появляются с задержкой или теряются при падении. <code>EXPOSE</code> ничего не открывает сам, это пометка «приложение слушает 8000». <code>CMD</code> записан списком — это <strong>exec-форма</strong>, и она важна для корректной остановки контейнера (§14).</p>
+<pre><code class="language-bash">docker build -t shop-api:0.1.0 .
+docker run -d --name api -p 8000:8000 -e DATABASE_URL=postgresql://... shop-api:0.1.0
+curl localhost:8000/healthz
+</code></pre>
+<p>Тег <code>0.1.0</code> вместо <code>latest</code> — привычка с первого дня: по нему всегда понятно, какая версия запущена, и на неё можно откатиться (<a href="../lessons/3-2.html#s-15">3.2 CI-CD</a>, §15).</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Монтирование конфигурации: volume вместо пересборки</h2><div class="prose"><p><em>Аналогия:</em> если каждый раз пересобирать весь дом ради замены одной картины на стене — абсурдно; вместо этого проще держать картину «снаружи» и просто вешать её на уже готовую стену.</p>
+<pre><code class="language-bash">docker run -d --name proxy -p 8080:80 \
+  -v ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro \
+  nginx:1.27-alpine
+</code></pre>
+<p><code>-v ./nginx/default.conf:/etc/nginx/conf.d/default.conf</code> монтирует файл с хоста внутрь контейнера — правка конфига на хосте видна в контейнере сразу, потому что физически это один и тот же файл. Чтобы nginx её подхватил, достаточно <code>docker exec proxy nginx -s reload</code> — <strong>без пересборки образа</strong>. Суффикс <code>:ro</code> (read-only) запрещает контейнеру менять файл: конфиг должен приходить снаружи, а не правиться изнутри.</p>
+<p>Разделение простое: <strong>код — в образе, настройки — снаружи</strong> (переменные окружения и смонтированные конфиги). Тогда один и тот же образ работает в dev, staging и prod, а различаются только настройки — принцип 12-factor из <a href="../lessons/2-5.html#s-12">2.5 Бэкенд-сервис</a>, §12.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Проверка Dockerfile и образа: hadolint и Dockle</h2><div class="prose"><p><em>Аналогия:</em> техосмотр перед выездом на дорогу: специально ищут типичные небезопасные привычки (запуск от root, «лысые» шины в виде тега <code>latest</code>), а не просто проверяют, что машина вообще едет.</p>
+<pre><code class="language-bash">docker run --rm -i hadolint/hadolint &lt; Dockerfile   # проверить сам Dockerfile
+dockle shop-api:0.1.0                               # проверить собранный образ
+</code></pre>
+<p><strong>hadolint</strong> читает Dockerfile и находит типовые ошибки ещё до сборки: <code>FROM</code> без версии, <code>apt-get install</code> без очистки кеша, <code>CMD</code> в shell-форме, отсутствие <code>USER</code>. <strong>Dockle</strong> проверяет уже собранный образ по CIS Benchmarks — набору общепринятых практик безопасности контейнеров — и подсвечивает конкретные предупреждения: «не создан отдельный непривилегированный пользователь», «в образе остались файлы с секретами», «не задан HEALTHCHECK». Задача — довести образ до состояния без предупреждений, а не просто прочитать отчёт. Сканирование на известные уязвимости (Trivy) — следующий шаг, о нём в <a href="../lessons/6-2.html#s-6">6.2 DevSecOps</a>, §6.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Docker Compose: несколько контейнеров как единое целое</h2><div class="prose"><p><em>Аналогия:</em> если Docker — это команда «запусти один инструмент», то Docker Compose — это целый чек-лист «запусти оркестр из нескольких инструментов в правильном порядке, и пусть они слышат друг друга».</p>
+<pre><code class="language-yaml"># compose.yaml
+services:
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://shop:shop@db:5432/shop
+    # без ports — сервис виден только внутри docker-сети
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+      POSTGRES_DB: shop
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  proxy:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - &quot;8080:80&quot;
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+</code></pre>
+<pre><code class="language-bash">docker compose up -d --build
+docker compose ps
+docker compose logs -f app
+docker compose down          # остановить и удалить контейнеры (тома остаются)
+</code></pre>
+<p>Все сервисы, описанные в одном <code>compose.yaml</code>, по умолчанию оказываются в общей внутренней docker-сети и видят друг друга по имени сервиса (<code>app</code>, <code>db</code>, <code>proxy</code>) как по доменному имени — именно поэтому nginx проксирует на <code>app:8000</code>, а приложение подключается к <code>db:5432</code>, хотя ни один из этих портов не опубликован наружу. Снаружи доступен только <code>proxy</code> на 8080. Пароль прямо в файле допустим только для учебного стенда — как с этим жить по-взрослому, разобрано в <a href="../lessons/4-1.html#s-13">4.1 Compose и Swarm</a>, §13 и <a href="../lessons/6-2.html">6.2 DevSecOps</a>.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Multi-stage build: инструменты сборки не едут в прод</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do5-multistage.svg" alt="" /><br />
+<em>Аналогия:</em> мебель собирают в цеху со станками и стружкой, а к заказчику привозят только готовый шкаф. Везти вместе с ним весь цех никому не приходит в голову.</p>
+<p>Некоторым Python-библиотекам при установке нужен компилятор: например, драйвер PostgreSQL <code>psycopg</code> или криптографические пакеты собираются из исходников на C. Если поставить <code>gcc</code> прямо в итоговый образ, в нём навсегда останутся компилятор, заголовочные файлы и кеш сборки. Это плохо по трём причинам: образ весит больше необходимого, внутри лежит компилятор (готовый инструмент для того, кто получит доступ к контейнеру), и каждый лишний пакет — это потенциальные уязвимости в отчёте сканера.</p>
+<p><strong>Multi-stage build</strong> решает это одним приёмом: этапов сборки может быть несколько, а в итоговый образ попадает только последний.</p>
+<pre><code class="language-dockerfile"># ---------- этап сборки ----------
+FROM python:3.13-slim AS builder
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends gcc libpq-dev \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+RUN python -m venv /venv
+COPY requirements.txt .
+RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# ---------- финальный образ ----------
+FROM python:3.13-slim
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends libpq5 \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+COPY --from=builder /venv /venv
+COPY src/ /app/src/
+WORKDIR /app
+ENV PATH=&quot;/venv/bin:$PATH&quot; PYTHONUNBUFFERED=1
+CMD [&quot;gunicorn&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;, &quot;src.app:create_app()&quot;]
+</code></pre>
+<p><code>AS builder</code> даёт этапу имя, а <code>COPY --from=builder</code> забирает из него только нужное — готовое виртуальное окружение со скомпилированными библиотеками. Компилятор, заголовочные файлы и кеш остаются в отброшенном этапе. В финальный образ ставится только <code>libpq5</code> — библиотека, нужная драйверу для работы, но без инструментов сборки.</p>
+<p>Для компилируемых языков эффект ещё заметнее: программа на Go собирается в один файл, который кладут в почти пустой образ (<code>distroless</code> или даже <code>scratch</code>) — <strong>с 800 МБ до 10–20 МБ</strong>. Образ быстрее качается на каждый узел, быстрее стартует и содержит на порядок меньше того, что нужно обновлять из-за уязвимостей.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Кеш слоёв: порядок инструкций</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do5-layer-cache.svg" alt="" /><br />
+<em>Аналогия:</em> если каждый раз перед приготовлением ужина заново ходить в магазин за солью — процесс станет вдвое дольше. Продукты длительного хранения закупают редко, свежие — каждый день.</p>
+<p>В §3 сказано, что слои кешируются. Ключевое следствие оттуда не выведено: <strong>кеш ломается на первой изменившейся инструкции и на всех, что идут после неё</strong>. Значит, порядок строк в Dockerfile напрямую определяет время пересборки.</p>
+<pre><code class="language-dockerfile"># ✘ плохо: любая правка кода запускает переустановку зависимостей
+COPY . /app
+RUN pip install -r /app/requirements.txt
+
+# ✔ хорошо: зависимости переустанавливаются, только если изменился их список
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r /app/requirements.txt
+COPY . /app
+</code></pre>
+<p>Разница на реальном проекте — три минуты против трёх секунд на каждую правку строчки кода. За рабочий день это десятки минут ожидания.</p>
+<p>Правило простое: <strong>инструкции располагают от редко меняющихся к часто меняющимся</strong>. Базовый образ и системные пакеты — вверху, зависимости — в середине, код приложения — в самом низу.</p>
+<p><strong><code>.dockerignore</code></strong> работает на ту же цель. Без него <code>COPY . /app</code> тащит в образ <code>.git</code>, <code>.venv</code>, кеши, логи и локальные конфиги — и ломает кеш при любом их изменении, даже если код не менялся:</p>
+<pre><code>.git
+.venv
+__pycache__
+*.pyc
+.env
+node_modules
+tests/
+README.md
+</code></pre>
+<p>Синтаксис тот же, что у <code>.gitignore</code> (<a href="../lessons/0-1.html#s-5">0.1 Git</a>, §5). Заодно это защита от случайного попадания <code>.env</code> с паролями внутрь образа.</p>
+
+<figure class="explain" data-anim="docker-cache"><figcaption><span class="explain-tag">▶ схема</span>Какие слои пересобираются после правки</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>CMD, ENTRYPOINT и кто такой PID 1</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do5-pid1-signals.svg" alt="" /><br />
+<em>Аналогия:</em> если между тобой и собеседником стоит переводчик, который не переводит, разговора не будет — сколько бы ты ни говорил.</p>
+<p>Два вопроса, которые задают почти всегда: чем <code>CMD</code> отличается от <code>ENTRYPOINT</code> и почему приложение в контейнере не завершается корректно.</p>
+<p><strong><code>CMD</code> против <code>ENTRYPOINT</code>.</strong> <code>ENTRYPOINT</code> задаёт саму команду, <code>CMD</code> — аргументы по умолчанию к ней. Аргументы, переданные в <code>docker run</code>, заменяют <code>CMD</code>, но не трогают <code>ENTRYPOINT</code>:</p>
+<pre><code class="language-dockerfile">ENTRYPOINT [&quot;python&quot;, &quot;app.py&quot;]
+CMD [&quot;--port&quot;, &quot;8000&quot;]
+</code></pre>
+<p><code>docker run myapp</code> запустит <code>python app.py --port 8000</code>, а <code>docker run myapp --port 9000</code> — с новым портом. Если написать всё в <code>CMD</code>, то <code>docker run myapp bash</code> просто заменит команду целиком — иногда это удобно для отладки, а иногда нежелательно.</p>
+<p><strong>Форма записи — важнее, чем кажется.</strong> Есть shell-форма (<code>CMD python app.py</code>) и exec-форма (<code>CMD [&quot;python&quot;, &quot;app.py&quot;]</code>). Различие не косметическое:</p>
+<p>При shell-форме Docker запускает <code>/bin/sh -c &quot;python app.py&quot;</code>, и процессом с <strong>PID 1</strong> становится оболочка, а приложение — её потомком. При остановке контейнера <code>SIGTERM</code> получает только PID 1, то есть оболочка, а она не передаёт сигнал дальше. Приложение не узнаёт, что его просят завершиться, и через несколько секунд получает <code>SIGKILL</code>.</p>
+<p>Практическое следствие прямо связано с <a href="../lessons/2-5.html#s-12">2.5 Бэкенд-сервис</a>, §12: обработчик <code>SIGTERM</code> там написан, корректное завершение реализовано — и всё это бесполезно, потому что сигнал до приложения не доходит. Каждый деплой обрывает запросы пользователей, и причину ищут в приложении, хотя она в одной строке Dockerfile.</p>
+<p><strong>Всегда используй exec-форму</strong> — с квадратными скобками. Если запуск действительно требует оболочки (например, скрипт с подстановкой переменных), последней командой в скрипте пишут <code>exec</code>:</p>
+<pre><code class="language-bash">#!/bin/sh
+# ... подготовка ...
+exec python app.py     # процесс заменит собой оболочку и унаследует PID 1
+</code></pre>
+<p>Обратите внимание, что <code>CMD</code> в §8 записан в shell-форме — как раз тот случай, который стоит исправить.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Пользователь, теги и уязвимости</h2><div class="prose"><p><strong>Не root.</strong> По умолчанию процесс в контейнере работает от root, и на это ругается Dockle из §10. Изоляция контейнера не абсолютна: связка «root внутри» и уязвимость в среде исполнения — это уже путь к хосту.</p>
+<pre><code class="language-dockerfile">RUN adduser -D -u 10001 appuser
+USER appuser
+</code></pre>
+<p>Порядок важен: всё, что требует прав (установка пакетов), делается до <code>USER</code>, всё остальное — после. Если приложение слушает порт ниже 1024, порт меняют на высокий — от непривилегированного пользователя занять 80-й нельзя.</p>
+<p><strong>Теги.</strong> <code>FROM nginx:latest</code> из §8 — то, за что Dockle тоже выдаёт предупреждение. <code>latest</code> не фиксирует ничего: сегодня это одна версия, через месяц другая, и сборка, работавшая вчера, ломается сегодня без единого изменения в коде. Правильно указывать конкретную версию (<code>nginx:1.27-alpine</code>), а в критичных случаях — цифровой отпечаток (<code>nginx@sha256:...</code>), который не меняется никогда.</p>
+<p>То же касается собственных образов: тег <code>latest</code> не даёт понять, что именно развёрнуто, и не позволяет откатиться. Обычно используют версию из тега Git (<a href="../lessons/0-1.html#s-13">0.1 Git</a>, §13) или короткий хеш коммита.</p>
+<p><strong>Два разных сканера.</strong> Dockle проверяет <em>практики</em> — root, отсутствие тега, секреты в переменных. Уязвимости в самих пакетах ищет другой инструмент:</p>
+<pre><code class="language-bash">trivy image myserver:1.0
+trivy image --severity HIGH,CRITICAL --exit-code 1 myserver:1.0
+</code></pre>
+<p><code>trivy</code> сверяет установленные пакеты с базой известных уязвимостей. Флаг <code>--exit-code 1</code> делает его пригодным для пайплайна: сборка падает, если найдено что-то критичное (<a href="../lessons/3-2.html">3.2 CI-CD</a>). Оба инструмента нужны — они отвечают на разные вопросы.</p>
+<p><strong>Проверка состояния</strong> прямо в образе:</p>
+<pre><code class="language-dockerfile">HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD wget -qO- http://localhost:8000/healthz || exit 1
+</code></pre>
+<p>Docker будет отмечать контейнер как <code>healthy</code> или <code>unhealthy</code>, а Compose — учитывать это в <code>depends_on</code>. Тот самый эндпоинт из <a href="../lessons/2-5.html#s-11">2.5 Бэкенд-сервис</a>, §11.</p>
+</div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/22 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Данные: тома против bind mount</h2><div class="prose"><p><em>Аналогия:</em> контейнер — вагон, а данные — груз. Груз не хранят в вагоне, который в любой момент отцепят и отправят в переплавку.</p>
+<p>Всё, что записано внутрь контейнера, исчезает вместе с ним. Это не недостаток, а свойство: контейнеры считаются одноразовыми. Данные выносят наружу, и способов два.</p>
+<p><strong>Bind mount</strong> (то, что в §9) подключает конкретную папку хоста:</p>
+<pre><code class="language-bash">docker run -v ./nginx:/etc/nginx/conf.d myserver
+</code></pre>
+<p>Удобен для разработки и конфигов: файл виден и правится с обеих сторон. Минусы — зависит от структуры каталогов конкретной машины и от прав доступа на хосте.</p>
+<p><strong>Именованный том</strong> управляется самим Docker:</p>
+<pre><code class="language-bash">docker volume create pgdata
+docker run -v pgdata:/var/lib/postgresql/data postgres:16-alpine
+</code></pre>
+<p>Для данных приложений в проде используют именно его: он переносим, его удобно бэкапить и он не привязан к путям на хосте.</p>
+<pre><code class="language-bash">docker volume ls                    # список
+docker volume inspect pgdata         # где физически лежит
+docker volume prune                   # удалить неиспользуемые — ОСТОРОЖНО
+</code></pre>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>docker volume prune удаляет данные безвозвратно</summary><div class="callout-body"><p>Команда убирает все тома, не подключённые ни к одному контейнеру. Если база временно остановлена, её том попадает под определение «неиспользуемый». Восстановления нет. Перед любой чисткой стоит посмотреть <code>docker volume ls</code> и убедиться, что среди кандидатов нет ничего ценного — то же правило, что для <code>find ... -delete</code> в <a href="../lessons/1-4.html#s-14">1.4 Метрики и логи</a>, §14.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>18</b>/22 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Контейнер делит ядро ОС с хостом и изолирует только нужное — поэтому он легче и быстрее полноценной виртуальной машины.</li>
+<li>Каждая инструкция Dockerfile — отдельный кэшируемый слой; избегай лишних отдельных RUN, объединяй команды через &amp;&amp;.</li>
+<li>docker exec/cp позволяют отлаживать контейнер на лету, но такие правки не сохраняются в образе без явного обновления Dockerfile.</li>
+<li>nginx как reverse proxy перенаправляет входящие запросы дальше — proxy_pass задаёт, куда именно.</li>
+<li>Volume (-v) подключает файл/папку хоста внутрь контейнера напрямую — правки применяются без пересборки образа.</li>
+<li>Dockle проверяет образ на типичные небезопасные практики по CIS Benchmarks.</li>
+<li>В Docker Compose сервисы видят друг друга по имени сервиса во внутренней сети — необязательно публиковать порт наружу, если сервис нужен только другим контейнерам.</li>
+<li><strong>Multi-stage build</strong>: собирать и запускать — разные задачи. <code>COPY --from=builder</code> берёт из этапа сборки только результат; образ уменьшается в десятки раз, компилятор и исходники в прод не едут.</li>
+<li>Кеш ломается на первой изменившейся инструкции и всех последующих: зависимости ставят <strong>до</strong> копирования кода. <code>.dockerignore</code> не даёт лишним файлам ломать кеш и попадать в образ.</li>
+<li><code>ENTRYPOINT</code> — команда, <code>CMD</code> — аргументы по умолчанию. <strong>Всегда exec-форма с квадратными скобками</strong>: при shell-форме PID 1 становится оболочка, <code>SIGTERM</code> не доходит до приложения и корректное завершение не работает.</li>
+<li>Не root: <code>adduser</code> + <code>USER</code>. Не <code>latest</code>: фиксируй версию базового образа и тегируй свои образы версией или хешем коммита.</li>
+<li>Dockle проверяет практики, <code>trivy</code> — уязвимости в пакетах. Нужны оба; <code>--exit-code 1</code> делает сканер пригодным для пайплайна.</li>
+<li>Данные — только во внешних томах. Именованный том для прода, bind mount для конфигов и разработки. <code>docker volume prune</code> удаляет безвозвратно.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>19</b>/22 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 2, 4 и 5 (свой Dockerfile, тома, проверка образа) — раздел «Контейнеры» в <a href="../projects/p1.html">P1</a>.</li>
+<li>Dockerfile для утилиты из <a href="../projects/m2.html">M2</a> собирается по тем же правилам.</li>
+</ul>
+</div></details><article class="task" data-task="f7fe8df50f"><h3>Задание 1 — жизненный цикл</h3><p>Скачай <code>nginx</code>, запусти с пробросом порта, зайди внутрь через <code>docker exec</code>, поменяй страницу, останови, удали.<br />
+<strong>Проверка:</strong> можешь объяснить, почему после <code>docker rm</code> изменения пропали, и показать слои образа через <code>docker history nginx</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="f7fe8df50f"> Сделала руками и проверила</label></article><article class="task" data-task="7a9aa16a85"><h3>Задание 2 — свой образ</h3><p>Напиши Dockerfile для Python-сервиса из <a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>: slim-база, сначала <code>requirements.txt</code>, потом код, <code>USER</code> не root, <code>HEALTHCHECK</code>, <code>ENTRYPOINT</code> в exec-форме.<br />
+<strong>Проверка:</strong> при изменении только кода пересборка занимает секунды (зависимости из кэша); <code>docker run</code> запускает сервис, <code>docker stop</code> завершает за 1–2 секунды.</p>
+<label class="task-done"><input type="checkbox" data-task-check="7a9aa16a85"> Сделала руками и проверила</label></article><article class="task" data-task="c8551c0e37"><h3>Задание 3 — multi-stage</h3><p>Собери приложение на C или Go в multi-stage: компиляция в полном образе, запуск в <code>alpine</code> или <code>distroless</code>.<br />
+<strong>Проверка:</strong> итоговый образ в десятки раз меньше сборочного (<code>docker images</code>).</p>
+<label class="task-done"><input type="checkbox" data-task-check="c8551c0e37"> Сделала руками и проверила</label></article><article class="task" data-task="45187b174f"><h3>Задание 4 — конфиг и данные</h3><p>Запусти nginx с конфигом через bind mount и PostgreSQL с именованным томом.<br />
+<strong>Проверка:</strong> правка конфига + <code>docker exec nginx nginx -s reload</code> применяется без пересборки; удаление и повторное создание контейнера базы не теряет данные.</p>
+<label class="task-done"><input type="checkbox" data-task-check="45187b174f"> Сделала руками и проверила</label></article><article class="task" data-task="f4c2245b01"><h3>Задание 5 — проверка образа</h3><p>Прогони свой образ через Dockle и Trivy, исправь найденное.<br />
+<strong>Проверка:</strong> нет предупреждений уровня FATAL/WARN в Dockle и критичных уязвимостей с исправлением в Trivy.</p>
+<label class="task-done"><input type="checkbox" data-task-check="f4c2245b01"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>20</b>/22 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>21</b>/22 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>22</b>/22 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — сервис, который здесь контейнеризуется, и его SIGTERM</li>
+<li><a href="../lessons/1-2.html">1.2 Сети</a> — NAT, которым работает проброс портов</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — сборка образов в пайплайне и сканирование</li>
+<li><a href="../lessons/4-1.html">4.1 Compose и Swarm</a> — Compose вглубь</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Docker: https://docs.docker.com/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-11.html">← 2.11 Продвинутый SQL и эксплуатация базы</a><a class="lesson-jump" href="3-2.html">3.2 CI/CD в GitLab →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "3-1", "number": "3.1", "title": "Docker", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["f7fe8df50f", "7a9aa16a85", "c8551c0e37", "45187b174f", "f4c2245b01"], "quiz": [{"id": "3a156926f7", "q": "Чем контейнер отличается от виртуальной машины?", "options": ["Контейнер эмулирует собственное железо", "Контейнер — изолированный процесс на общем ядре хоста, ВМ запускает своё ядро", "Контейнер всегда безопаснее ВМ", "Ничем"], "answer": [1], "why": "<p>поэтому контейнеры стартуют за секунды и занимают мало ресурсов, но изоляция у них слабее.<\/p>\n"}, {"id": "a585975aaf", "q": "Почему в Dockerfile сначала копируют <code>requirements.txt<\/code> и ставят зависимости, а потом весь код?", "options": ["Так меньше итоговый образ", "Чтобы правка кода не сбрасывала кэш слоя с установкой зависимостей", "Иначе pip не найдёт файл", "Это требование Docker"], "answer": [1], "why": "<p>кэш ломается на первой изменившейся инструкции и на всех после неё.<\/p>\n"}, {"id": "2873478247", "q": "Какая запись CMD позволяет приложению получить SIGTERM при <code>docker stop<\/code>?", "options": ["<code>CMD gunicorn app:app<\/code>", "<code>CMD [&quot;gunicorn&quot;, &quot;app:app&quot;]<\/code>", "<code>CMD sh -c &quot;gunicorn app:app&quot;<\/code>", "Любая"], "answer": [1], "why": "<p>exec-форма делает приложение процессом PID 1. В shell-форме PID 1 — оболочка, которая не передаёт сигналы дальше.<\/p>\n"}, {"id": "4daadb57b3", "q": "nginx в одном контейнере проксирует на приложение в соседнем и получает 502. Приложение запущено с <code>--bind 127.0.0.1:8000<\/code>. В чём проблема?", "options": ["Нужен другой порт", "Внутри контейнера 127.0.0.1 — это сам контейнер; приложение нужно слушать на 0.0.0.0", "nginx не умеет проксировать в контейнеры", "Нужно опубликовать порт приложения наружу"], "answer": [1], "why": "<p>каждый контейнер — отдельный сетевой узел со своим localhost.<\/p>\n"}, {"id": "88338f84a3", "q": "Что даёт multi-stage сборка?", "options": ["Параллельную сборку нескольких образов", "В итоговый образ попадает только результат сборки, а компиляторы и кэш остаются в промежуточном этапе", "Автоматическое сканирование уязвимостей", "Возможность запускать несколько процессов"], "answer": [1], "why": "<p>образ становится меньше, быстрее скачивается и содержит меньше лишнего для атакующего.<\/p>\n"}, {"id": "9f89b80ba8", "q": "Где хранить данные PostgreSQL, запущенного в контейнере?", "options": ["Внутри слоя контейнера", "В именованном томе (volume)", "В образе", "В переменных окружения"], "answer": [1], "why": "<p>всё, что записано в слой контейнера, пропадёт при его удалении. Том живёт независимо.<\/p>\n"}, {"id": "e44a921e0d", "q": "Какие привычки делают образ безопаснее? Выбери все.", "options": ["Запуск от непривилегированного пользователя через <code>USER<\/code>", "Фиксированная версия базового образа вместо <code>latest<\/code>", "Установка компилятора в итоговый образ на всякий случай", "Минимальный базовый образ (<code>slim<\/code>, <code>alpine<\/code>, distroless)"], "answer": [0, 1, 3], "why": "<p>меньше пакетов — меньше уязвимостей, а запуск не от root ограничивает ущерб при взломе.<\/p>\n"}], "cards": [{"id": "8ede8bb1d3", "q": "Чем контейнер отличается от виртуальной машины?", "a": "<p>Контейнер — изолированный процесс на общем ядре хоста (namespaces для изоляции, cgroups для ограничения ресурсов). ВМ эмулирует железо и запускает своё ядро. Контейнеры легче и стартуют за секунды, но изоляция слабее.<\/p>\n"}, {"id": "34b29f4d47", "q": "Чем образ отличается от контейнера?", "a": "<p>Образ — неизменяемый шаблон из слоёв. Контейнер — запущенный экземпляр образа с тонким слоем для записи сверху.<\/p>\n"}, {"id": "e32c580307", "q": "Чем CMD отличается от ENTRYPOINT?", "a": "<p>ENTRYPOINT — что запускать, CMD — аргументы по умолчанию (или команда, если ENTRYPOINT нет). Аргументы <code>docker run<\/code> заменяют CMD. Используют exec-форму <code>[&quot;prog&quot;, &quot;arg&quot;]<\/code>, чтобы процесс был PID 1 и получал сигналы.<\/p>\n"}, {"id": "3a6c4ab4bd", "q": "Почему важен порядок инструкций в Dockerfile?", "a": "<p>Каждая инструкция — слой, кэш инвалидируется с первой изменённой. Редко меняющееся (зависимости) — выше, часто меняющееся (код) — ниже.<\/p>\n"}, {"id": "fa69e92c63", "q": "Чем COPY отличается от ADD?", "a": "<p>COPY просто копирует файлы. ADD ещё распаковывает архивы и умеет скачивать по URL — неявное поведение, поэтому по умолчанию используют COPY.<\/p>\n"}, {"id": "e3ca744c59", "q": "Чем том отличается от bind mount?", "a": "<p>Том управляется Docker и живёт в его каталоге — для данных баз. Bind mount монтирует конкретную папку хоста — для конфигов и разработки.<\/p>\n"}, {"id": "7d233170b2", "q": "Как уменьшить размер образа?", "a": "<p>Минимальный базовый образ, multi-stage, объединение команд установки с очисткой кэша в один RUN, <code>.dockerignore<\/code>.<\/p>\n"}, {"id": "d3088c71c8", "q": "Почему контейнер не останавливается по docker stop 10 секунд?", "a": "<p>Процесс не получил или не обработал SIGTERM: shell-форма CMD (PID 1 — <code>sh<\/code>, который не пробрасывает сигналы) или приложение не обрабатывает сигнал. После таймаута Docker посылает SIGKILL.<\/p>\n"}], "next": "3-2"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

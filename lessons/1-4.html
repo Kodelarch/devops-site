@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1.4 Метрики, логи и алерты — DevOps-маршрут</title>
+<meta name="description" content="Урок 1.4: Метрики, логи и алерты">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c1)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-1">← 1. Linux и сети</a>
+    <div class="sidebar-art"><svg class="art art-linux" viewBox="0 0 240 140" role="img" aria-label="Сервер и сеть" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect x="18" y="22" width="76" height="96" rx="7"/>
+<rect class="dim" x="28" y="34" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="61" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="88" width="56" height="18" rx="3"/>
+<circle class="led l1" cx="74" cy="43" r="2.6"/>
+<circle class="led l2" cx="74" cy="70" r="2.6"/>
+<circle class="led l3" cx="74" cy="97" r="2.6"/>
+<path class="dim" d="M35 43 H58 M35 70 H52 M35 97 H62"/>
+<path class="dim" d="M94 70 H160"/>
+<rect class="packet p1" x="96" y="66" width="8" height="8" rx="2"/>
+<rect class="packet p2" x="96" y="66" width="8" height="8" rx="2"/>
+<circle cx="192" cy="70" r="32"/>
+<ellipse class="dim" cx="192" cy="70" rx="13" ry="32"/>
+<path class="dim" d="M160 70 H224 M164 54 H220 M164 86 H220"/>
+<text class="lbl" x="26" y="134">$ ssh prod</text>
+</svg></div>
+    <div class="lesson-number">lesson 1.4 · linux</div>
+    <h1 class="lesson-title">Метрики, логи и алерты</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">GoAccess — лог-анализатор в реальном времени</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Базы данных временных рядов и Prometheus</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Типы метрик: counter, gauge, histogram</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">PromQL — язык запросов Prometheus</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Перцентили: почему среднее время ответа врёт</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Кардинальность — как убить свой Prometheus</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Grafana — панели и дашборды</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Alertmanager — когда смотреть на график уже недостаточно</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">SLI, SLO и бюджет ошибок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Golden signals — что реально стоит мониторить</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Экспортеры и нагрузочное тестирование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Когда одного GoAccess мало — Loki и ELK</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Учебные аварии: заполнить диск и иноды</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Уборка: политики хранения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Разбор логов nginx в терминале</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Урок <a href="../lessons/1-3.html">1.3 Bash</a> научил разово спрашивать систему «как ты себя чувствуешь прямо сейчас» — запустил скрипт, получил ответ. Но сервер может упасть ночью, когда никто не смотрит на экран: разовая проверка тут бесполезна, потому что просто не была запущена в нужный момент. Этот урок — про наблюдение, которое работает само, непрерывно, и умеет сказать человеку «вот сейчас что-то не так».</p>
+<p>Здесь есть и повседневные инструменты (разбор логов в терминале, проверка мониторинга искусственной нагрузкой), и то, что спрашивают на собеседованиях — вопрос «как ты мониторишь свои сервисы» гарантирован практически на любом. Три темы отвечают за большую часть таких вопросов: <strong>типы метрик</strong> (без них PromQL не понять), <strong>перцентили</strong> (почему среднее время ответа врёт) и <strong>SLO с бюджетом ошибок</strong> (как «сайт должен работать» превращается в число).</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Временной ряд (time series)</strong> — данные, где к каждому значению приклеена метка времени; важна не просто цифра, а когда именно она зафиксирована.</li>
+<li><strong>Экспортер (exporter)</strong> — маленькая программа, которая снимает метрики и отдаёт их в формате, понятном Prometheus.</li>
+<li><strong>Панель (panel)</strong> — один график или число на дашборде. <strong>Дашборд</strong> — набор панелей на одну тему.</li>
+<li><strong>Алерт</strong> — автоматическое уведомление «что-то пошло не так», которое само находит человека.</li>
+<li><strong>Метка (label)</strong> — дополнительная подпись у метрики, например <code>method=&quot;GET&quot;</code>; по меткам фильтруют и группируют.</li>
+<li><strong>Перцентиль</strong> — значение, ниже которого оказалась заданная доля измерений: p95 = 8 с означает «95% запросов уложились в 8 секунд».</li>
+<li><strong>Combined log format</strong> — стандартный формат строки лога nginx/Apache: IP, дата, метод, URL, код ответа, User-Agent.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>GoAccess — лог-анализатор в реальном времени</h2><div class="prose"><p><em>Аналогия:</em> табло с расписанием на вокзале. Можно читать бумажный список поездов построчно, но табло уже посчитало и показало главное. GoAccess делает то же самое с логами сайта: вместо чтения сырого файла строка за строкой сразу видна посчитанная статистика, обновляющаяся на лету.</p>
+<pre><code class="language-bash">sudo apt install -y goaccess
+goaccess access.log --log-format=COMBINED -o report.html --real-time-html
+</code></pre>
+<p><code>access.log</code> — путь к файлу логов, куда nginx дописывает строку про каждый запрос. <code>--log-format=COMBINED</code> говорит, в каком формате записаны строки — без этого GoAccess не знает, где искать IP, а где код ответа. <code>-o report.html</code> сохраняет результат в HTML-файл. <code>--real-time-html</code> делает отчёт живым: он продолжает обновляться, пока в лог дописываются новые строки.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Базы данных временных рядов и Prometheus</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-pipeline.webp" alt="" /><br />
+<em>Аналогия:</em> обычная база — шкаф с папками, где хранится текущее состояние: «баланс счёта прямо сейчас — 500 рублей». База временных рядов устроена иначе — это дневник: каждая запись подписана «когда именно», и ценность представляет вся история, а не последняя строчка.</p>
+<p><strong>Prometheus</strong> — самая популярная база временных рядов, спроектированная под мониторинг. Работает по <strong>pull-модели</strong>: не ждёт, пока кто-то пришлёт метрики, а сам по расписанию стучится к каждому известному экспортеру и спрашивает текущие значения. Термин для этого — <strong>scrape</strong> («наскребать»).</p>
+<pre><code class="language-yaml"># prometheus.yml
+global:
+  scrape_interval: 15s        # как часто опрашивать цели
+
+scrape_configs:
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']   # порт node_exporter
+</code></pre>
+<p><code>scrape_configs</code> — список того, кого опрашивать. <code>job_name</code> — человекочитаемое имя группы целей. <code>targets</code> — конкретные адреса; порт <code>9100</code> — стандартный для node_exporter.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Pull против push — вопрос на собеседовании</summary><div class="callout-body"><p>Преимущество pull: Prometheus сам знает, кто должен быть жив, и <strong>отсутствие ответа само по себе является сигналом</strong> — метрика <code>up</code> становится нулём. В push-модели молчащий сервис неотличим от сервиса, который просто ничего не отправлял. Плюс не нужно настраивать каждое приложение на адрес системы мониторинга.</p>
+<p>Где pull не работает: короткоживущие задачи (cron-скрипт отработал 3 секунды и умер — Prometheus просто не успеет его опросить). Для них есть <strong>Pushgateway</strong>, промежуточный буфер, куда задача сама отправляет результат перед завершением. Пользоваться им стоит только для этого случая: превращать Pushgateway в общий приёмник метрик — известная ошибка, он ломает модель обнаружения мёртвых целей.</p>
+</div></details>
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Prometheus — не архив</summary><div class="callout-body"><p>Он не предназначен для долгого хранения: по умолчанию держит данные около 15 дней и живёт на локальном диске одного сервера. Если нужна история за год или единое хранилище на много кластеров, поверх ставят отдельные решения — <strong>Thanos</strong>, <strong>VictoriaMetrics</strong> или <strong>Mimir</strong>. Знать про это стоит: вопрос «как вы храните метрики дольше месяца» встречается на собеседованиях уровня выше джуна.</p>
+</div></details></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Типы метрик: counter, gauge, histogram</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-metric-types.svg" alt="" /><br />
+<em>Аналогия:</em> одометр в машине только растёт и показывает общий пробег. Спидометр показывает текущую скорость и скачет вверх-вниз. А журнал поездок, разложенный по длительности, позволяет сказать «90% поездок были короче получаса». Это три разных типа измерений, и путать их нельзя.</p>
+<p><strong>Counter</strong> — счётчик, который только растёт и обнуляется при перезапуске процесса. Примеры: <code>http_requests_total</code>, <code>node_network_receive_bytes_total</code>. Суффикс <code>_total</code> — общепринятая пометка счётчика.</p>
+<p><strong>Gauge</strong> — величина, которая свободно растёт и падает. Примеры: <code>node_memory_MemAvailable_bytes</code>, <code>node_filesystem_avail_bytes</code>, количество активных соединений.</p>
+<p><strong>Histogram</strong> — раскладывает наблюдения по корзинам («сколько запросов уложилось в 0.1 с, сколько в 0.5 с, сколько в 1 с»). Из него потом считают перцентили. Пример: <code>http_request_duration_seconds_bucket</code>.</p>
+<p>Практическое следствие, ради которого это и разбирается:</p>
+<pre><code class="language-promql">http_requests_total                 # ✘ бесполезно: «17 483 921 запрос с момента запуска»
+rate(http_requests_total[5m])        # ✔ осмысленно: запросов в секунду
+rate(node_memory_MemAvailable_bytes[5m])   # ✘ бессмыслица: rate к gauge
+</code></pre>
+<p>Счётчик никогда не смотрят напрямую — из накопленного за месяц числа ничего не следует. Его оборачивают в <code>rate()</code>, получая скорость. И наоборот: применять <code>rate()</code> к gauge бессмысленно — там и так текущее значение.</p>
+<p>Проверить тип можно прямо в выводе экспортера: перед каждой метрикой экспортер печатает служебную строку <code># TYPE имя_метрики counter</code>.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>PromQL — язык запросов Prometheus</h2><div class="prose"><p><em>Аналогия:</em> PromQL — способ задать Prometheus вопрос на его родном языке, вместо того чтобы листать накопленные цифры глазами.</p>
+<pre><code class="language-promql">rate(http_requests_total[5m])                                     # запросов в секунду
+sum(rate(http_requests_total[5m])) by (status)                     # то же, с разбивкой по коду
+100 - (avg(rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[5m])) * 100)    # % занятости CPU
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+</code></pre>
+<p><code>rate(...[5m])</code> берёт счётчик, смотрит, на сколько он вырос за 5 минут, и делит прирост на число секунд — получается «в секунду». Эту конструкцию стоит запомнить целиком: она есть практически в любом реальном дашборде.</p>
+<p>Фигурные скобки — фильтр по меткам. У <code>node_cpu_seconds_total</code> метка <code>mode</code> бывает <code>idle</code>, <code>user</code>, <code>system</code>; фильтр оставляет только время простоя, а вычитание из 100 даёт занятость.</p>
+<p><code>sum(...) by (status)</code> группирует результат: вместо одной линии получаются отдельные линии по каждому коду ответа. Обратная операция — <code>without</code>, «сложить всё, игнорируя эту метку».</p>
+<p>Последняя строка считает <strong>95-й перцентиль</strong> времени ответа из гистограммы. <code>le</code> (less or equal) — служебная метка корзин, по ней и раскладываются значения; её обязательно нужно сохранить в <code>by</code>, иначе <code>histogram_quantile</code> не сработает.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>rate или irate</summary><div class="callout-body"><p><code>rate()</code> усредняет по всему указанному окну и даёт сглаженную картину — это то, что нужно почти всегда, особенно для алертов. <code>irate()</code> считает по двум последним точкам и реагирует резко — полезно для отладки коротких всплесков, но в алертах даёт ложные срабатывания. Ещё есть <code>increase()</code> — тот же <code>rate</code>, но не в секунду, а «на сколько всего выросло за окно»; удобно читается в тексте алерта.</p>
+</div></details></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Перцентили: почему среднее время ответа врёт</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-percentiles.svg" alt="" /><br />
+<em>Аналогия:</em> средняя зарплата в компании, где один директор и девять стажёров, ничего не говорит о зарплате стажёра.</p>
+<p>Типичная картина: дашборд показывает среднее время ответа 180 мс, все довольны, а поддержка получает жалобы «сайт висит». Причина в том, что среднее сминает распределение: масса быстрых ответов тянет его вниз, и медленные 5% в нём растворяются.</p>
+<p>Перцентиль отвечает на честный вопрос. <strong>p95 = 8 с</strong> читается как «95% запросов уложились в 8 секунд, а каждый двадцатый ждал дольше». Именно эти 5% и пишут в поддержку.</p>
+<p>На практике смотрят p50 (медиана — типичный пользователь), p95 (граница нормы) и p99 (худший опыт). Мониторить только среднее — распространённая ошибка, и на собеседовании вопрос «почему нельзя смотреть на среднее время ответа» проверяет именно это понимание.</p>
+<pre><code class="language-promql">histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+</code></pre>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Кардинальность — как убить свой Prometheus</h2><div class="prose"><p><em>Аналогия:</em> картотека, где на каждого посетителя заводится отдельный ящик. Пока посетителей сотня — удобно. Когда их миллион, картотека занимает весь этаж и в ней невозможно ничего найти.</p>
+<p>Prometheus хранит <strong>отдельный временной ряд на каждую уникальную комбинацию меток</strong>. Метрика с меткой <code>method</code> (3 значения) и <code>status</code> (5 значений) — это 15 рядов, нормально. Но если добавить метку с идентификатором пользователя или запроса, рядов станет столько же, сколько пользователей, и хранилище распухнет до полной неработоспособности.</p>
+<pre><code class="language-promql">http_requests_total{method=&quot;GET&quot;, status=&quot;200&quot;}                    # ✔ десятки рядов
+http_requests_total{method=&quot;GET&quot;, user_id=&quot;8814-af22-...&quot;, url=&quot;/order/98123&quot;}   # ✘ миллионы
+</code></pre>
+<p>Правило: <strong>в метки идёт только то, у чего мало возможных значений</strong> — метод, код ответа, имя сервиса, окружение. Идентификаторы пользователей, сессий, запросов, полные URL с параметрами и сообщения об ошибках в метки не кладут никогда. Для таких данных существуют логи (<a href="../lessons/4-5.html">4.5 Наблюдаемость</a> и раздел 12 ниже), а не метрики.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Симптомы, которые стоит узнавать</summary><div class="callout-body"><p>Prometheus начал отъедать десятки гигабайт памяти, запросы стали выполняться минутами, в логе появились <code>sample limit exceeded</code> — почти всегда причина именно во взрыве кардинальности, а не в объёме трафика. Проверить: <code>topk(10, count by (__name__)({__name__=~&quot;.+&quot;}))</code> покажет метрики с наибольшим числом рядов.</p>
+</div></details></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Grafana — панели и дашборды</h2><div class="prose"><p><em>Аналогия:</em> если Prometheus — дневник с цифрами и датами, то Grafana — художник, который рисует по нему графики.</p>
+<p>Grafana сама ничего не хранит и не собирает — она подключается к источникам данных (чаще всего к Prometheus) и визуализирует то, что там уже есть. Без источника метрик у неё просто нет данных.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Не обязательно рисовать самому</summary><div class="callout-body"><p>Сообщество собрало огромное количество готовых дашбордов под популярные экспортеры — например, «Node Exporter Full» показывает всё важное о сервере сразу после установки. Такие дашборды импортируют по числовому ID прямо в интерфейсе. Именно так поступают в подавляющем большинстве случаев, а не собирают панели с нуля.</p>
+</div></details>
+<p>Полезное про эксплуатацию Grafana: дашборды стоит хранить как код (JSON в репозитории), а не только кликать в интерфейсе — иначе при переезде или сбое вся работа теряется. Это же позволяет ревьюить изменения дашбордов через merge request, как обычный код.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Alertmanager — когда смотреть на график уже недостаточно</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-alerting.webp" alt="" /><br />
+<em>Аналогия:</em> график — термометр: молча показывает температуру, и если никто не смотрит именно в тот момент, когда она подскочила, никто и не узнает. Alertmanager — тот, кто берёт трубку и звонит врачу.</p>
+<p>Важно различать две ответственности: <strong>правило</strong> («когда считать, что что-то не так») задаётся в конфигурации Prometheus, а <strong>куда отправить уведомление</strong> — в Slack, Telegram, дежурному по расписанию — настраивается в Alertmanager, отдельном компоненте.</p>
+<pre><code class="language-yaml"># alert.rules.yml
+groups:
+  - name: example
+    rules:
+      - alert: HighCPU
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[5m])) * 100) &gt; 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;CPU выше 90% дольше 5 минут на {{ $labels.instance }}&quot;
+          runbook: &quot;https://wiki.company/runbooks/high-cpu&quot;
+</code></pre>
+<p><code>alert</code> — имя правила. <code>expr</code> — PromQL-условие, которое Prometheus пересчитывает регулярно. <code>labels: severity</code> — метка важности, по которой Alertmanager решает, будить ли дежурного ночью. <code>annotations</code> — человекочитаемый текст уведомления.</p>
+<p>Поле <strong><code>for: 5m</code></strong> — самая важная деталь: условие должно оставаться истинным непрерывно 5 минут, и только тогда алерт сработает. Это защищает от ложных тревог на кратковременные всплески.</p>
+<p>Поле <code>runbook</code> — ссылка на инструкцию «что делать, когда это сработало». Строго говоря, оно необязательное, но именно оно превращает алерт из «пищит непонятно что» в задачу, которую может выполнить любой дежурный. Наличие runbook-ссылок в алертах — заметный признак зрелой команды, и упомянуть это на собеседовании стоит.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Alert fatigue — усталость от алертов</summary><div class="callout-body"><p>Если настроить алерты на всё подряд, дежурный быстро начнёт машинально их игнорировать («опять эта штука пищит, наверное, ерунда»). Эффект называется <strong>alert fatigue</strong>, и он опасен: среди множества ложных тревог однажды затеряется настоящая.</p>
+<p>Критерий простой: алерт должен требовать <strong>немедленного действия живого человека прямо сейчас</strong>. Всё, что просто любопытно посмотреть, рисуют на дашборде без уведомления. Хороший вопрос к каждому алерту: «что конкретно человек сделает, получив его в три часа ночи?» Если ответа нет — это не алерт.</p>
+</div></details>
+<figure class="explain" data-anim="prometheus-scrape"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: путь от метрики до алерта</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>SLI, SLO и бюджет ошибок</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-slo-budget.svg" alt="" /><br />
+<em>Аналогия:</em> «машина должна ездить хорошо» — не требование. «Расход не выше 8 литров на сотню» — требование, потому что его можно измерить и проверить.</p>
+<p>Три термина, которые превращают расплывчатое «сайт должен работать» в число:</p>
+<ul>
+<li><strong>SLI</strong> (Service Level Indicator) — сам измеряемый показатель: доля успешных ответов, время отклика, доступность.</li>
+<li><strong>SLO</strong> (Service Level Objective) — внутренняя цель по этому показателю: «доступность не ниже 99.9% за календарный месяц».</li>
+<li><strong>SLA</strong> (Service Level Agreement) — обещание клиенту, закреплённое договором со штрафами. Его всегда ставят <strong>ниже</strong> SLO, чтобы был запас: сначала команда нарушит свою цель и увидит это, и только потом дойдёт до нарушения обязательств.</li>
+</ul>
+<p><strong>Бюджет ошибок (error budget)</strong> — то, ради чего вся конструкция и нужна. Если SLO 99.9% в месяц, то 0.1% — это примерно 43 минуты допустимого простоя. Это не «плохо», это <strong>разрешённый ресурс</strong>, который можно тратить осознанно.</p>
+<p>Полезные ориентиры, которые стоит помнить: 99% — около 7 часов в месяц, 99.9% — около 43 минут, 99.99% — около 4 минут. Разница между «три девятки» и «четыре девятки» на словах кажется мелочью, а на деле это разница в стоимости инфраструктуры в разы.</p>
+<p>Логика применения бюджета:</p>
+<ul>
+<li><strong>бюджет есть</strong> — можно рисковать: катить релизы чаще, экспериментировать, ускоряться;</li>
+<li><strong>бюджет исчерпан</strong> — новые функции замораживаются, команда занимается надёжностью, пока не восстановится.</li>
+</ul>
+<p>Это снимает вечный спор «разработка хочет быстрее, эксплуатация хочет стабильнее»: спор заменяется числом, за которым обе стороны следят вместе.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Golden signals — что реально стоит мониторить</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-golden-signals.webp" alt="" /><br />
+<em>Аналогия:</em> вместо того чтобы следить за каждой цифрой и утонуть в десятках графиков, договорились смотреть на четыре показателя — этого почти всегда достаточно, чтобы понять, здоров сервис или нет.</p>
+<ul>
+<li><strong>Latency</strong> (задержка) — сколько занимает ответ. Смотреть по перцентилям, а не по среднему (§5). Отдельно стоит считать задержку успешных и неуспешных запросов: быстро возвращаемая ошибка иначе улучшает картину.</li>
+<li><strong>Traffic</strong> (трафик) — сколько запросов приходит в единицу времени. Сам по себе не проблема, но нужен как контекст для остальных.</li>
+<li><strong>Errors</strong> (ошибки) — доля запросов, закончившихся ошибкой. Именно доля, а не абсолютное число: сто ошибок на миллион запросов и сто на тысячу — разные ситуации.</li>
+<li><strong>Saturation</strong> (насыщение) — насколько ресурс подошёл к своему пределу. Предупреждение о проблеме до того, как она случилась.</li>
+</ul>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Готовый каркас ответа</summary><div class="callout-body"><p>Это «четыре золотых сигнала» из книги Google по SRE, давно ставшие стандартной темой на собеседованиях. Вопрос «что бы ты в первую очередь начал мониторить у нового сервиса» ожидает в ответ именно этот список. Сильный ответ добавляет к нему две вещи: измерять latency по перцентилям и алертить на симптомы, которые чувствует пользователь, а не на внутренние причины вроде загрузки CPU.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Экспортеры и нагрузочное тестирование</h2><div class="prose"><p><em>Аналогия:</em> node_exporter — медсестра, которая обходит палату, снимает базовые показатели и записывает в карту. Врач (Prometheus) забирает готовую карту по запросу, а не измеряет всё сам.</p>
+<pre><code class="language-bash">./node_exporter &amp;
+curl localhost:9100/metrics | head
+</code></pre>
+<p>Экспортер слушает порт <code>9100</code> и по обычному HTTP-запросу отдаёт текущие метрики простым текстом — никакого особого протокола, поэтому <code>curl</code> и работает.</p>
+<p>Второй экспортер, который стоит знать, — <strong>blackbox_exporter</strong>. Он проверяет сервис снаружи, как это делает пользователь: отвечает ли URL, какой код возвращает, сколько занял ответ и — что особенно полезно — <strong>сколько дней осталось до истечения TLS-сертификата</strong>. Это прямое продолжение разговора о сертификатах из <a href="../lessons/1-2.html#s-3">1.2 Сети</a>, §3: вопрос «как вы следите за сроками сертификатов» получает наконец конкретный ответ.</p>
+<pre><code class="language-promql">probe_success == 0                                        # сайт не отвечает
+(probe_ssl_earliest_cert_expiry - time()) / 86400 &lt; 14      # сертификат истекает через 2 недели
+</code></pre>
+<p>Разница между двумя видами проверок важна: node_exporter меряет <strong>изнутри</strong> («сервер жив, память в порядке»), blackbox — <strong>снаружи</strong> («пользователь может открыть сайт»). Мониторинг только изнутри пропускает целые классы аварий вроде сломанного DNS или закрытого файрволом порта.</p>
+<p>Искусственная нагрузка, чтобы проверить, как ведут себя алерты:</p>
+<pre><code class="language-bash">sudo apt install -y stress-ng
+stress-ng --cpu 2 --timeout 120s                     # нагрузить два ядра на 2 минуты
+stress-ng --vm 1 --vm-bytes 75% --timeout 120s        # занять 75% доступной памяти
+stress-ng --hdd 1 --timeout 60s                        # нагрузить диск записью
+</code></pre>
+<p><code>--cpu 2</code> запускает два процесса, загружающих процессор; <code>--vm 1 --vm-bytes 75%</code> — процесс, который держит три четверти доступной памяти; <code>--hdd 1</code> — процесс, который постоянно пишет на диск; <code>--timeout</code> — время, после которого всё вернётся в норму. Смысл не в самой нагрузке, а в проверке цепочки: график в Grafana пошёл вверх → алерт перешёл в <code>pending</code> → через время из <code>for</code> пришло уведомление → после окончания нагрузки пришло <code>resolved</code>. Алерт, который ни разу не срабатывал на учебной нагрузке, нельзя считать работающим. Для сетевой нагрузки между машинами — знакомый по <a href="../lessons/1-2.html">1.2 Сети</a> <code>iperf3</code>.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Когда одного GoAccess мало — Loki и ELK</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do4-log-scale.webp" alt="" /><br />
+<em>Аналогия:</em> GoAccess отлично читает дневник одного человека. Но если дневников сотни — по одному на сервер — нужен способ собрать их в общую библиотеку с единым поиском.</p>
+<ul>
+<li><strong>ELK / Elastic Stack</strong> (Elasticsearch + Logstash + Kibana) — тяжеловесное решение, требующее ресурсов, но дающее мощный полнотекстовый поиск по любому слову внутри логов.</li>
+<li><strong>Loki</strong> (от авторов Grafana) — заметно легче, спроектирован в паре с Grafana: логи и метрики смотрятся в одном интерфейсе. Индексирует не текст, а только метки, поэтому дешевле в хранении.</li>
+</ul>
+<p>Ключевое разделение обязанностей, которое стоит усвоить: <strong>метрики отвечают на вопрос «что сломалось», логи — «почему»</strong>. По метрикам видно, что доля ошибок выросла в 14:32; по логам находится конкретное исключение, которое эти ошибки вызвало. Именно поэтому в метки метрик не кладут детали (§6) — детали живут в логах.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Что чаще встречается в вакансиях</summary><div class="callout-body"><p>Связка <strong>Prometheus + Grafana + Loki</strong> сейчас чаще всего фигурирует как единый стек наблюдаемости (observability). GoAccess хорош для быстрого взгляда на один сервер, но в командах почти наверняка встретится эта тройка. Третий элемент наблюдаемости, о котором стоит хотя бы знать, — <strong>трассировки</strong> (tracing, инструменты Jaeger и Tempo): они показывают путь одного запроса через десяток микросервисов и отвечают на вопрос «на каком именно шаге ушло время».</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Учебные аварии: заполнить диск и иноды</h2><div class="prose"><p><em>Аналогия:</em> пожарные учения. Сигнализацию проверяют не дожидаясь пожара: устраивают дым в безопасных условиях и смотрят, сработала ли она и знают ли люди, что делать.</p>
+<p>Алерт на заполнение диска нужно хотя бы раз увидеть сработавшим. Для этого место занимают специально — быстро и так, чтобы потом легко убрать:</p>
+<pre><code class="language-bash">fallocate -l 5G /var/tmp/drill-fill          # мгновенно занять 5 ГБ
+df -h /var/tmp                                # убедиться, что место ушло
+rm /var/tmp/drill-fill                         # вернуть всё как было
+</code></pre>
+<p><code>fallocate</code> резервирует место под файл, не записывая данных, поэтому работает за доли секунды. Старый способ — <code>dd if=/dev/zero of=файл bs=1M count=5120</code>: он реально пишет 5 ГБ нулей и занимает минуты. <code>if=/dev/zero</code> — источник бесконечных нулевых байтов (противоположность <code>/dev/null</code>, который всё поглощает), <code>bs</code> — размер блока, <code>count</code> — сколько блоков.</p>
+<p>Вторая учебная авария — <strong>кончились иноды</strong> (<a href="../lessons/1-1.html#s-15">1.1 Linux</a>, §15): места много, а файлы не создаются. Её устраивают, создавая очень много крошечных файлов:</p>
+<pre><code class="language-bash">mkdir -p /var/tmp/drill-inodes
+free_kb=$(df --output=avail /var/tmp | tail -1)
+if [ &quot;$free_kb&quot; -lt 1048576 ]; then            # меньше 1 ГБ — не рискуем
+  echo &quot;Свободного места мало — учения отменены&quot; &gt;&amp;2; exit 1
+fi
+for i in $(seq 1 200000); do : &gt; &quot;/var/tmp/drill-inodes/f$i&quot;; done
+df -i /var/tmp                                  # процент занятых инодов вырос
+rm -rf /var/tmp/drill-inodes
+</code></pre>
+<p>Перед учениями — защитная привычка: проверить, что места достаточно и учения не положат настоящий сервис. <code>df --output=avail</code> печатает только столбец со свободным местом, <code>tail -1</code> откидывает заголовок, <code>-lt</code> — числовое «меньше чем»; 1048576 килобайт — ровно 1 ГБ. <code>: &gt; файл</code> создаёт пустой файл быстрее, чем <code>touch</code>, потому что не запускает отдельную программу.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Учения — только на стенде</summary><div class="callout-body"><p>На продакшене заполнять диск нельзя даже «на минутку»: база данных, которой не хватило места для записи, может повредить свои файлы. Учебные аварии устраивают на тестовой машине, а на продакшене проверяют алерты через тестовое правило с заведомо низким порогом.</p>
+</div></details></div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Уборка: политики хранения</h2><div class="prose"><p><em>Аналогия:</em> правила архива: документы хранятся определённый срок, из ежедневных копий оставляют последние семь, а временные черновики выбрасывают в конце дня.</p>
+<p>Когда сработал алерт на диск, удалять «что-нибудь большое» руками — плохая идея. Уборка должна идти по заранее заданным правилам и сама, по расписанию. Три типовые политики:</p>
+<pre><code class="language-bash"># 1. По возрасту: временные файлы и старые архивы логов
+find /var/tmp -type f -mtime +7 -delete
+find /var/log/myapp -name &quot;*.gz&quot; -mtime +30 -delete
+
+# 2. По количеству: из бэкапов оставить семь самых свежих
+ls -1t /backup/db-*.dump | tail -n +8 | xargs -r rm --
+
+# 3. По времени события: убрать всё, что создано за время учений
+find /var/tmp -newermt &quot;2026-10-26 14:00&quot; ! -newermt &quot;2026-10-26 15:00&quot; -print
+</code></pre>
+<p><code>-mtime +7</code> — изменённые больше семи дней назад, <code>-delete</code> удаляет найденное сразу.</p>
+<p>Во второй строке <code>ls -1t</code> перечисляет файлы по одному в строке, самые новые сверху; <code>tail -n +8</code> пропускает первые семь строк и выдаёт всё, начиная с восьмой; <code>xargs -r rm --</code> удаляет переданные файлы, а <code>-r</code> не запускает <code>rm</code> вовсе, если удалять нечего. Двойной дефис <code>--</code> защищает от имён, начинающихся с <code>-</code>.</p>
+<p>В третьей <code>-newermt &quot;дата&quot;</code> означает «изменён позже указанной даты», а <code>!</code> перед вторым условием — логическое «НЕ». Вместе читается как «позже 14:00, но не позже 15:00». Здесь стоит <code>-print</code> вместо <code>-delete</code> — о причине ниже.</p>
+<p>Для больших объёмов <code>find ... -exec rm {} +</code> с <code>+</code> в конце быстрее, чем с <code>\;</code>: <code>find</code> соберёт пачку путей и передаст их одной команде <code>rm</code>, вместо запуска отдельного процесса на каждый файл.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Проверяй перед удалением</summary><div class="callout-body"><p>Любую конструкцию с <code>find ... -delete</code> или <code>-exec rm</code> сначала запускают <strong>без удаления</strong> — просто посмотреть список. Замени <code>-delete</code> на <code>-print</code> или убери <code>-exec</code>, убедись, что в выводе именно то, что ожидалось, и только потом добавляй удаление. Ошибка в маске или лишний пробел в пути превращают эту команду в очень эффективный способ потерять данные.</p>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Разбор логов nginx в терминале</h2><div class="prose"><p><em>Аналогия:</em> GoAccess и Grafana — готовые отчёты, а <code>awk</code> по логу — умение самой задать любой вопрос журналу посещений, когда под рукой только SSH.</p>
+<p>Чтобы было что разбирать на учебном стенде, достаточно погонять запросы к своему nginx: <code>hey -n 2000 http://localhost/</code> для обычных запросов и несколько <code>curl</code> на несуществующие страницы для ошибок 404.</p>
+<pre><code>203.0.113.5 - - [21/Jul/2026:14:32:10 +0000] &quot;GET /index.html HTTP/1.1&quot; 200 512 &quot;-&quot; &quot;Mozilla/5.0&quot;
+</code></pre>
+<p>Строка в формате Combined. Слева направо: IP посетителя; два дефиса — служебные поля, обычно пустые; дата и время в квадратных скобках; в кавычках строка запроса — метод, путь, версия протокола; <code>200</code> — код ответа (<a href="../lessons/1-2.html#s-2">1.2 Сети</a>, §2); <code>512</code> — размер ответа в байтах; реферер (откуда пришли, тут пусто); User-Agent.</p>
+<pre><code class="language-bash">awk '{print $9}' access.log | sort | uniq -c            # сколько раз какой код ответа
+awk '{print $1}' access.log | sort -u                     # уникальные IP
+awk '$9 ~ /^[45]/' access.log                               # только ошибки 4xx/5xx
+awk '{print $1}' access.log | sort | uniq -c | sort -rn | head   # топ активных адресов
+</code></pre>
+<p><code>awk</code> делит строку на столбцы по пробелам. Девятое слово (<code>$9</code>) — код ответа. <code>sort</code> собирает одинаковые значения подряд (обязательное условие для следующего шага), <code>uniq -c</code> схлопывает повторы и подписывает количество.</p>
+<p>Конструкция <code>$9 ~ /^[45]/</code> фильтрует строки по регулярному выражению: <code>~</code> — оператор сравнения с регуляркой внутри <code>awk</code>, <code>^[45]</code> — «начинается с 4 или 5». Так из огромного лога быстро выцепляются только проблемные запросы.</p>
+<p>Последняя строка — готовый рецепт для разбора инцидента: топ адресов по числу запросов сразу показывает, был ли всплеск вызван одним источником.</p>
+<p>Ещё два вопроса, которые задают логу чаще всего:</p>
+<pre><code class="language-bash">awk '{print $7}' access.log | sort | uniq -c | sort -rn | head      # самые популярные адреса
+awk '{print substr($4, 14, 5)}' access.log | sort | uniq -c          # запросы по минутам
+</code></pre>
+<p>Во второй строке <code>substr($4, 14, 5)</code> вырезает из поля с датой <code>[26/Oct/2026:14:32:10</code> пять символов, начиная с четырнадцатого, — время до минут. Получается гистограмма нагрузки по минутам прямо в терминале.</p>
+
+<figure class="explain" data-anim="bash-pipe"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: собери конвейер команд по звену</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Prometheus сам опрашивает экспортеры по расписанию (pull-модель); отсутствие ответа само по себе сигнал — метрика <code>up</code> уходит в ноль.</li>
+<li>Три типа метрик: <strong>counter</strong> только растёт (смотреть через <code>rate()</code>), <strong>gauge</strong> гуляет вверх-вниз, <strong>histogram</strong> раскладывает по корзинам для перцентилей.</li>
+<li><code>rate(metric[5m])</code> — самая частая конструкция PromQL. <code>irate</code> для отладки всплесков, в алертах — <code>rate</code>.</li>
+<li>Среднее время ответа врёт: смотреть <strong>p50/p95/p99</strong>, потому что жалуются именно те 5%, что в среднем растворились.</li>
+<li><strong>Кардинальность</strong>: в метки идёт только то, у чего мало значений. Идентификаторы и полные URL в метках убивают Prometheus.</li>
+<li>Grafana ничего не хранит, только рисует; дашборды держат как код в репозитории.</li>
+<li><code>for: 5m</code> в алерте защищает от ложных тревог. Алерт должен требовать <strong>немедленного действия человека</strong> — иначе это дашборд, а не алерт.</li>
+<li><strong>SLI</strong> — что меряем, <strong>SLO</strong> — наша цель, <strong>SLA</strong> — обещание клиенту (ставится ниже SLO). Бюджет ошибок при 99.9% — около 43 минут в месяц.</li>
+<li><strong>4 golden signals</strong>: latency, traffic, errors, saturation — ожидаемый каркас ответа на «что мониторить».</li>
+<li>node_exporter меряет изнутри, <strong>blackbox_exporter</strong> — снаружи, включая срок TLS-сертификата.</li>
+<li>Метрики отвечают «что сломалось», логи — «почему». На масштабе логи собирают в Loki или ELK.</li>
+<li>Перед <code>find ... -delete</code> всегда сначала запуск с <code>-print</code>.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 2, 5 и 6 (Prometheus, Grafana, первый алерт, SLO) — раздел «Мониторинг» в <a href="../projects/p2.html">P2</a>.</li>
+<li>Алерт из задания 5 можно сразу отправлять через своего бота из <a href="../projects/m3.html">M3</a>.</li>
+</ul>
+</div></details><article class="task" data-task="0a4ead972b"><h3>Задание 1 — разбор логов nginx</h3><p>Погоняй трафик на свой nginx: <code>hey -n 2000 http://localhost/</code>, плюс пару сотен запросов на несуществующие адреса и на несколько разных страниц. Через <code>awk</code>, <code>sort</code>, <code>uniq</code> выведи: число запросов по кодам ответа, топ-10 адресов страниц, запросы с ошибками 4xx/5xx, нагрузку по минутам.<br />
+<strong>Проверка:</strong> те же цифры показывает GoAccess (<code>goaccess /var/log/nginx/access.log --log-format=COMBINED</code>).</p>
+<label class="task-done"><input type="checkbox" data-task-check="0a4ead972b"> Сделала руками и проверила</label></article><article class="task" data-task="248fb6e51f"><h3>Задание 2 — Prometheus и Grafana</h3><p>Поставь Prometheus, node_exporter и Grafana. Сделай дашборд: CPU, свободная память, свободное место, дисковые операции.<br />
+<strong>Проверка:</strong> под нагрузкой <code>stress-ng --cpu 2 --vm 1 --vm-bytes 1G --timeout 120s</code> графики реагируют.</p>
+<label class="task-done"><input type="checkbox" data-task-check="248fb6e51f"> Сделала руками и проверила</label></article><article class="task" data-task="3b60247873"><h3>Задание 3 — PromQL</h3><p>Напиши запросы: доля свободного места в процентах по каждой точке монтирования; загрузка CPU в процентах за 5 минут; скорость входящего трафика по интерфейсам.<br />
+<strong>Проверка:</strong> значения совпадают с <code>df -h</code>, <code>top</code> и <code>ip -s link</code> в пределах погрешности.</p>
+<label class="task-done"><input type="checkbox" data-task-check="3b60247873"> Сделала руками и проверила</label></article><article class="task" data-task="fd2b6dd2ff"><h3>Задание 4 — перцентили</h3><p>Запусти простой сервис, который отвечает со случайной задержкой (90% быстро, 10% медленно). Нагрузи его через <code>hey</code> и построй среднее, p50, p95 и p99.<br />
+<strong>Проверка:</strong> объясняешь на своих данных, почему среднее выглядит хорошо, а p99 — плохо.</p>
+<label class="task-done"><input type="checkbox" data-task-check="fd2b6dd2ff"> Сделала руками и проверила</label></article><article class="task" data-task="b3e5bab3d4"><h3>Задание 5 — первый алерт</h3><p>Настрой Alertmanager и правило «свободного места меньше 15% в течение 5 минут». Заполни диск через <code>fallocate</code>.<br />
+<strong>Проверка:</strong> алерт проходит путь <code>inactive</code> → <code>pending</code> → <code>firing</code>, уведомление приходит, после удаления файла — <code>resolved</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="b3e5bab3d4"> Сделала руками и проверила</label></article><article class="task" data-task="372a83ce7f"><h3>Задание 6 — SLO на бумаге</h3><p>Сформулируй SLI и SLO для своего учебного сервиса. Посчитай бюджет ошибок в минутах на месяц.<br />
+<strong>Проверка:</strong> SLI выражен PromQL-запросом, бюджет посчитан для 99%, 99.9% и 99.99%.</p>
+<label class="task-done"><input type="checkbox" data-task-check="372a83ce7f"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-3.html">1.3 Bash</a> — bash, на котором пишутся проверки</li>
+<li><a href="../lessons/1-2.html">1.2 Сети</a> — коды ответов и сертификаты, которые здесь мониторятся</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — тот же стек в связке с Docker и облаком</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Prometheus: https://prometheus.io/docs/</li>
+<li>Google SRE Book, главы Monitoring Distributed Systems и Service Level Objectives: https://sre.google/books/</li>
+<li>Grafana Loki: https://grafana.com/docs/loki/</li>
+<li>Обзоры требований к DevOps-инженерам 2026 года (Hexlet, Хабр Карьера)</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="1-3.html">← 1.3 Bash-скрипты для администрирования</a><a class="lesson-jump" href="2-1.html">2.1 Python с нуля →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "1-4", "number": "1.4", "title": "Метрики, логи и алерты", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["0a4ead972b", "248fb6e51f", "3b60247873", "fd2b6dd2ff", "b3e5bab3d4", "372a83ce7f"], "quiz": [{"id": "db7beba4b7", "q": "Метрика <code>http_requests_total<\/code> — какого она типа и как её смотреть?", "options": ["Gauge, смотреть как есть", "Counter, смотреть через <code>rate()<\/code>", "Histogram, смотреть через <code>histogram_quantile()<\/code>", "Summary, смотреть через <code>sum()<\/code>"], "answer": [1], "why": "<p>счётчик только растёт, и само накопленное число ничего не говорит. <code>rate()<\/code> превращает его в скорость — запросы в секунду.<\/p>\n"}, {"id": "87ba264488", "q": "Почему для времени ответа смотрят p95/p99, а не среднее?", "options": ["Среднее сложно посчитать", "Среднее прячет медленный «хвост»: несколько очень долгих запросов почти не сдвигают его", "Перцентили занимают меньше места", "Prometheus не умеет считать среднее"], "answer": [1], "why": "<p>если 1% запросов идёт 10 секунд, среднее останется приличным, а каждый сотый пользователь будет страдать.<\/p>\n"}, {"id": "bf3cd743d6", "q": "Какое значение НЕЛЬЗЯ класть в метку метрики?", "options": ["Код ответа", "HTTP-метод", "Идентификатор пользователя", "Имя сервиса"], "answer": [2], "why": "<p>каждое уникальное сочетание меток — отдельный временной ряд. Миллион пользователей превратится в миллион рядов, и Prometheus упадёт.<\/p>\n"}, {"id": "c3f393fe0d", "q": "SLO доступности — 99.9% в месяц. Сколько примерно простоя допускает бюджет ошибок?", "options": ["4 минуты", "43 минуты", "7 часов", "3 дня"], "answer": [1], "why": "<p>0.1% от 30 дней — это примерно 43 минуты. При 99% было бы около 7 часов.<\/p>\n"}, {"id": "4267e88226", "q": "Зачем в правиле алерта параметр <code>for: 5m<\/code>?", "options": ["Чтобы алерт приходил каждые 5 минут", "Чтобы алерт загорался, только если условие держится 5 минут подряд", "Чтобы хранить данные 5 минут", "Чтобы опрашивать экспортер раз в 5 минут"], "answer": [1], "why": "<p><code>for<\/code> защищает от ложных тревог на кратковременных всплесках.<\/p>\n"}, {"id": "dccef5ab1f", "q": "Какие из сигналов входят в «четыре золотых сигнала»? Выбери все.", "options": ["Latency — задержка", "Errors — ошибки", "Uptime — время работы сервера", "Saturation — насыщение ресурсов"], "answer": [0, 1, 3], "why": "<p>четвёртый сигнал — Traffic. Это минимальный набор, который стоит мониторить у любого сервиса.<\/p>\n"}, {"id": "dc7de14979", "q": "Перед тем как запустить <code>find /var/tmp -mtime +7 -delete<\/code>, что стоит сделать?", "options": ["Ничего, команда безопасна", "Запустить ту же команду с <code>-print<\/code> и проверить список", "Перезагрузить сервер", "Отключить cron"], "answer": [1], "why": "<p>ошибка в пути или маске превращает удаление в потерю нужных данных. Сначала смотрят, что именно будет удалено.<\/p>\n"}], "cards": [{"id": "70e2dd2a14", "q": "Какие типы метрик есть в Prometheus?", "a": "<p>Counter — только растёт (число запросов), используется с <code>rate()<\/code>. Gauge — растёт и падает (память, температура). Histogram — распределение по корзинам (время ответа), из него считают перцентили. Summary — перцентили, посчитанные на стороне клиента, не агрегируются между экземплярами.<\/p>\n"}, {"id": "a1e4d371b1", "q": "Почему нельзя использовать среднее время ответа?", "a": "<p>Среднее прячет хвост: 99% быстрых запросов и 1% по 10 секунд дадут приличное среднее, но каждый сотый пользователь страдает. Используют перцентили p95/p99.<\/p>\n"}, {"id": "bcfccabad4", "q": "Чем rate() отличается от irate()?", "a": "<p><code>rate<\/code> — средняя скорость роста счётчика за окно, сглаживает, подходит для алертов и графиков. <code>irate<\/code> — по двум последним точкам, показывает резкие всплески, для алертов не годится.<\/p>\n"}, {"id": "be07fc9f2d", "q": "Что такое кардинальность и чем она опасна?", "a": "<p>Число уникальных временных рядов. Метка с неограниченным числом значений (user_id, URL с параметрами) создаёт миллионы рядов, Prometheus съедает память и падает.<\/p>\n"}, {"id": "b76942627a", "q": "Что такое SLI, SLO, SLA и бюджет ошибок?", "a": "<p>SLI — измеряемый показатель (доля успешных запросов), SLO — внутренняя цель (99.9% за месяц), SLA — обязательство перед клиентом с последствиями, ниже SLO. Бюджет ошибок — допустимая доля сбоев (43 минуты в месяц при 99.9%), которую можно тратить на изменения.<\/p>\n"}, {"id": "e82fc4a7d7", "q": "Что такое четыре золотых сигнала?", "a": "<p>Latency (задержка), Traffic (нагрузка), Errors (ошибки), Saturation (насыщение ресурсов). Минимальный набор, который нужно мониторить у любого сервиса.<\/p>\n"}, {"id": "e9aefa27ab", "q": "Чем RED отличается от USE?", "a": "<p>RED (Rate, Errors, Duration) — для сервисов, обрабатывающих запросы. USE (Utilization, Saturation, Errors) — для ресурсов: CPU, память, диск, сеть.<\/p>\n"}, {"id": "cbbee85729", "q": "Как найти в логе nginx IP, сделавшие больше всего запросов?", "a": "<p><code>awk '{print $1}' access.log | sort | uniq -c | sort -rn | head<\/code>.<\/p>\n"}], "next": "2-1"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

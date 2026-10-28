@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.6 SQL: первые запросы — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.6: SQL: первые запросы">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.6 · code</div>
+    <h1 class="lesson-title">SQL: первые запросы</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#x-1" data-step="x-1"><span class="step-icon">§</span><span class="step-title">Учебная база для всех SQL-уроков</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">SELECT и WHERE — первый запрос</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Сортировка результата: ORDER BY</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Операторы сравнения и BETWEEN</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Уникальные значения: DISTINCT</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Вычисляемый столбец из текста и данных</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Подзапрос в SELECT</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Логическое условие как отдельный столбец</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Множественные условия: CASE WHEN</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Чётные и нечётные значения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Подзапрос в FROM (производная таблица)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">NULL — не значение, а его отсутствие</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Поиск по шаблону: LIKE</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">LIMIT и OFFSET</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">psql: как зайти в базу и осмотреться</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>SQL — язык, на котором ты «разговариваешь» с базой данных: просишь показать, отфильтровать, отсортировать нужные строки. Почти любой backend, аналитика или дашборд рано или поздно упирается в SQL-запрос — это не опция, а базовый навык наравне с самим программированием.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Таблица</strong> — структура данных из строк (записей) и столбцов (полей), как лист Excel с фиксированными колонками.</li>
+<li><strong>Первичный ключ (Primary Key)</strong> — столбец (или набор столбцов), уникально идентифицирующий строку в таблице; в наших таблицах это всегда <code>id</code>.</li>
+<li><strong>Внешний ключ (Foreign Key)</strong> — столбец, ссылающийся на первичный ключ другой таблицы — так таблицы связываются друг с другом.</li>
+<li><strong>Запрос (query)</strong> — инструкция, которая просит базу данных вернуть (или изменить) какие-то данные.</li>
+<li><strong>Подзапрос (subquery)</strong> — запрос, вложенный внутрь другого запроса.</li>
+</ul>
+</div></details></div></section><section class="step" id="x-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Учебная база для всех SQL-уроков</h2><div class="prose"><p>Все SQL-уроки используют одну и ту же учебную базу — маркетплейс электроники, где на одной площадке торгуют несколько магазинов. Схема и тестовые данные лежат в файле <code>_assets/sql/shop.sql</code>: создай базу командой <code>createdb shop</code> и загрузи их через <code>psql -d shop -f shop.sql</code>, тогда любой пример из уроков можно выполнить самой.</p>
+<ul>
+<li><strong>store</strong> (магазины на площадке) — <code>id</code>, <code>name</code>, <code>rating</code> (0–5).</li>
+<li><strong>customer</strong> (покупатели) — <code>id</code>, <code>name</code>, <code>age</code>, <code>city</code>, <code>premium</code> (есть ли платная подписка).</li>
+<li><strong>product</strong> (товары конкретного магазина) — <code>id</code>, <code>store_id</code> → store, <code>title</code>, <code>price</code>, <code>stock</code> (остаток на складе).</li>
+<li><strong>store_visit</strong> (журнал просмотров витрины магазина) — <code>id</code>, <code>customer_id</code> → customer, <code>store_id</code> → store, <code>visit_date</code>.</li>
+<li><strong>purchase</strong> (журнал покупок) — <code>id</code>, <code>customer_id</code> → customer, <code>product_id</code> → product, <code>purchase_date</code>.</li>
+</ul>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Важная деталь</summary><div class="callout-body"><p>Просмотр витрины и покупка — разные, не связанные напрямую события. Покупатель может открыть магазин, посмотреть товары и ничего не купить, а купить в другой день по прямой ссылке из рассылки, вообще не заходя на витрину. Это нормальная «неидеальность» реальных данных: события пишутся в разные таблицы разными частями системы.</p>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>SELECT и WHERE — первый запрос</h2><div class="prose"><p><em>Аналогия:</em> <code>SELECT</code> — это «покажи мне колонки X и Y», а <code>WHERE</code> — «но только те строки, где выполняется условие». Как попросить официанта показать меню, но только вегетарианские блюда.</p>
+<pre><code class="language-sql">SELECT name, age
+FROM customer
+WHERE city = 'Казань';
+</code></pre>
+<p><code>SELECT name, age</code> — какие столбцы нужны в результате. <code>FROM customer</code> — из какой таблицы. <code>WHERE city = 'Казань'</code> — фильтр по значению столбца.</p>
+<p>Важная деталь, которая часто путает новичков: <strong>писать</strong> запрос принято именно в порядке <code>SELECT</code> → <code>FROM</code> → <code>WHERE</code>, но реально <strong>выполняется</strong> он в другом порядке: сначала база смотрит, из какой таблицы вообще брать данные (<code>FROM</code>), затем отфильтровывает строки по условию (<code>WHERE</code>), и только в самом конце решает, какие именно столбцы показать в результате (<code>SELECT</code>). Из-за этого, например, в <code>WHERE</code> нельзя сослаться на псевдоним столбца, придуманный в <code>SELECT</code> этого же запроса — на момент выполнения <code>WHERE</code> этот псевдоним ещё просто не существует.</p>
+<p>Полный порядок выполнения стоит запомнить сразу — он объясняет сразу несколько правил, которые иначе выглядят произволом: <code>FROM</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>HAVING</code> → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. Отсюда же следует и разница между <code>WHERE</code> и <code>HAVING</code> (<a href="../lessons/2-9.html">2.9 Агрегация</a>): первый отбрасывает строки до группировки, второй — целые группы после неё.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Сортировка результата: ORDER BY</h2><div class="prose"><p><em>Аналогия:</em> <code>ORDER BY</code> — как попросить библиотекаря выдать книги не как попало, а по алфавиту.</p>
+<pre><code class="language-sql">SELECT name, age
+FROM customer
+WHERE city = 'Казань' AND premium
+ORDER BY name;
+</code></pre>
+<p><code>AND</code> комбинирует несколько условий — обе части должны быть истинны одновременно. <code>premium</code> — логический столбец, поэтому его можно писать в условии как есть, без <code>= true</code>. По умолчанию <code>ORDER BY</code> сортирует по возрастанию (<code>ASC</code>); чтобы отсортировать по убыванию, добавляют <code>DESC</code>.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Операторы сравнения и BETWEEN</h2><div class="prose"><p><em>Аналогия:</em> «рейтинг от 3.5 до 5» можно сказать двумя способами — либо явно «не меньше 3.5 и не больше 5», либо одним словом «между 3.5 и 5». Смысл одинаковый, слова разные.</p>
+<pre><code class="language-sql">-- через операторы сравнения
+SELECT name, rating
+FROM store
+WHERE rating &gt;= 3.5 AND rating &lt;= 5
+ORDER BY rating;
+
+-- то же самое через BETWEEN
+SELECT name, rating
+FROM store
+WHERE rating BETWEEN 3.5 AND 5
+ORDER BY rating;
+</code></pre>
+<p><code>BETWEEN a AND b</code> включает обе границы (это как <code>&gt;= a AND &lt;= b</code>), а не «строго между».</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Уникальные значения: DISTINCT</h2><div class="prose"><p><em>Аналогия:</em> если покупатель несколько раз открывал один и тот же магазин, его всё равно нужно посчитать как одного посетителя, а не несколько раз — как список гостей на вечеринке без дублей.</p>
+<pre><code class="language-sql">SELECT DISTINCT customer_id
+FROM store_visit
+WHERE visit_date BETWEEN '2026-03-02' AND '2026-03-05'
+   OR store_id = 2
+ORDER BY customer_id DESC;
+</code></pre>
+<p><code>DISTINCT</code> убирает повторяющиеся строки результата — ровно тот же смысл, что и <code>set()</code> в Python (см. урок 2.1). <code>OR</code> — «выполнено хотя бы одно из условий», в отличие от <code>AND</code>.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Вычисляемый столбец из текста и данных</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы отдавать голые значения по отдельности, можно попросить базу «собрать» их в одну готовую фразу — как автоматическая подпись к фотографии.</p>
+<pre><code class="language-sql">SELECT name || ', ' || age || ' лет, город ''' || city || '''' AS customer_card
+FROM customer
+ORDER BY customer_card;
+</code></pre>
+<p><code>||</code> — оператор конкатенации (склеивания) строк в SQL, аналог <code>+</code> для строк в Python. Получится строка вида <code>Анна, 27 лет, город 'Москва'</code>. Одинарная кавычка внутри строки экранируется удвоением (<code>''</code>) — поэтому в конце примера видно <code>''''</code>: это строка, состоящая из одной кавычки. У покупателей без города или возраста результат окажется пустым — почему, разобрано в §11.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Подзапрос в SELECT</h2><div class="prose"><p><em>Аналогия:</em> подзапрос в <code>SELECT</code> — как записка внутри записки: сначала находишь ответ на маленький вопрос («как зовут этого человека?»), а потом подставляешь его в основной ответ.</p>
+<pre><code class="language-sql">SELECT
+    (SELECT c.name FROM customer c WHERE c.id = pu.customer_id) AS customer_name
+FROM purchase pu
+WHERE pu.product_id IN (9, 14)       -- сетевые кабели из двух магазинов
+  AND pu.purchase_date &gt;= '2026-03-04';
+</code></pre>
+<p>Подзапрос выполняется отдельно для каждой строки основного запроса и подставляет результат как обычное значение столбца. <code>IN (9, 14)</code> — короткая запись для <code>product_id = 9 OR product_id = 14</code>. Тот же результат обычно получают через соединение таблиц (<a href="../lessons/2-7.html">2.7 Соединения</a>) — для больших таблиц это быстрее, чем подзапрос на каждую строку.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Логическое условие как отдельный столбец</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы просто отфильтровать строки, можно оставить их все, но добавить колонку-пометку «да/нет» — как галочка в чек-листе рядом с каждым пунктом, а не удаление невыполненных пунктов.</p>
+<pre><code class="language-sql">SELECT
+    (SELECT c.name FROM customer c WHERE c.id = pu.customer_id) AS customer_name,
+    (SELECT c.name FROM customer c WHERE c.id = pu.customer_id) = 'Анна' AS is_anna
+FROM purchase pu
+WHERE pu.product_id = 9 OR pu.product_id = 14;
+</code></pre>
+<p>Сравнение (<code>= 'Анна'</code>) само по себе возвращает <code>true</code>/<code>false</code> — в PostgreSQL это можно использовать прямо как значение столбца, без обёртки в <code>CASE WHEN</code>.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Множественные условия: CASE WHEN</h2><div class="prose"><p><em>Аналогия:</em> <code>CASE WHEN</code> — это <code>if/elif/else</code> внутри SQL-запроса (см. урок 2.1, раздел 4), только результат не печатается, а становится значением нового столбца.</p>
+<pre><code class="language-sql">SELECT
+    id,
+    name,
+    CASE
+        WHEN age &lt; 18 THEN 'подросток'
+        WHEN age &lt; 30 THEN 'молодой'
+        WHEN age &lt; 60 THEN 'взрослый'
+        ELSE 'старший или неизвестно'
+    END AS age_group
+FROM customer
+ORDER BY age_group;
+</code></pre>
+<p>Условия проверяются по порядку сверху вниз, срабатывает первое подходящее — совсем как <code>if</code>/<code>elif</code>/<code>else</code> в Python. Поэтому во второй ветке достаточно <code>age &lt; 30</code>: до неё дойдут только те, кому уже не меньше 18. Покупатель без возраста (<code>NULL</code>) не подойдёт ни под одно условие и попадёт в <code>ELSE</code> — об этом в §11.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Чётные и нечётные значения</h2><div class="prose"><p><em>Аналогия:</em> тот же остаток от деления, что уже встречался в уроке 2.1 (<code>%</code> в Python) — только в SQL он называется <code>MOD</code> или обозначается тем же символом <code>%</code>.</p>
+<pre><code class="language-sql">SELECT *
+FROM purchase
+WHERE id % 2 = 0
+ORDER BY id;
+</code></pre>
+<p><code>id % 2 = 0</code> — «остаток от деления id на 2 равен нулю», то есть число чётное. <code>SELECT *</code> означает «все столбцы таблицы», без перечисления по именам.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Подзапрос в FROM (производная таблица)</h2><div class="prose"><p><em>Аналогия:</em> подзапрос в <code>FROM</code> — это отчёт, построенный не по исходным данным напрямую, а по уже готовому промежуточному отчёту — как посчитать средний балл по оценкам, которые сначала сам отфильтровал.</p>
+<pre><code class="language-sql">SELECT
+    (SELECT c.name FROM customer c WHERE c.id = sv.customer_id) AS customer_name,
+    (SELECT s.name FROM store s WHERE s.id = sv.store_id) AS store_name
+FROM (
+    SELECT customer_id, store_id
+    FROM store_visit
+    WHERE visit_date BETWEEN '2026-03-03' AND '2026-03-06'
+) AS sv
+ORDER BY customer_name ASC, store_name DESC;
+</code></pre>
+<p>Подзапрос в <code>FROM</code> обязательно должен иметь алиас (здесь — <code>AS sv</code>) — база данных должна как-то называть эту временную «виртуальную таблицу», чтобы можно было обращаться к её столбцам дальше в запросе.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>NULL — не значение, а его отсутствие</h2><div class="prose"><p><em>Аналогия:</em> в анкете поле «телефон» может быть пустым. Это не значит, что телефон равен пустой строке или нулю — это значит, что телефон <strong>неизвестен</strong>. Сравнивать неизвестное с чем-либо бессмысленно, даже с другим неизвестным.</p>
+<p>Тема, которую в учебных базах обходят стороной, а в реальных она даёт больше всего тихих ошибок. И самый частый вопрос на собеседовании по SQL.</p>
+<pre><code class="language-sql">-- ✘ вернёт ноль строк, но НЕ выдаст ошибку
+SELECT * FROM customer WHERE city = NULL;
+SELECT * FROM customer WHERE city != NULL;
+
+-- ✔ единственно верный способ
+SELECT * FROM customer WHERE city IS NULL;
+SELECT * FROM customer WHERE city IS NOT NULL;
+</code></pre>
+<p>Причина в <strong>трёхзначной логике</strong>: кроме <code>true</code> и <code>false</code> в SQL есть третье состояние — <code>unknown</code>. Любое сравнение с <code>NULL</code> даёт именно его, включая <code>NULL = NULL</code>. А в <code>WHERE</code> строка попадает в результат, только если условие истинно; <code>unknown</code> отбрасывается наравне с <code>false</code>. Отсюда и получается пустая выборка вместо ошибки — запрос «работает», просто молча возвращает не то.</p>
+<p>Тот же эффект в арифметике и склейке строк:</p>
+<pre><code class="language-sql">SELECT 100 + NULL;              -- NULL, а не 100
+SELECT 'Заказ №' || NULL;       -- NULL — пропадает вся строка целиком
+</code></pre>
+<p>Именно так в отчётах появляются пустые ячейки там, где ожидался текст: одно неизвестное поле обнуляет всю собранную строку.</p>
+<p><strong>Как с этим работать:</strong></p>
+<pre><code class="language-sql">-- подставить значение по умолчанию
+SELECT name, COALESCE(city, 'адрес не указан') AS city
+FROM customer;
+
+-- превратить конкретное значение обратно в NULL
+SELECT NULLIF(rating, 0) FROM store;
+</code></pre>
+<p><code>COALESCE</code> возвращает первый не-<code>NULL</code> аргумент из перечисленных — прямой аналог <code>${VAR:-default}</code> из bash (<a href="../lessons/1-3.html#s-9">1.3 Bash</a>, §9) и <code>.get(key, default)</code> из Python.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Ловушка NOT IN — почти гарантированный вопрос на собеседовании</summary><div class="callout-body"><pre><code class="language-sql">SELECT * FROM customer
+WHERE id NOT IN (SELECT customer_id FROM store_visit);   -- ✘ опасно
+</code></pre>
+<p>Если подзапрос вернёт хотя бы один <code>NULL</code>, весь запрос вернёт <strong>ноль строк</strong>. Всегда. Логика такая: <code>id NOT IN (1, 2, NULL)</code> разворачивается в <code>id != 1 AND id != 2 AND id != NULL</code>, а последнее условие даёт <code>unknown</code>, и всё выражение перестаёт быть истинным для любой строки.</p>
+<p>С <code>IN</code> этой проблемы нет — там достаточно одного совпадения. Поэтому запрос с <code>IN</code> работает, а его «зеркальный» вариант с <code>NOT IN</code> внезапно даёт пустоту, и найти причину без знания этой особенности почти невозможно.</p>
+<p>Безопасные варианты: <code>NOT EXISTS</code> вместо <code>NOT IN</code>, либо явное <code>WHERE customer_id IS NOT NULL</code> внутри подзапроса.</p>
+</div></details>
+<p>Ещё две особенности, которые всплывают на практике: при сортировке PostgreSQL по умолчанию ставит <code>NULL</code> <strong>в конец</strong> при <code>ASC</code> и <strong>в начало</strong> при <code>DESC</code> (управляется через <code>NULLS FIRST</code> / <code>NULLS LAST</code>), а <code>COUNT(столбец)</code> не считает строки с <code>NULL</code>, в отличие от <code>COUNT(*)</code> — подробнее в <a href="../lessons/2-9.html">2.9 Агрегация</a>.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Поиск по шаблону: LIKE</h2><div class="prose"><p><em>Аналогия:</em> фильтр «начинается на» в поиске по контактам.</p>
+<pre><code class="language-sql">SELECT name FROM store    WHERE name LIKE 'Умн%';       -- начинается с «Умн»
+SELECT title FROM product WHERE title LIKE '%кабель%';  -- содержит «кабель»
+SELECT name FROM customer  WHERE name LIKE '_нна';      -- ровно один символ, затем нна
+SELECT title FROM product WHERE title ILIKE '%КАБЕЛЬ%';  -- без учёта регистра (PostgreSQL)
+</code></pre>
+<p>Символ <code>%</code> заменяет любое количество любых символов (включая ноль), <code>_</code> — ровно один символ. <code>ILIKE</code> — расширение PostgreSQL, то же самое без учёта регистра; в других СУБД пишут <code>LOWER(name) LIKE LOWER('...')</code>.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Почему <code>LIKE '%текст%'</code> тормозит</summary><div class="callout-body"><p>Шаблон, начинающийся с <code>%</code>, не может воспользоваться обычным индексом: база не знает, с чего начинается искомое, и вынуждена просмотреть все строки целиком. На таблице в миллион записей это заметно. Шаблон вида <code>'Умн%'</code> (без ведущего <code>%</code>) индекс использовать может — разница принципиальная. Подробнее про индексы — в <a href="../lessons/2-8.html">2.8 Индексы</a>, а для полноценного текстового поиска в PostgreSQL есть отдельный механизм.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>LIMIT и OFFSET</h2><div class="prose"><p><em>Аналогия:</em> «покажи первые десять» и «а теперь следующие десять» — обычная постраничная выдача.</p>
+<pre><code class="language-sql">SELECT name, rating FROM store ORDER BY rating DESC LIMIT 5;
+SELECT name, rating FROM store ORDER BY rating DESC LIMIT 5 OFFSET 10;
+</code></pre>
+<p><code>LIMIT</code> ограничивает число строк, <code>OFFSET</code> пропускает первые N. Вместе они дают постраничный вывод, к которому сводится почти любой список в интерфейсе.</p>
+<p>Две детали, о которых стоит знать сразу. Во-первых, <strong><code>LIMIT</code> без <code>ORDER BY</code> не имеет смысла</strong>: база не обязана возвращать строки в каком-либо порядке, поэтому «первые пять» без сортировки могут оказаться разными при каждом запуске. Во-вторых, большие <code>OFFSET</code> работают медленно: чтобы пропустить 100 000 строк, база их всё равно прочитает. Для глубокой пагинации используют другой приём — фильтр по последнему увиденному значению (<code>WHERE id &gt; последний_id LIMIT 20</code>).</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>psql: как зайти в базу и осмотреться</h2><div class="prose"><p><em>Аналогия:</em> прежде чем писать запросы, надо уметь открыть дверь и понять, что вообще лежит внутри.</p>
+<p>Для DevOps это едва ли не более частая задача, чем написание сложных запросов: подключиться к незнакомой базе, посмотреть, какие есть таблицы, проверить размер, найти застрявший запрос.</p>
+<pre><code class="language-bash">psql -h localhost -U postgres -d shop         # подключиться
+psql &quot;postgresql://user:pass@host:5432/dbname&quot;    # то же одной строкой подключения
+</code></pre>
+<p>Служебные команды <code>psql</code> начинаются с обратного слеша и к SQL отношения не имеют:</p>
+<pre><code>\l              список баз
+\c shop      переключиться на базу
+\dt             список таблиц
+\d customer       структура таблицы: столбцы, типы, индексы, ключи
+\du             список пользователей и их прав
+\dt+            таблицы с размерами
+\x              переключить вывод в вертикальный вид — спасение для широких таблиц
+\timing         показывать время выполнения каждого запроса
+\q              выйти
+</code></pre>
+<p>Запустить запрос из скрипта, не входя в интерактивный режим:</p>
+<pre><code class="language-bash">psql -d shop -c &quot;SELECT count(*) FROM customer;&quot;       # одна команда
+psql -d shop -f migration.sql                          # выполнить файл
+psql -d shop -At -c &quot;SELECT count(*) FROM customer;&quot;      # только значение, без рамок
+</code></pre>
+<p>Флаги <code>-A</code> (без выравнивания) и <code>-t</code> (без заголовков) дают чистое значение, которое удобно положить в переменную bash — так пишут проверки состояния базы для мониторинга.</p>
+<p>Пара запросов, которые пригодятся в эксплуатации сразу:</p>
+<pre><code class="language-sql">SELECT pg_size_pretty(pg_database_size('shop'));    -- сколько весит база
+SELECT count(*) FROM pg_stat_activity;                   -- сколько сейчас соединений
+SELECT pid, state, query_start, query
+FROM pg_stat_activity
+WHERE state != 'idle' ORDER BY query_start;               -- что выполняется прямо сейчас
+</code></pre>
+<p>Последний — первое, что смотрят, когда «база тормозит». Подробнее про диагностику и блокировки — в <a href="../lessons/2-10.html">2.10 Транзакции</a>.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>SELECT * — не для рабочего кода</summary><div class="callout-body"><p>В консоли <code>SELECT *</code> удобен. В коде приложения — нет: он тянет лишние данные по сети, ломается при добавлении столбца в таблицу и мешает базе использовать покрывающие индексы. Правило простое: в консоли можно, в коде перечисляй столбцы явно.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Порядок частей запроса — <code>SELECT</code> → <code>FROM</code> → <code>WHERE</code> → <code>ORDER BY</code>, даже если реально база выполняет их в другом порядке внутри.</li>
+<li><code>BETWEEN a AND b</code> включает обе границы.</li>
+<li><code>DISTINCT</code> убирает дубликаты строк результата — как <code>set()</code> в Python.</li>
+<li>Подзапрос можно поставить и в <code>SELECT</code> (вычислить одно значение), и в <code>FROM</code> (построить временную таблицу) — у подзапроса в <code>FROM</code> обязателен алиас.</li>
+<li><code>CASE WHEN ... THEN ... ELSE ... END</code> — это <code>if/elif/else</code> языка SQL.</li>
+<li>Порядок выполнения: <code>FROM</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>HAVING</code> → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. Псевдоним из <code>SELECT</code> доступен в <code>ORDER BY</code>, но не в <code>WHERE</code>.</li>
+<li><strong><code>NULL</code> — отсутствие значения, а не значение.</strong> Только <code>IS NULL</code> / <code>IS NOT NULL</code>; <code>= NULL</code> молча вернёт пустоту. <code>COALESCE</code> подставляет значение по умолчанию.</li>
+<li><code>NOT IN</code> с <code>NULL</code> в списке всегда возвращает ноль строк — используй <code>NOT EXISTS</code>.</li>
+<li><code>LIKE '%текст%'</code> не может использовать индекс; <code>LIKE 'текст%'</code> — может.</li>
+<li><code>LIMIT</code> без <code>ORDER BY</code> не гарантирует ничего; большие <code>OFFSET</code> медленные.</li>
+<li><code>psql</code>: <code>\dt</code> таблицы, <code>\d имя</code> структура, <code>\x</code> вертикальный вывод, <code>-At -c</code> для скриптов. <code>pg_stat_activity</code> — что выполняется прямо сейчас.</li>
+<li><code>SELECT *</code> — только в консоли, в коде перечисляй столбцы.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 1 (PostgreSQL в Docker с учебной базой) — база для приложения в <a href="../projects/p1.html">P1</a>: каркас <code>shop-api</code> использует ту же схему.</li>
+</ul>
+</div></details><article class="task" data-task="c7b0204871"><h3>Задание 1 — база в Docker</h3><p>Подними PostgreSQL в контейнере с томом для данных, создай базу <code>shop</code> и загрузи в неё <code>_assets/sql/shop.sql</code>.<br />
+<strong>Проверка:</strong> <code>docker compose down &amp;&amp; docker compose up -d</code> — данные на месте; <code>\dt</code> в psql показывает пять таблиц.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c7b0204871"> Сделала руками и проверила</label></article><article class="task" data-task="95dfe32e72"><h3>Задание 2 — базовые выборки</h3><p>Напиши запросы: покупатели с подпиской старше 25 лет по алфавиту; магазины с рейтингом от 4 до 5 через <code>BETWEEN</code>; уникальные идентификаторы покупателей, открывавших витрины с 3 по 6 марта; товары, в названии которых есть «кабель», дешевле 500 рублей.<br />
+<strong>Проверка:</strong> каждый запрос проверен на ожидаемое число строк, сортировка явная.</p>
+<label class="task-done"><input type="checkbox" data-task-check="95dfe32e72"> Сделала руками и проверила</label></article><article class="task" data-task="c1afc131f2"><h3>Задание 3 — CASE и вычисляемые столбцы</h3><p>Выведи покупателей с колонкой <code>segment</code>: «подписчик» для <code>premium</code>, «постоянный» для тех, у кого больше одной покупки (через подзапрос), «новичок» для остальных; и строку вида «Анна из Москвы, 27 лет».<br />
+<strong>Проверка:</strong> покупатели без города или возраста не теряются и не дают пустых строк — используй <code>COALESCE</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c1afc131f2"> Сделала руками и проверила</label></article><article class="task" data-task="a989aa6033"><h3>Задание 4 — ловушки NULL</h3><p>В базе уже есть покупатель без города. Сравни результаты <code>WHERE city = NULL</code>, <code>WHERE city IS NULL</code> и <code>WHERE city &lt;&gt; 'Москва'</code>.<br />
+<strong>Проверка:</strong> объясняешь, почему первый запрос пуст, а третий не включает покупателя без города.</p>
+<label class="task-done"><input type="checkbox" data-task-check="a989aa6033"> Сделала руками и проверила</label></article><article class="task" data-task="342d3729e3"><h3>Задание 5 — постраничный вывод</h3><p>Выведи каталог товаров по 5 позиций на страницу, третья страница, с сортировкой по цене и названию.<br />
+<strong>Проверка:</strong> при одинаковых ценах порядок стабилен между запусками.</p>
+<label class="task-done"><input type="checkbox" data-task-check="342d3729e3"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-1.html">2.1 Python</a> — <code>set()</code>, <code>if/elif</code>, <code>${VAR:-default}</code> как аналоги</li>
+<li><a href="../lessons/2-7.html">2.7 Соединения</a> — соединение таблиц</li>
+<li><a href="../lessons/2-8.html">2.8 Индексы</a> — почему <code>LIKE '%...'</code> медленный</li>
+<li><a href="../lessons/2-10.html">2.10 Транзакции</a> — диагностика блокировок</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация PostgreSQL: https://www.postgresql.org/docs/current/</li>
+<li>Документация PostgreSQL, раздел про NULL: https://www.postgresql.org/docs/current/functions-comparison.html</li>
+<li>Справочник по psql: https://www.postgresql.org/docs/current/app-psql.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-5.html">← 2.5 Бэкенд-сервис на Python</a><a class="lesson-jump" href="2-7.html">2.7 SQL: соединения и множества →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-6", "number": "2.6", "title": "SQL: первые запросы", "steps": [{"id": "intro", "kind": "theory"}, {"id": "x-1", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["c7b0204871", "95dfe32e72", "c1afc131f2", "a989aa6033", "342d3729e3"], "quiz": [{"id": "fdc90422e7", "q": "Почему запрос <code>SELECT * FROM customer WHERE city = NULL<\/code> всегда возвращает пустой результат?", "options": ["Нет покупателей без города", "Сравнение с NULL даёт unknown, а не true; проверять нужно через <code>IS NULL<\/code>", "NULL нельзя хранить в текстовых столбцах", "Нужно писать <code>== NULL<\/code>"], "answer": [1], "why": "<p>в SQL трёхзначная логика. <code>WHERE<\/code> пропускает только строки, где условие истинно.<\/p>\n"}, {"id": "82316baef4", "q": "В каком порядке база выполняет части запроса?", "options": ["SELECT → FROM → WHERE → ORDER BY", "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT", "WHERE → FROM → SELECT → LIMIT", "В том порядке, в котором написано"], "answer": [1], "why": "<p>поэтому псевдоним из SELECT нельзя использовать в WHERE, но можно в ORDER BY.<\/p>\n"}, {"id": "ff28f0d0f1", "q": "Что вернёт <code>BETWEEN 3 AND 5<\/code> для значения 5?", "options": ["Попадёт в результат: обе границы включены", "Не попадёт: верхняя граница исключена", "Ошибку", "Зависит от базы"], "answer": [0], "why": "<p><code>BETWEEN a AND b<\/code> — то же самое, что <code>&gt;= a AND &lt;= b<\/code>.<\/p>\n"}, {"id": "6838a27278", "q": "Почему <code>NOT IN (подзапрос)<\/code> опасен?", "options": ["Он медленнее <code>IN<\/code>", "Если подзапрос вернёт хотя бы один NULL, результат будет пустым", "Он не работает с числами", "Его нельзя комбинировать с WHERE"], "answer": [1], "why": "<p><code>id != NULL<\/code> даёт unknown, и всё условие перестаёт быть истинным. Безопасная замена — <code>NOT EXISTS<\/code>.<\/p>\n"}, {"id": "1782cb4acf", "q": "Какой шаблон LIKE может использовать обычный индекс?", "options": ["<code>'Умн%'<\/code>", "<code>'%кабель%'<\/code>", "<code>'%ов'<\/code>", "Ни один"], "answer": [0], "why": "<p>индекс ищет по началу строки. Шаблон с <code>%<\/code> в начале заставляет читать все строки.<\/p>\n"}, {"id": "98a8360d61", "q": "Что не так с запросом <code>SELECT * FROM product LIMIT 5<\/code> без ORDER BY?", "options": ["Он вернёт ошибку", "«Первые пять» могут быть разными при каждом запуске", "Он вернёт все строки", "Ничего"], "answer": [1], "why": "<p>база не обязана возвращать строки в каком-либо порядке без явной сортировки.<\/p>\n"}, {"id": "cf6abf27f5", "q": "Какая команда psql показывает структуру таблицы?", "options": ["<code>\\l<\/code>", "<code>\\dt<\/code>", "<code>\\d имя_таблицы<\/code>", "<code>\\du<\/code>"], "answer": [2], "why": "<p><code>\\l<\/code> — список баз, <code>\\dt<\/code> — список таблиц, <code>\\du<\/code> — пользователи.<\/p>\n"}], "cards": [{"id": "3b52a68e54", "q": "В каком порядке выполняются части SELECT?", "a": "<p>FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT/OFFSET. Поэтому псевдоним из SELECT нельзя использовать в WHERE, но можно в ORDER BY.<\/p>\n"}, {"id": "1f2507fb96", "q": "Почему <code>= NULL<\/code> не работает?", "a": "<p>NULL — отсутствие значения, сравнение с ним даёт неизвестность (<code>NULL<\/code>), а не истину. Проверяют через <code>IS NULL<\/code> / <code>IS NOT NULL<\/code>.<\/p>\n"}, {"id": "82a9689d35", "q": "Что не так с большим OFFSET?", "a": "<p>База всё равно читает и отбрасывает все пропущенные строки, страница 10 000 работает медленно. Для больших объёмов используют keyset-пагинацию: <code>WHERE id &gt; последний_id ORDER BY id LIMIT 20<\/code>.<\/p>\n"}, {"id": "5ea7e27471", "q": "Чем WHERE отличается от HAVING?", "a": "<p>WHERE фильтрует строки до группировки, HAVING — группы после агрегации.<\/p>\n"}, {"id": "c5b2337616", "q": "Как зайти в базу и посмотреть структуру таблицы?", "a": "<p><code>psql -h host -U user -d db<\/code>, затем <code>\\dt<\/code> — таблицы, <code>\\d table<\/code> — структура, <code>\\l<\/code> — базы, <code>\\du<\/code> — пользователи, <code>\\q<\/code> — выход.<\/p>\n"}, {"id": "6f00bba135", "q": "Чем LIKE отличается от ILIKE?", "a": "<p><code>ILIKE<\/code> — регистронезависимый вариант в PostgreSQL. <code>%<\/code> — любое число символов, <code>_<\/code> — ровно один. LIKE с <code>%<\/code> в начале шаблона не использует обычный индекс.<\/p>\n"}], "next": "2-7"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

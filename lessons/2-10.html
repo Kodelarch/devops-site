@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.10 SQL: транзакции и блокировки — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.10: SQL: транзакции и блокировки">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.10 · code</div>
+    <h1 class="lesson-title">SQL: транзакции и блокировки</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Транзакция и COMMIT</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">ACID — четыре гарантии транзакций</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Уровни изоляции: зачем их несколько</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Аномалия потери обновления (Lost Update)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Может ли REPEATABLE READ решить Lost Update?</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Аномалия неповторяющегося чтения (Non-Repeatable Read)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Как SERIALIZABLE защищает от Non-Repeatable Read</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Аномалия фантомного чтения (Phantom Read)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Phantom Read на REPEATABLE READ</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Deadlock — взаимная блокировка</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">SELECT FOR UPDATE — правильный способ избежать Lost Update</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">MVCC и VACUUM: почему база растёт</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Длинная транзакция — тихий убийца базы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Диагностика: кто кого блокирует</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Повторы при ошибке сериализации</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Пока за базой работает один человек, все предыдущие уроки работают безупречно. Но в реальности к одной базе одновременно обращаются сотни запросов — и тут начинаются гонки: два запроса читают и меняют одни и те же строки почти одновременно. Транзакции и уровни изоляции — это то, что не даёт данным испортиться в такой ситуации.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Транзакция</strong> — блок операций, который выполняется как единое целое: либо применяются все изменения (<code>COMMIT</code>), либо ни одно (<code>ROLLBACK</code>).</li>
+<li><strong>ACID</strong> — четыре гарантии транзакций: атомарность, согласованность, изолированность, устойчивость.</li>
+<li><strong>Уровень изоляции</strong> — правило, определяющее, что одна транзакция может «увидеть» из изменений другой параллельной транзакции, ещё не зафиксированной или уже зафиксированной.</li>
+<li><strong>Deadlock (взаимоблокировка)</strong> — ситуация, когда две транзакции блокируют друг друга навсегда, каждая ждёт ресурс, занятый другой.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Транзакция и COMMIT</h2><div class="prose"><p><em>Аналогия:</em> транзакция — как черновик письма: пока не нажал «отправить» (<code>COMMIT</code>), получатель ничего не видит, даже если ты уже написал весь текст. Нажал «отмена» (<code>ROLLBACK</code>) — письмо вообще не отправится, будто его не писали.</p>
+<pre><code class="language-sql">-- Session #1: снижаем цену видеокарты
+BEGIN;
+UPDATE product SET price = 49990 WHERE id = 3;
+SELECT price FROM product WHERE id = 3;   -- видит 49990, изменения ещё не зафиксированы
+
+-- Session #2 (параллельно, до COMMIT в Session #1)
+SELECT price FROM product WHERE id = 3;   -- всё ещё видит старую цену 54990
+
+-- Session #1
+COMMIT;
+
+-- Session #2 (после COMMIT)
+SELECT price FROM product WHERE id = 3;   -- теперь видит 49990
+</code></pre>
+<p>Изменения внутри транзакции видны самой этой транзакции сразу, но другим параллельным сессиям — только после <code>COMMIT</code>. Это базовое поведение, работающее одинаково на всех уровнях изоляции.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>ACID — четыре гарантии транзакций</h2><div class="prose"><p><em>Аналогия:</em> ACID — как правила безопасного перевода денег в банке: либо перевод проходит целиком (деньги списаны у одного и зачислены другому), либо не проходит вообще — никогда не бывает «списали, но не зачислили».</p>
+<ul>
+<li><strong>Atomicity (атомарность)</strong> — транзакция выполняется целиком или не выполняется вовсе.</li>
+<li><strong>Consistency (согласованность)</strong> — транзакция переводит базу из одного корректного состояния в другое, не нарушая ограничений (<code>CHECK</code>, <code>FOREIGN KEY</code> и т.д.).</li>
+<li><strong>Isolation (изолированность)</strong> — параллельные транзакции не мешают друг другу сильнее, чем позволяет выбранный уровень изоляции.</li>
+<li><strong>Durability (устойчивость)</strong> — после <code>COMMIT</code> изменения сохранятся даже при сбое питания сразу после этого.</li>
+</ul>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Уровни изоляции: зачем их несколько</h2><div class="prose"><p><em>Аналогия:</em> уровни изоляции — как разная степень приватности переговорной комнаты: от «дверь нараспашку, всем всё слышно» до «полная звукоизоляция», и каждый вариант — компромисс между скоростью и защитой от чужого влияния.</p>
+<p>PostgreSQL поддерживает три уровня (стандарт ANSI SQL описывает четыре, но <code>READ UNCOMMITTED</code> в PostgreSQL ведёт себя как <code>READ COMMITTED</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Уровень</th>
+<th>Защищает от Non-Repeatable Read</th>
+<th>Защищает от Phantom Read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>READ COMMITTED (по умолчанию)</td>
+<td>Нет</td>
+<td>Нет</td>
+</tr>
+<tr>
+<td>REPEATABLE READ</td>
+<td>Да</td>
+<td>В основном да (за счёт MVCC)</td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td>Да</td>
+<td>Да</td>
+</tr>
+</tbody>
+</table></div>
+<p>Более строгий уровень изоляции даёт больше гарантий, но может привести к ошибке сериализации (транзакцию приходится повторить), если конфликт всё же произошёл.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Аномалия потери обновления (Lost Update)</h2><div class="prose"><p><em>Аналогия:</em> два человека одновременно редактируют одну и ту же ячейку в старой офлайн-таблице без блокировок: оба читают исходное значение, оба вносят свою правку, и тот, кто сохранил вторым, полностью затирает правку первого — как будто её никогда и не было.</p>
+<p>В магазине это выглядит так: на складе 5 видеокарт, два покупателя оформляют заказ одновременно. Код приложения читает остаток, вычитает единицу и записывает результат.</p>
+<pre><code class="language-sql">-- Session #1 (READ COMMITTED)            -- Session #2 (READ COMMITTED)
+BEGIN;                                     BEGIN;
+SELECT stock FROM product WHERE id = 3;    SELECT stock FROM product WHERE id = 3;
+-- видит 5                                 -- видит 5
+                                           UPDATE product SET stock = 4 WHERE id = 3;
+                                           COMMIT;
+UPDATE product SET stock = 4 WHERE id = 3;
+COMMIT;
+-- Итог: stock = 4, хотя продано две видеокарты
+</code></pre>
+<p>Обе транзакции читают одно и то же исходное значение, и более поздний <code>COMMIT</code> полностью перезаписывает результат более ранней транзакции — правка <code>Session #2</code> теряется, хотя формально обе транзакции завершились успешно. На складе по данным базы 4 видеокарты, а на полке 3: через неделю кто-то оплатит товар, которого нет.</p>
+
+<figure class="explain" data-anim="lost-update"><figcaption><span class="explain-tag">▶ схема</span>Две покупки последнего товара: без блокировки и с FOR UPDATE</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Может ли REPEATABLE READ решить Lost Update?</h2><div class="prose"><p><em>Аналогия:</em> более строгий уровень не «магически чинит» конфликт — вместо тихой потери данных он честно говорит «извини, попробуй ещё раз».</p>
+<pre><code class="language-sql">-- Session #1 (REPEATABLE READ)           -- Session #2 (REPEATABLE READ)
+BEGIN;                                     BEGIN;
+SELECT stock FROM product WHERE id = 3;    SELECT stock FROM product WHERE id = 3;
+                                           UPDATE product SET stock = 4 WHERE id = 3;
+                                           COMMIT;
+UPDATE product SET stock = 4 WHERE id = 3;
+-- ERROR: could not serialize access due to concurrent update
+</code></pre>
+<p>На <code>REPEATABLE READ</code> PostgreSQL обнаруживает конфликт и завершает вторую транзакцию с ошибкой сериализации вместо молчаливой потери данных — приложение обязано перезапустить транзакцию заново.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Аномалия неповторяющегося чтения (Non-Repeatable Read)</h2><div class="prose"><p><em>Аналогия:</em> дважды посмотреть на одно и то же табло за время одного разговора — и увидеть разные цифры, потому что кто-то другой успел его переписать между двумя твоими взглядами.</p>
+<pre><code class="language-sql">-- Session #1 (READ COMMITTED)            -- Session #2
+BEGIN;
+SELECT price FROM product WHERE id = 1;    -- видит 7490
+                                           UPDATE product SET price = 6990 WHERE id = 1;
+                                           COMMIT;
+SELECT price FROM product WHERE id = 1;    -- видит уже 6990 — в той же транзакции!
+COMMIT;
+</code></pre>
+<p>На <code>READ COMMITTED</code> каждый отдельный <code>SELECT</code> видит последние зафиксированные данные — даже внутри одной незавершённой транзакции повторный запрос может вернуть другое значение. Для отчёта это опасно: первая строка отчёта посчитана по одной цене, последняя — по другой.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Как SERIALIZABLE защищает от Non-Repeatable Read</h2><div class="prose"><p><em>Аналогия:</em> сфотографировать табло в начале разговора — и весь разговор ссылаться только на эту фотографию, что бы ни происходило с настоящим табло за окном.</p>
+<pre><code class="language-sql">-- Session #1 (SERIALIZABLE)              -- Session #2
+BEGIN;
+SELECT price FROM product WHERE id = 1;    -- видит 7490
+                                           UPDATE product SET price = 6490 WHERE id = 1;
+                                           COMMIT;
+SELECT price FROM product WHERE id = 1;    -- всё ещё видит 7490 — снимок на начало транзакции
+COMMIT;
+</code></pre>
+<p>На <code>REPEATABLE READ</code> и <code>SERIALIZABLE</code> транзакция видит согласованный «снимок» данных на момент своего начала — чужие <code>COMMIT</code>, случившиеся после этого момента, для неё как будто не существуют, пока она не завершится.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Аномалия фантомного чтения (Phantom Read)</h2><div class="prose"><p><em>Аналогия:</em> пересчитать товары на полке дважды за одну инвентаризацию и получить разное число — потому что кто-то зашёл в комнату между двумя подсчётами, хотя ни один из уже посчитанных людей не менялся.</p>
+<pre><code class="language-sql">-- Session #1 (READ COMMITTED)            -- Session #2
+BEGIN;
+SELECT COUNT(*) FROM product
+WHERE store_id = 1;                        -- 3 товара
+                                           INSERT INTO product
+                                           VALUES (30, 1, 'SSD 2 ТБ', 12990, 10);
+                                           COMMIT;
+SELECT COUNT(*) FROM product
+WHERE store_id = 1;                        -- уже 4 — появился «фантом»
+COMMIT;
+</code></pre>
+<p>В отличие от Non-Repeatable Read (изменилось существующее значение), здесь появилась <strong>новая строка</strong>, которой не было при первом чтении — отсюда название «фантом».</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Phantom Read на REPEATABLE READ</h2><div class="prose"><p><em>Аналогия:</em> в PostgreSQL «снимок» данных на <code>REPEATABLE READ</code> фиксируется настолько строго, что новые строки, появившиеся после начала транзакции, для неё как будто ещё не существуют — в отличие от классического определения из стандарта SQL, где формально <code>REPEATABLE READ</code> не обязан защищать от фантомов.</p>
+<pre><code class="language-sql">-- Session #1 (REPEATABLE READ)           -- Session #2
+BEGIN;
+SELECT COUNT(*) FROM product
+WHERE store_id = 1;                        -- 3 товара
+                                           INSERT INTO product
+                                           VALUES (31, 1, 'Блок питания', 6490, 7);
+                                           COMMIT;
+SELECT COUNT(*) FROM product
+WHERE store_id = 1;                        -- всё ещё 3
+COMMIT;
+</code></pre>
+<p>Это особенность конкретной реализации PostgreSQL (через MVCC-снимок), а не универсальное правило ANSI SQL — в других СУБД <code>REPEATABLE READ</code> может вести себя иначе.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Deadlock — взаимная блокировка</h2><div class="prose"><p><em>Аналогия:</em> два человека в узком коридоре одновременно уступают друг другу дорогу, каждый шагает в сторону — и оба шагают в одну и ту же сторону одновременно, снова блокируя проход; в случае с базой данных это происходит с блокировками строк, а не с людьми, и без внешнего вмешательства длилось бы вечно.</p>
+<pre><code class="language-sql">-- Session #1: корзина «SSD + память»     -- Session #2: корзина «память + SSD»
+BEGIN;                                     BEGIN;
+UPDATE product SET stock = stock - 1       UPDATE product SET stock = stock - 1
+WHERE id = 1;                              WHERE id = 2;
+                                           UPDATE product SET stock = stock - 1
+                                           WHERE id = 1;  -- ждёт Session #1
+UPDATE product SET stock = stock - 1
+WHERE id = 2;      -- ждёт Session #2 → DEADLOCK
+</code></pre>
+<p>Каждая сессия удерживает блокировку одной строки и ждёт освобождения другой строки, заблокированной противоположной сессией — круговое ожидание. PostgreSQL периодически проверяет граф ожиданий и сам прерывает одну из транзакций с ошибкой <code>deadlock detected</code>, чтобы разорвать цикл — это не баг, а встроенный защитный механизм.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Как не получать deadlock</summary><div class="callout-body"><p>Правило то же, что для блокировок в Python (<a href="../lessons/2-3.html#s-9">2.3 Параллельность</a>, §9): <strong>всегда захватывать ресурсы в одном и том же порядке</strong>. Если бы обе сессии списывали товары из корзины в порядке возрастания <code>id</code>, взаимной блокировки не случилось бы вовсе — вторая просто подождала бы первую. В коде это одна строка: отсортировать товары корзины перед списанием.</p>
+<p>Второй приём — держать транзакции короткими: чем меньше времени удерживается блокировка, тем меньше шансов встретиться. И третий — приложение должно <strong>уметь повторить</strong> транзакцию, прерванную из-за deadlock, потому что полностью исключить их нельзя (см. §15).</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>SELECT FOR UPDATE — правильный способ избежать Lost Update</h2><div class="prose"><p><em>Аналогия:</em> взять документ со стола и сразу положить на него табличку «занято», а не надеяться, что за время работы никто другой его не тронет.</p>
+<p>В §4–5 показано, что потеря обновления либо происходит тихо (<code>READ COMMITTED</code>), либо превращается в ошибку (<code>REPEATABLE READ</code>). Есть третий путь, который используют чаще всего: <strong>заблокировать строку сразу при чтении</strong>.</p>
+<pre><code class="language-sql">BEGIN;
+SELECT stock FROM product WHERE id = 3 FOR UPDATE;   -- строка заблокирована
+-- вторая сессия на этой же строке будет ждать здесь
+-- приложение проверяет: stock &gt; 0? если нет — «товар закончился»
+UPDATE product SET stock = stock - 1 WHERE id = 3;
+COMMIT;                                              -- блокировка снята
+</code></pre>
+<p><code>FOR UPDATE</code> говорит: «я собираюсь менять эту строку, никого сюда не пускать до конца транзакции». Вторая сессия на том же <code>SELECT ... FOR UPDATE</code> не получит старое значение — она просто подождёт, а после снятия блокировки прочитает уже новое.</p>
+<p>Варианты, которые стоит знать:</p>
+<pre><code class="language-sql">SELECT ... FOR UPDATE NOWAIT;         -- не ждать, сразу вернуть ошибку
+SELECT ... FOR UPDATE SKIP LOCKED;     -- пропустить занятые строки и взять свободные
+SELECT ... FOR SHARE;                   -- запретить изменение, но разрешить такое же чтение
+</code></pre>
+<p><code>SKIP LOCKED</code> — основа простых очередей задач на базе: несколько обработчиков берут по задаче, не мешая друг другу и не дожидаясь чужих.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Что выбрать</summary><div class="callout-body"><p>Есть и четвёртый способ — вообще не читать значение заранее: <code>UPDATE product SET stock = stock - 1 WHERE id = 3 AND stock &gt; 0</code> атомарен сам по себе, потому что база вычисляет новое значение в момент изменения. Если обновилась ноль строк — товар закончился. Если логика позволяет обойтись так — это надёжнее и дешевле всего. <code>FOR UPDATE</code> нужен, когда между чтением и записью есть решение, которое надо принять в коде.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>MVCC и VACUUM: почему база растёт</h2><div class="prose"><p><em>Аналогия:</em> редактор, который при каждой правке не меняет страницу, а подшивает новую версию и зачёркивает старую. Папка толстеет, даже если текст остался прежним.</p>
+<p>То, что делает возможными «снимки» из §7, имеет обратную сторону. PostgreSQL при <code>UPDATE</code> <strong>не меняет строку на месте</strong> — он создаёт новую версию, а старую помечает мёртвой. При <code>DELETE</code> строка тоже не исчезает, а просто помечается.</p>
+<p>Старые версии нужны транзакциям, которые начались раньше и должны видеть прежнее состояние. Это и есть <strong>MVCC</strong> — многоверсионное управление конкурентным доступом, механизм, благодаря которому читающие не блокируют пишущих и наоборот.</p>
+<p>Убирает мусор <strong>VACUUM</strong>. Обычно этим занимается фоновый <code>autovacuum</code>, и вмешиваться не приходится. Полезные команды:</p>
+<pre><code class="language-sql">VACUUM ANALYZE orders;        -- убрать мусор и обновить статистику
+VACUUM FULL orders;            -- перестроить таблицу целиком, вернув место системе
+SELECT relname, n_dead_tup, last_autovacuum
+FROM pg_stat_user_tables ORDER BY n_dead_tup DESC;   -- где больше всего мусора
+</code></pre>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>VACUUM FULL блокирует таблицу целиком</summary><div class="callout-body"><p>Обычный <code>VACUUM</code> работает параллельно с нагрузкой и освобождает место <strong>внутри</strong> файлов таблицы для повторного использования. <code>VACUUM FULL</code> физически перестраивает таблицу и возвращает место операционной системе, но берёт исключительную блокировку: на время работы таблица недоступна ни на чтение, ни на запись. На большой таблице это часы простоя. В эксплуатации вместо него используют <code>pg_repack</code>, который делает то же самое без длительной блокировки.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Длинная транзакция — тихий убийца базы</h2><div class="prose"><p><em>Аналогия:</em> один человек не сдал ключ от общего архива и ушёл в отпуск. Никто не может разобрать старые документы, и хранилище переполняется — хотя сам он ничего плохого не делает.</p>
+<p>Самая недооценённая проблема из всего урока, и одна из самых частых реальных аварий.</p>
+<p>VACUUM может убрать только те мёртвые версии, которые <strong>не нужны ни одной активной транзакции</strong>. Если где-то открыта транзакция — пусть даже она ничего не делает, — её снимок удерживает все версии, появившиеся после её начала. По всей базе, а не только по её таблицам.</p>
+<p>Что происходит дальше: таблицы распухают мёртвыми версиями, запросы начинают читать больше данных и замедляются, диск заканчивается. Причём виновная транзакция может вообще не выполнять запросов — она просто открыта.</p>
+<pre><code class="language-sql">-- найти долгие транзакции
+SELECT pid, state, now() - xact_start AS transaction_age, query
+FROM pg_stat_activity
+WHERE state IN ('idle in transaction', 'active')
+  AND now() - xact_start &gt; interval '5 minutes'
+ORDER BY xact_start;
+</code></pre>
+<p>Состояние <strong><code>idle in transaction</code></strong> — главный подозреваемый: соединение открыло транзакцию и ничего не делает. Обычно это ошибка в приложении, где забыли <code>COMMIT</code> или не закрыли соединение при исключении.</p>
+<p>Защита на стороне базы — таймауты, которые стоит выставлять всегда:</p>
+<pre><code class="language-sql">ALTER SYSTEM SET idle_in_transaction_session_timeout = '5min';
+ALTER SYSTEM SET statement_timeout = '30s';
+</code></pre>
+<p>Первый обрывает соединения, забывшие закрыть транзакцию. Второй ограничивает время одного запроса, не давая случайному тяжёлому <code>SELECT</code> работать часами.</p>
+<p>Отсюда же правило проектирования: <strong>не держать транзакцию открытой во время обращения к внешним системам</strong>. Схема «начали транзакцию → пошли в стороннее API → ждём ответа 30 секунд → закоммитили» превращает чужую медлительность в проблему собственной базы.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Диагностика: кто кого блокирует</h2><div class="prose"><p><em>Аналогия:</em> пробка на дороге — сначала находят, где именно она начинается, и только потом разбираются почему.</p>
+<p>Три запроса, которые стоит держать наготове.</p>
+<p><strong>Что выполняется прямо сейчас:</strong></p>
+<pre><code class="language-sql">SELECT pid, state, wait_event_type, now() - query_start AS runtime, query
+FROM pg_stat_activity
+WHERE state != 'idle'
+ORDER BY runtime DESC;
+</code></pre>
+<p><strong>Кто кого блокирует</strong> — самый полезный из трёх:</p>
+<pre><code class="language-sql">SELECT pid, pg_blocking_pids(pid) AS blocked_by, query
+FROM pg_stat_activity
+WHERE cardinality(pg_blocking_pids(pid)) &gt; 0;
+</code></pre>
+<p>Функция <code>pg_blocking_pids</code> сразу выдаёт список процессов, которых ждёт данный. Раньше для этого писали громоздкие соединения с <code>pg_locks</code>; сейчас достаточно одной строки.</p>
+<p><strong>Убрать виновника:</strong></p>
+<pre><code class="language-sql">SELECT pg_cancel_backend(12345);      -- отменить текущий запрос, соединение остаётся
+SELECT pg_terminate_backend(12345);    -- оборвать соединение целиком, транзакция откатится
+</code></pre>
+<p>Сначала пробуют <code>cancel</code> — он мягче. <code>terminate</code> применяют, когда отмена не сработала или когда соединение висит в <code>idle in transaction</code>: там отменять нечего, запрос уже не выполняется.</p>
+<p>Дополнение к <a href="../lessons/2-8.html">2.8 Индексы</a>: именно этими запросами диагностируют ситуацию, когда кто-то запустил <code>CREATE INDEX</code> без <code>CONCURRENTLY</code> и все записи в таблицу встали.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Повторы при ошибке сериализации</h2><div class="prose"><p><em>Аналогия:</em> если система честно говорит «извини, попробуй ещё раз», кто-то должен эту попытку сделать. Пользователь для этой роли не годится.</p>
+<p>На уровнях <code>REPEATABLE READ</code> и <code>SERIALIZABLE</code> конфликт заканчивается ошибкой (§5), и это <strong>штатное поведение, а не сбой</strong>. Но оно означает, что приложение обязано уметь повторить транзакцию целиком:</p>
+<pre><code class="language-python">from psycopg import errors
+
+def with_retry(operation, attempts=3):
+    for attempt in range(attempts):
+        try:
+            return operation()
+        except errors.SerializationFailure:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(0.1 * (2 ** attempt) + random.uniform(0, 0.1))
+</code></pre>
+<p>Это ровно та же механика повторов с экспоненциальной задержкой и джиттером, что разбиралась в <a href="../lessons/2-3.html#s-11">2.3 Параллельность</a>, §11. Отличие в том, что повторять надо <strong>всю транзакцию с начала</strong>, а не последний запрос: снимок данных был отброшен вместе с ней.</p>
+<p>То же относится и к <code>deadlock detected</code> из §10 — прерванную транзакцию надо повторить.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Что нельзя делать внутри повторяемой транзакции</summary><div class="callout-body"><p>Если транзакция может быть перезапущена, внутри неё не должно быть необратимых побочных действий: отправки письма, списания денег во внешней системе, записи в файл. Иначе при повторе они выполнятся дважды. Такие действия выносят за пределы транзакции или делают идемпотентными — понятие, которое уже встречалось в <a href="../lessons/1-3.html#s-14">1.3 Bash</a>, §14.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Изменения видны только внутри своей транзакции, пока не случился COMMIT — другие сессии ждут его.</li>
+<li>ACID — Atomicity, Consistency, Isolation, Durability: четыре гарантии, которые обеспечивает СУБД.</li>
+<li>Более строгий уровень изоляции не устраняет конфликты полностью — он превращает тихую потерю данных в явную ошибку сериализации.</li>
+<li>Lost Update — правка одной транзакции незаметно затирается другой; Non-Repeatable Read — одно и то же значение меняется между двумя чтениями; Phantom Read — появляется новая строка между двумя чтениями.</li>
+<li>REPEATABLE READ и SERIALIZABLE в PostgreSQL используют «снимок» данных на момент начала транзакции — чужие изменения после этого момента не видны до конца транзакции.</li>
+<li>Deadlock — круговое ожидание блокировок; PostgreSQL сам обнаруживает его и прерывает одну из транзакций. Профилактика — единый порядок захвата и короткие транзакции.</li>
+<li><code>SELECT ... FOR UPDATE</code> блокирует строку при чтении — самый практичный способ избежать потери обновления. <code>SKIP LOCKED</code> — основа очередей задач.</li>
+<li><strong>MVCC</strong>: <code>UPDATE</code> создаёт новую версию строки, старую помечает мёртвой. Убирает мусор <code>VACUUM</code>; <code>VACUUM FULL</code> блокирует таблицу целиком — в проде вместо него <code>pg_repack</code>.</li>
+<li><strong>Одна забытая открытая транзакция останавливает VACUUM по всей базе</strong> — таблицы распухают, запросы замедляются, диск кончается. Ищи состояние <code>idle in transaction</code>.</li>
+<li>Всегда выставляй <code>statement_timeout</code> и <code>idle_in_transaction_session_timeout</code>. Не держи транзакцию открытой во время обращения к внешним системам.</li>
+<li>Диагностика: <code>pg_stat_activity</code> — что выполняется, <code>pg_blocking_pids()</code> — кто кого блокирует, <code>pg_cancel_backend</code> / <code>pg_terminate_backend</code> — убрать.</li>
+<li>Ошибка сериализации и deadlock — штатное поведение: приложение обязано повторить <strong>всю транзакцию</strong> с экспоненциальной задержкой. Внутри повторяемой транзакции не должно быть необратимых побочных действий.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 2 (потерянное обновление остатков) — ровно та гонка, от которой защищает оформление заказа в <code>shop-api</code>. В каркасе <a href="../projects/p1.html">P1</a> она решена атомарным <code>UPDATE</code>; объясни это в README.</li>
+</ul>
+</div></details><article class="task" data-task="a15be2d202"><h3>Задание 1 — уровни изоляции в двух сессиях</h3><p>Открой два psql. Воспроизведи non-repeatable read на READ COMMITTED и убедись, что на REPEATABLE READ его нет.<br />
+<strong>Проверка:</strong> записана пошаговая таблица «сессия 1 / сессия 2» с результатами каждого шага.</p>
+<label class="task-done"><input type="checkbox" data-task-check="a15be2d202"> Сделала руками и проверила</label></article><article class="task" data-task="ce6a4dbd95"><h3>Задание 2 — потерянное обновление</h3><p>Воспроизведи lost update при списании остатка товара двумя сессиями. Исправь тремя способами: атомарный <code>UPDATE ... SET stock = stock - 1</code>, <code>SELECT ... FOR UPDATE</code>, уровень SERIALIZABLE с повтором.<br />
+<strong>Проверка:</strong> во всех трёх вариантах итоговый остаток правильный.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ce6a4dbd95"> Сделала руками и проверила</label></article><article class="task" data-task="1c8b421487"><h3>Задание 3 — deadlock</h3><p>Получи deadlock, обновляя две строки в разном порядке из двух сессий.<br />
+<strong>Проверка:</strong> PostgreSQL убивает одну транзакцию с ошибкой <code>deadlock detected</code>; исправленная версия с единым порядком обновления deadlock не даёт.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1c8b421487"> Сделала руками и проверила</label></article><article class="task" data-task="c24d3fa63b"><h3>Задание 4 — кто кого блокирует</h3><p>Оставь в одной сессии открытую транзакцию с UPDATE, в другой попробуй обновить ту же строку. Найди блокирующий процесс через <code>pg_stat_activity</code> и <code>pg_blocking_pids()</code>.<br />
+<strong>Проверка:</strong> запрос показывает PID, текст запроса и длительность блокирующей транзакции; <code>pg_terminate_backend</code> снимает блокировку.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c24d3fa63b"> Сделала руками и проверила</label></article><article class="task" data-task="654b53db55"><h3>Задание 5 — рост таблицы</h3><p>Обнови все строки большой таблицы три раза подряд и посмотри размер (<code>pg_total_relation_size</code>) до и после <code>VACUUM</code>.<br />
+<strong>Проверка:</strong> объясняешь через MVCC, почему таблица выросла и почему обычный VACUUM не вернул место операционной системе.</p>
+<label class="task-done"><input type="checkbox" data-task-check="654b53db55"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-8.html">2.8 Индексы</a> — блокировка при <code>CREATE INDEX</code>, диагностируемая теми же запросами</li>
+<li><a href="../lessons/2-9.html">2.9 Агрегация</a> — агрегация</li>
+<li><a href="../lessons/2-11.html">2.11 Продвинутый SQL</a> — оконные функции</li>
+<li><a href="../lessons/2-3.html">2.3 Параллельность</a> — гонки и повторы в коде приложения</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — что мониторить у базы в эксплуатации</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация PostgreSQL, изоляция транзакций: https://www.postgresql.org/docs/current/transaction-iso.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-9.html">← 2.9 SQL: агрегация</a><a class="lesson-jump" href="2-11.html">2.11 Продвинутый SQL и эксплуатация базы →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-10", "number": "2.10", "title": "SQL: транзакции и блокировки", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["a15be2d202", "ce6a4dbd95", "1c8b421487", "c24d3fa63b", "654b53db55"], "quiz": [{"id": "6b6e0f2471", "q": "Что гарантирует атомарность (буква A в ACID)?", "options": ["Что транзакции выполняются по одной", "Что транзакция выполняется целиком или не выполняется вовсе", "Что данные хранятся на диске", "Что транзакции не видят друг друга"], "answer": [1], "why": "<p>«списали, но не зачислили» не бывает: при сбое изменения откатываются полностью.<\/p>\n"}, {"id": "468d5586dd", "q": "Два покупателя одновременно купили последнюю видеокарту: обе сессии прочитали stock = 1 и записали 0. Как называется эта аномалия?", "options": ["Phantom read", "Dirty read", "Lost update", "Deadlock"], "answer": [2], "why": "<p>более позднее изменение затёрло более раннее, хотя обе транзакции завершились «успешно».<\/p>\n"}, {"id": "18df02f857", "q": "Какие способы защищают от потерянного обновления? Выбери все.", "options": ["Атомарный <code>UPDATE ... SET stock = stock - 1 WHERE stock &gt; 0<\/code>", "<code>SELECT ... FOR UPDATE<\/code> перед изменением", "Уровень SERIALIZABLE с повтором транзакции при ошибке", "Уровень READ COMMITTED без изменений в коде"], "answer": [0, 1, 2], "why": "<p>на READ COMMITTED обновление теряется тихо — именно с этого всё и началось.<\/p>\n"}, {"id": "c8cb5939e0", "q": "Какой уровень изоляции в PostgreSQL используется по умолчанию?", "options": ["READ UNCOMMITTED", "READ COMMITTED", "REPEATABLE READ", "SERIALIZABLE"], "answer": [1], "why": "<p>на нём каждый SELECT видит последние зафиксированные данные, поэтому возможно неповторяющееся чтение.<\/p>\n"}, {"id": "ff57799033", "q": "Как уменьшить вероятность deadlock?", "options": ["Увеличить число подключений", "Захватывать строки во всех транзакциях в одном и том же порядке и держать транзакции короткими", "Отключить индексы", "Использовать только SELECT"], "answer": [1], "why": "<p>взаимная блокировка возникает, когда двое ждут друг друга по кругу. Единый порядок этот круг разрывает.<\/p>\n"}, {"id": "9cdfd28bf7", "q": "Чем опасна транзакция, которую открыли и забыли (<code>idle in transaction<\/code>)?", "options": ["Ничем", "Она держит блокировки и мешает VACUUM чистить старые версии строк — таблицы раздуваются", "Она удаляет данные", "Она занимает всю оперативную память"], "answer": [1], "why": "<p>из-за MVCC база не может удалить версии строк, которые теоретически ещё видны этой транзакции.<\/p>\n"}, {"id": "ab0b71a90b", "q": "Что делать приложению, если транзакция на уровне SERIALIZABLE упала с ошибкой сериализации?", "options": ["Показать пользователю ошибку и ничего не делать", "Повторить транзакцию целиком", "Перейти на READ UNCOMMITTED", "Перезапустить базу"], "answer": [1], "why": "<p>на строгом уровне это штатная ситуация, а не авария. Код обязан уметь повторять.<\/p>\n"}], "cards": [{"id": "1f1ff44232", "q": "Что такое ACID?", "a": "<p>Atomicity — транзакция выполняется целиком или никак; Consistency — база переходит из одного корректного состояния в другое; Isolation — параллельные транзакции не мешают друг другу; Durability — подтверждённые изменения переживают сбой.<\/p>\n"}, {"id": "45326c4b3b", "q": "Какие уровни изоляции есть и какой по умолчанию в PostgreSQL?", "a": "<p>READ UNCOMMITTED (в PostgreSQL работает как READ COMMITTED), READ COMMITTED (по умолчанию), REPEATABLE READ, SERIALIZABLE. Чем выше уровень, тем меньше аномалий и больше конфликтов.<\/p>\n"}, {"id": "0bbbc5fb3c", "q": "Что такое MVCC?", "a": "<p>Многоверсионность: при изменении строки создаётся новая версия, старая остаётся видимой транзакциям, которые начались раньше. Читатели не блокируют писателей. Старые версии убирает VACUUM.<\/p>\n"}, {"id": "0370209cfa", "q": "Чем опасна долгая транзакция?", "a": "<p>Держит блокировки, мешает VACUUM удалять старые версии строк — таблицы и индексы раздуваются, производительность падает. Особенно опасно состояние <code>idle in transaction<\/code>.<\/p>\n"}, {"id": "d10354fce5", "q": "Как избежать deadlock?", "a": "<p>Захватывать блокировки в одном порядке, держать транзакции короткими, при ошибке повторять транзакцию.<\/p>\n"}, {"id": "59b3ac7653", "q": "Что делать при ошибке сериализации?", "a": "<p>Повторить транзакцию целиком — на уровне SERIALIZABLE это штатная ситуация, и приложение обязано уметь повторять.<\/p>\n"}], "next": "2-11"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

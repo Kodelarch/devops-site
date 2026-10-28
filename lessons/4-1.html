@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.1 Docker Compose и Swarm — DevOps-маршрут</title>
+<meta name="description" content="Урок 4.1: Docker Compose и Swarm">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c4)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-4">← 4. Облако и IaC</a>
+    <div class="sidebar-art"><svg class="art art-cloud" viewBox="0 0 240 140" role="img" aria-label="Облако и серверы" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M84 58 C66 58 62 38 80 34 C82 16 108 12 118 26 C128 10 158 14 160 34 C180 34 184 58 164 58 Z"/>
+<path class="flow" d="M122 60 V76 M122 76 H58 V88 M122 76 V88 M122 76 H186 V88"/>
+<g class="srv v1"><rect x="38" y="90" width="40" height="28" rx="4"/><circle class="led l1" cx="70" cy="104" r="2.4"/><path class="dim" d="M45 104 H60"/></g>
+<g class="srv v2"><rect x="102" y="90" width="40" height="28" rx="4"/><circle class="led l2" cx="134" cy="104" r="2.4"/><path class="dim" d="M109 104 H124"/></g>
+<g class="srv v3"><rect x="166" y="90" width="40" height="28" rx="4"/><circle class="led l3" cx="198" cy="104" r="2.4"/><path class="dim" d="M173 104 H188"/></g>
+<text class="lbl" x="18" y="134">terraform apply</text>
+</svg></div>
+    <div class="lesson-number">lesson 4.1 · infra</div>
+    <h1 class="lesson-title">Docker Compose и Swarm</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Правило «1 микросервис — 1 контейнер»</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Docker Compose для нескольких сервисов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Vagrant: виртуальные машины из кода</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Кластер и узлы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Docker Swarm: инициализация и присоединение узлов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Docker Hub: публикация и переиспользование образов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Стек в Docker Swarm: docker stack deploy</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Оверлейная сеть: скрываем внутренние сервисы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Распределение задач по узлам</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Portainer: визуализация кластера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Ограничение ресурсов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Порядок запуска: depends_on и healthcheck</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Одна конфигурация на все окружения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Swarm или Kubernetes</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>До сих пор мы запускали один контейнер за раз. Реальные приложения почти всегда состоят из нескольких сервисов, работающих вместе, а сами сервисы — распределены по разным машинам. Этот урок — мост от «одного контейнера на одном компьютере» к «кластеру машин, слаженно запускающих множество связанных сервисов».</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Микросервис</strong> — маленький независимый сервис, отвечающий ровно за одну зону ответственности приложения.</li>
+<li><strong>Узел (node)</strong> — отдельная машина (реальная или виртуальная), включённая в кластер.</li>
+<li><strong>Кластер</strong> — объединение узлов в единую сеть с распределённой между ними нагрузкой.</li>
+<li><strong>Оркестратор</strong> — программа, которая запускает и управляет контейнерами на множестве узлов кластера как единым целым (например, Docker Swarm).</li>
+<li><strong>Оверлейная сеть (overlay network)</strong> — виртуальная сеть, объединяющая контейнеры на разных физических узлах так, будто они в одной локальной сети.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Правило «1 микросервис — 1 контейнер»</h2><div class="prose"><p><em>Аналогия:</em> можно засунуть всех сотрудников компании в один огромный кабинет, но по факту это разрушает всю пользу от разделения на отделы — они просто физически смешаются, и уволить/заменить одного станет так же сложно, как всю компанию.</p>
+<p>Формально ничего не мешает засунуть все сервисы приложения в один контейнер — но это разрушает принципы SOLID и чистой архитектуры: становится практически невозможно развернуть новую версию одного отдельного микросервиса, не трогая остальные. Основное правило контейнеризации микросервисных приложений: <strong>один контейнер — один микросервис</strong>, ни больше, ни меньше.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Docker Compose для нескольких сервисов</h2><div class="prose"><p><em>Аналогия:</em> Docker Compose — дирижёр маленького оркестра: он не играет сам, но знает, кто, когда и в каком порядке должен вступить, и как инструменты должны звучать вместе.</p>
+<pre><code class="language-yaml">services:
+  proxy:
+    image: nginx:1.27-alpine
+    ports:
+      - &quot;8080:80&quot;
+  api:
+    build: ./api                 # API магазина из урока 2.5
+  worker:
+    build: ./worker              # фоновые задачи: письма о заказах, пересчёт отчётов
+  db:
+    image: postgres:17
+    # ни у кого, кроме proxy, нет ports — снаружи сервисы недоступны
+</code></pre>
+<p>Сервисы, объявленные в одном <code>compose.yaml</code>, автоматически попадают в общую сеть и видят друг друга по имени сервиса (<code>proxy</code> обращается к <code>api</code> по адресу <code>http://api:8000</code>, <code>api</code> — к базе по адресу <code>db:5432</code>). Наружу (на локальную машину) пробрасывают порты только тех сервисов, к которым реально должен обращаться внешний клиент (здесь — только <code>proxy</code>), а внутренние сервисы вроде <code>api</code>, <code>worker</code> и <code>db</code> остаются недоступны напрямую. Полная версия этого файла с томами и переменными — в <a href="../lessons/3-1.html#s-11">3.1 Docker</a>, §11.</p>
+
+<figure class="explain" data-anim="compose-network"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: как запрос ходит между контейнерами</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Vagrant: виртуальные машины из кода</h2><div class="prose"><p><em>Аналогия:</em> Vagrant — как рецепт для 3D-принтера: вместо того чтобы вручную настраивать виртуальную машину через графический интерфейс, ты один раз описываешь её параметры в файле, и дальше она печатается (создаётся) по команде за секунды, одинаково, сколько угодно раз.</p>
+<pre><code class="language-ruby">Vagrant.configure(&quot;2&quot;) do |config|
+  config.vm.box = &quot;ubuntu/jammy64&quot;
+  config.vm.hostname = &quot;node01&quot;
+  config.vm.network &quot;private_network&quot;, ip: &quot;192.168.56.10&quot;
+  config.vm.synced_folder &quot;./src&quot;, &quot;/home/vagrant/app&quot;
+end
+</code></pre>
+<pre><code class="language-bash">vagrant up       # создать и запустить виртуальную машину по конфигурации
+vagrant ssh      # зайти внутрь по SSH
+vagrant halt     # остановить
+vagrant destroy  # полностью уничтожить машину
+</code></pre>
+<p><code>synced_folder</code> автоматически «пробрасывает» папку с хоста внутрь виртуальной машины — исходный код оказывается доступен внутри VM без ручного копирования. Одним и тем же <code>Vagrantfile</code> можно поднять хоть одну машину, хоть десяток одинаковых — Vagrant создаёт их по описанию, а не вручную через интерфейс гипервизора.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Кластер и узлы</h2><div class="prose"><p><em>Аналогия:</em> если один компьютер — это один работник, то кластер — это целый цех работников, которые вместе выполняют один большой заказ, а не соревнуются друг с другом.</p>
+<p>Узел (node) — это отдельная машина (виртуальная или реальная), включённая в кластер. Узлы делятся на роли:</p>
+<ul>
+<li><strong>manager</strong> — управляет кластером, решает, какой узел получит какую задачу;</li>
+<li><strong>worker</strong> — исполняет задачи (запускает контейнеры), но сам не принимает решений об их распределении.</li>
+</ul>
+<p>Кластер как таковой не привязан к тому, находятся ли все узлы физически на одной машине — реальные распределённые системы почти всегда работают на узлах, разбросанных по разным серверам или даже дата-центрам.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Docker Swarm: инициализация и присоединение узлов</h2><div class="prose"><p><em>Аналогия:</em> Docker Swarm — простой прораб на стройке: собирает бригаду (worker-узлы) вокруг одного руководителя (manager), и дальше просто раздаёт задания, не требуя от рабочих знать полный план стройки целиком.</p>
+<pre><code class="language-bash"># на будущем manager-узле:
+docker swarm init --advertise-addr 192.168.56.10
+# команда выведет токен присоединения для worker-узлов
+
+# на каждом worker-узле:
+docker swarm join --token &lt;TOKEN&gt; 192.168.56.10:2377
+</code></pre>
+<p><code>docker swarm init</code> превращает обычный Docker-хост в manager нового кластера и генерирует токен, необходимый другим узлам, чтобы присоединиться именно к этому кластеру (а не к случайному). Docker Swarm — один из самых простых оркестраторов «из коробки», не требующий отдельной установки поверх Docker.</p>
+<p><img loading="lazy" src="../assets/diagrams/do7-swarm.webp" alt="" /></p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Docker Hub: публикация и переиспользование образов</h2><div class="prose"><p><em>Аналогия:</em> Docker Hub — как общедоступная библиотека: вместо того чтобы возить с собой физическую копию книги (образа) на каждый узел кластера, ты кладёшь её в библиотеку один раз, а каждый узел сам берёт нужную копию оттуда, когда она понадобится.</p>
+<pre><code class="language-bash">docker tag shop-api:latest username/shop-api:1.0
+docker push username/shop-api:1.0
+</code></pre>
+<pre><code class="language-yaml">services:
+  api:
+    image: username/shop-api:1.0    # вместо build: ./api — тянем готовый образ из реестра
+</code></pre>
+<p>В контексте кластера образы обычно не собираются заново на каждом узле (это было бы медленно и неудобно) — их один раз собирают, публикуют в реестр (Docker Hub или приватный аналог), а <code>docker-compose.yml</code> для кластера ссылается на <code>image:</code>, а не на <code>build:</code>.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Стек в Docker Swarm: docker stack deploy</h2><div class="prose"><p><em>Аналогия:</em> если обычный <code>docker compose up</code> — это запустить оркестр в одном зале, то <code>docker stack deploy</code> — это запустить тот же оркестр, но распределённый по нескольким залам сразу, с одним и тем же дирижёрским планом (тем же файлом).</p>
+<pre><code class="language-bash">docker stack deploy -c compose.yaml shop
+docker stack services shop      # список сервисов стека
+docker service ps shop_api      # на каком узле выполняется конкретный сервис
+</code></pre>
+<p>Формат <code>compose.yaml</code> для Swarm практически идентичен обычному Compose-файлу (с некоторыми ограничениями и дополнениями вроде <code>deploy:</code>) — это осознанное решение: тот же самый навык описания сервисов работает что на одной машине, что на целом кластере.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Оверлейная сеть: скрываем внутренние сервисы</h2><div class="prose"><p><em>Аналогия:</em> оверлейная сеть — это отдельная защищённая линия связи между филиалами компании, разбросанными по разным городам: физически они далеко, но по этой линии общаются так, будто сидят в соседних кабинетах одного здания.</p>
+<pre><code class="language-yaml">services:
+  proxy:
+    image: nginx:1.27
+    ports:
+      - &quot;80:80&quot;
+    networks:
+      - app-net
+  api:
+    image: username/shop-api:1.0
+    networks:
+      - app-net
+    # без ports — доступен только proxy внутри той же оверлейной сети
+
+networks:
+  app-net:
+    driver: overlay
+</code></pre>
+<p>Оверлейная сеть (<code>driver: overlay</code>) работает поверх нескольких физических узлов кластера так же прозрачно, как обычная docker-сеть работает в пределах одной машины. Реверс-прокси (например, nginx) — единственная точка входа снаружи; сервисы вроде <code>api</code>, <code>worker</code> и <code>db</code>, к которым не должно быть прямого доступа, просто не публикуют <code>ports</code> наружу вообще.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Распределение задач по узлам</h2><div class="prose"><p><em>Аналогия:</em> manager кластера — как диспетчер такси: сам не знает заранее, какая именно машина возьмёт конкретный заказ, но распределяет заказы по доступным машинам равномерно и следит, чтобы никто не простаивал зря.</p>
+<pre><code class="language-bash">docker node ls                  # список узлов кластера и их ролей
+docker service ps shop_api      # где сейчас выполняется конкретный сервис
+</code></pre>
+<p>Задача (task) — это конкретный запущенный экземпляр сервиса на конкретном узле. Manager сам решает, на каком узле разместить каждую задачу (с учётом доступных ресурсов) — оператору не нужно вручную указывать «этот контейнер — на этой машине».</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Portainer: визуализация кластера</h2><div class="prose"><p><em>Аналогия:</em> Portainer — как диспетчерская панель с картой всего цеха: вместо того чтобы вычитывать текстовый вывод десятка команд <code>docker service ps</code>, ты просто смотришь на графическую схему, кто где выполняется прямо сейчас.</p>
+<pre><code class="language-bash">docker stack deploy -c portainer-agent-stack.yml portainer
+</code></pre>
+<p>Portainer разворачивается как отдельный стек внутри того же Swarm-кластера и подключается к Docker API, показывая веб-интерфейс с визуализацией узлов, сервисов и того, какие задачи на каком узле сейчас выполняются — удобно для отладки распределения нагрузки без запоминания десятков CLI-команд.</p>
+<p><img loading="lazy" src="../assets/diagrams/do7-portainer.webp" alt="" /></p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Portainer имеет полный доступ к Docker</summary><div class="callout-body"><p>Он подключается к сокету Docker API, а доступ к этому сокету равносилен правам root на хосте: через него можно запустить контейнер, смонтировавший корневую файловую систему. Поэтому Portainer не публикуют в интернет без ограничений, закрывают отдельной аутентификацией и по возможности держат в приватной сети. То же относится к любому инструменту, которому дают <code>/var/run/docker.sock</code>.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Ограничение ресурсов</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do7-resource-limits.svg" alt="" /><br />
+<em>Аналогия:</em> если в общей квартире один жилец может занять все розетки, остальные останутся без электричества — независимо от того, насколько аккуратно они себя ведут.</p>
+<p>По умолчанию контейнер видит <strong>всю</strong> память и все процессоры хоста. Это значит, что утечка памяти в одном сервисе выключает все остальные на той же машине — и OOM killer (<a href="../lessons/1-1.html#s-6">1.1 Linux</a>, §6) выберет жертвой самый прожорливый процесс, которым вполне может оказаться база данных, а не виновник.</p>
+<pre><code class="language-yaml">services:
+  app:
+    image: myapp:1.0
+    deploy:
+      resources:
+        limits:
+          cpus: &quot;1.5&quot;
+          memory: 512M
+        reservations:
+          cpus: &quot;0.5&quot;
+          memory: 256M
+</code></pre>
+<p><strong><code>limits</code></strong> — жёсткий потолок. Превысил по памяти — контейнер убивают и перезапускают. Превысил по процессору — просто замедляют, ничего не падает. <strong><code>reservations</code></strong> — гарантированный минимум, который планировщик учитывает, размещая задачи по узлам.</p>
+<p>В обычном Compose (не Swarm) секция <code>deploy</code> игнорируется, и лимиты задают напрямую:</p>
+<pre><code class="language-yaml">    mem_limit: 512m
+    cpus: 1.5
+</code></pre>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Как подобрать значения</summary><div class="callout-body"><p>Не угадыванием. Запусти под реальной нагрузкой, посмотри <code>docker stats</code> и метрики из <a href="../lessons/1-4.html">1.4 Метрики и логи</a>, возьми пиковое потребление и добавь запас процентов тридцать. Слишком низкий лимит по памяти приводит к перезапускам под нагрузкой, слишком высокий — не защищает ни от чего. И обязательно поставь <code>restart: unless-stopped</code>, чтобы убитый по лимиту контейнер поднимался сам.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Порядок запуска: depends_on и healthcheck</h2><div class="prose"><p><em>Аналогия:</em> «база запущена» и «база готова принимать соединения» — разные события, между которыми проходит десяток секунд. Приложение, стартовавшее в промежутке, падает.</p>
+<p>Обычный <code>depends_on</code> гарантирует только порядок <strong>запуска</strong> контейнеров, но не их готовность. Контейнер с базой создан за секунду, а сама база инициализируется полминуты — приложение всё это время будет получать отказ в соединении.</p>
+<pre><code class="language-yaml">services:
+  db:
+    image: postgres:17-alpine
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U $$POSTGRES_USER&quot;]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  app:
+    image: myapp:1.0
+    depends_on:
+      db:
+        condition: service_healthy      # ждать не запуска, а готовности
+    restart: unless-stopped
+</code></pre>
+<p><code>condition: service_healthy</code> заставляет Compose дождаться, пока healthcheck базы начнёт проходить. <code>start_period</code> даёт время на первичную инициализацию, не считая ранние неудачи за отказ.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Но полагаться на это нельзя</summary><div class="callout-body"><p>Даже с healthcheck приложение обязано переживать временную недоступность базы: она может уйти в перезапуск позже, уже во время работы. В Kubernetes (<a href="../lessons/5-1.html">5.1 Kubernetes</a>) аналога <code>depends_on</code> нет вовсе — контейнеры стартуют в произвольном порядке, и приложение просто обязано уметь ждать и переподключаться. Здоровая привычка: повторы с экспоненциальной задержкой при подключении к зависимостям (<a href="../lessons/2-3.html#s-11">2.3 Параллельность</a>, §11).</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Одна конфигурация на все окружения</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do7-compose-envs.svg" alt="" /><br />
+<em>Аналогия:</em> один чертёж здания и отдельные листы правок под конкретную площадку — а не пять полных чертежей, которые начинают расходиться между собой с первого же изменения.</p>
+<p>Копировать <code>compose.yaml</code> в <code>compose.prod.yaml</code> — прямой путь к тому, что через месяц окружения будут отличаться неизвестно чем. Compose умеет накладывать файлы друг на друга.</p>
+<pre><code class="language-bash">docker compose up -d
+# автоматически читает compose.yaml + compose.override.yaml (разработка)
+
+docker compose -f compose.yaml -f compose.prod.yaml up -d
+# явно указанный набор для прода
+</code></pre>
+<p>Файл <code>compose.override.yaml</code> подхватывается автоматически (старые имена <code>docker-compose.yml</code> и <code>docker-compose.override.yml</code> тоже работают, но их не смешивают с новыми) и содержит то, что нужно только при разработке: монтирование кода внутрь контейнера, проброшенный наружу порт базы, подробные логи. В репозиторий он кладётся, а вот <code>.env</code> с реальными значениями — нет (<a href="../lessons/2-5.html#s-9">2.5 Бэкенд-сервис</a>, §9).</p>
+<p><strong>Профили</strong> решают смежную задачу — необязательные сервисы:</p>
+<pre><code class="language-yaml">  pgadmin:
+    image: dpage/pgadmin4
+    profiles: [&quot;debug&quot;]        # поднимется только с --profile debug
+</code></pre>
+<p>Пара мелочей, о которых стоит знать. Ключ <code>version:</code> в начале файла <strong>устарел</strong> — современный Compose его игнорирует и выдаёт предупреждение. И логи: без настройки драйвера файл лога контейнера растёт неограниченно, пока не кончится диск:</p>
+<pre><code class="language-yaml">    logging:
+      driver: json-file
+      options:
+        max-size: &quot;10m&quot;
+        max-file: &quot;3&quot;
+</code></pre>
+<p>Ровно та же проблема, что решает logrotate для обычных сервисов (<a href="../lessons/1-1.html#s-17">1.1 Linux</a>, §17).</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Swarm или Kubernetes</h2><div class="prose"><p><em>Аналогия:</em> Swarm — это надёжный велосипед, а Kubernetes — грузовик. Велосипед проще, дешевле и для поездки за хлебом лучше во всех отношениях. Но работу возят на грузовике, и вакансии открывают на водителей грузовиков.</p>
+<p>Честная картина на 2026 год: <strong>Docker Swarm фактически проиграл Kubernetes</strong>. Он не заброшен и продолжает работать, но новых крупных внедрений почти нет, экосистема инструментов вокруг него не развивается, а в вакансиях он упоминается редко — обычно как «плюсом будет».</p>
+<p>Зачем тогда изучать его здесь:</p>
+<ul>
+<li>Понятия <strong>одинаковы</strong>: узлы, менеджеры и воркеры, сервисы, задачи, реплики, оверлейная сеть, декларативное описание желаемого состояния. Всё это перейдёт в <a href="../lessons/5-1.html">5.1 Kubernetes</a> почти без изменений в смысле — поменяются только названия и объём YAML.</li>
+<li>Swarm показывает те же идеи <strong>на порядок проще</strong>: кластер поднимается двумя командами, а не полудневной установкой.</li>
+<li>Для маленьких проектов он до сих пор разумный выбор: если нужно три сервиса на двух машинах, Kubernetes здесь избыточен по сложности эксплуатации.</li>
+</ul>
+<p>Что делать в вакансиях: если требуют оркестрацию — это почти наверняка Kubernetes. Опыт со Swarm стоит упоминать как понимание принципов, а не как замену.</p>
+<p>Из промежуточных вариантов сейчас встречается <strong>Docker Compose на одной машине плюс systemd</strong> — для небольших сервисов этого хватает, и это честнее, чем разворачивать кластер ради трёх контейнеров.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>16</b>/20 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Правило «1 микросервис — 1 контейнер» — иначе разваливается независимость развёртывания сервисов.</li>
+<li>Vagrant создаёт виртуальные машины по декларативному описанию (Vagrantfile), а не вручную через интерфейс.</li>
+<li>Docker Swarm объединяет несколько Docker-хостов в один кластер: manager решает, worker выполняет.</li>
+<li>Для кластера образы обычно публикуются в реестр (Docker Hub) заранее, а не собираются заново на каждом узле.</li>
+<li>docker stack deploy использует практически тот же формат файла, что и обычный docker compose — только теперь распределённо по узлам.</li>
+<li>Оверлейная сеть скрывает внутренние сервисы от прямого доступа снаружи — наружу смотрит только реверс-прокси.</li>
+<li>Portainer даёт визуальное представление того, что происходит в кластере, вместо чтения текстового вывода CLI. Доступ к сокету Docker равносилен правам root на хосте.</li>
+<li><strong>Без лимитов ресурсов</strong> утечка в одном сервисе кладёт всю машину, а OOM killer убьёт не виновника, а самого прожорливого. <code>limits</code> — потолок, <code>reservations</code> — гарантия.</li>
+<li><code>depends_on</code> без <code>condition: service_healthy</code> гарантирует только порядок запуска, но не готовность. И даже с ним приложение обязано уметь переподключаться.</li>
+<li>Один базовый Compose-файл плюс наложения под окружения (<code>compose.override.yml</code>, <code>compose.prod.yml</code>) вместо копий, которые расходятся. Ключ <code>version:</code> устарел.</li>
+<li>Логи контейнера растут неограниченно, пока не задан <code>max-size</code> — тот же класс проблемы, что решает logrotate.</li>
+<li><strong>Swarm фактически проиграл Kubernetes.</strong> Изучать его стоит ради понятий (узлы, сервисы, реплики, оверлейная сеть), которые почти без изменений перейдут в K8s.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>17</b>/20 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 1 (<code>compose.yaml</code> с healthcheck) — файл, которым поднимается <a href="../projects/p1.html">P1</a>.</li>
+<li>Задание 5 (разные окружения через дополнительные файлы) — <code>compose.prod.yaml</code> в <a href="../projects/p1.html">P1</a>.</li>
+</ul>
+</div></details><article class="task" data-task="15f3964b6b"><h3>Задание 1 — стек в Compose</h3><p>Опиши приложение, PostgreSQL и nginx в одном <code>compose.yaml</code>: сети, том для базы, <code>depends_on</code> с <code>condition: service_healthy</code>, переменные из <code>.env</code>.<br />
+<strong>Проверка:</strong> <code>docker compose up -d</code> с нуля поднимает всё в правильном порядке; приложение не падает при старте из-за неготовой базы.</p>
+<label class="task-done"><input type="checkbox" data-task-check="15f3964b6b"> Сделала руками и проверила</label></article><article class="task" data-task="c271648612"><h3>Задание 2 — кластер Swarm</h3><p>Через Vagrant подними три машины, инициализируй Swarm (менеджер + 2 воркера).<br />
+<strong>Проверка:</strong> <code>docker node ls</code> показывает три узла в статусе Ready.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c271648612"> Сделала руками и проверила</label></article><article class="task" data-task="8c4e1c3085"><h3>Задание 3 — стек в Swarm</h3><p>Задеплой стек через <code>docker stack deploy</code> с 3 репликами приложения, оверлейной сетью, где база не доступна снаружи, и лимитами памяти.<br />
+<strong>Проверка:</strong> при остановке одного воркера реплики переезжают на оставшиеся; порт базы не отвечает с хоста.</p>
+<label class="task-done"><input type="checkbox" data-task-check="8c4e1c3085"> Сделала руками и проверила</label></article><article class="task" data-task="d75ecd867a"><h3>Задание 4 — обновление без простоя</h3><p>Обнови образ приложения с <code>update_config: parallelism: 1, order: start-first</code>.<br />
+<strong>Проверка:</strong> во время обновления цикл <code>curl</code> каждую секунду не получает ошибок.</p>
+<label class="task-done"><input type="checkbox" data-task-check="d75ecd867a"> Сделала руками и проверила</label></article><article class="task" data-task="f509e74910"><h3>Задание 5 — один compose на окружения</h3><p>Вынеси различия dev и prod в <code>compose.override.yaml</code> и <code>compose.prod.yaml</code>.<br />
+<strong>Проверка:</strong> <code>docker compose -f compose.yaml -f compose.prod.yaml config</code> показывает итоговую конфигурацию без dev-настроек.</p>
+<label class="task-done"><input type="checkbox" data-task-check="f509e74910"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>18</b>/20 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>19</b>/20 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>20</b>/20 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a> — образы и тома, из которых собирается стек</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — пайплайн, публикующий образы в реестр</li>
+<li><a href="../lessons/4-3.html">4.3 Ansible</a> — автоматизация настройки самих узлов</li>
+<li><a href="../lessons/5-1.html">5.1 Kubernetes</a> — те же понятия в промышленном оркестраторе</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Docker Compose: https://docs.docker.com/compose/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="3-2.html">← 3.2 CI/CD в GitLab</a><a class="lesson-jump" href="4-2.html">4.2 Основы облаков →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "4-1", "number": "4.1", "title": "Docker Compose и Swarm", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["15f3964b6b", "c271648612", "8c4e1c3085", "d75ecd867a", "f509e74910"], "quiz": [{"id": "7cebf0a529", "q": "Почему каждому сервису — свой контейнер?", "options": ["Docker не умеет запускать несколько процессов", "Сервисы можно обновлять, перезапускать и масштабировать независимо, а логи не смешиваются", "Так меньше потребление памяти", "Это требование Compose"], "answer": [1], "why": "<p>контейнер живёт столько, сколько его главный процесс. Несколько служб в одном ломают эту модель.<\/p>\n"}, {"id": "71bf4327ac", "q": "Гарантирует ли простой <code>depends_on<\/code>, что база готова принимать подключения?", "options": ["Да", "Нет, только порядок запуска; готовность — через <code>healthcheck<\/code> и <code>condition: service_healthy<\/code>", "Да, если база PostgreSQL", "Нет, depends_on вообще ни на что не влияет"], "answer": [1], "why": "<p>контейнер базы может уже работать, а сама база — ещё инициализироваться. Приложение тоже должно уметь повторять подключение.<\/p>\n"}, {"id": "fb22436ae7", "q": "Как сервисы из одного compose.yaml находят друг друга?", "options": ["По IP-адресам, которые надо прописать вручную", "По имени сервиса как по доменному имени во внутренней сети", "Через опубликованные порты хоста", "Никак, нужен Swarm"], "answer": [1], "why": "<p>Compose создаёт общую сеть со встроенным DNS: <code>api<\/code> обращается к <code>db:5432<\/code>.<\/p>\n"}, {"id": "8e6dfb9f10", "q": "Чем <code>docker stack deploy<\/code> отличается от <code>docker compose up<\/code>?", "options": ["Разворачивает сервисы на несколько узлов кластера Swarm", "Работает только с одним контейнером", "Не поддерживает тома", "Ничем"], "answer": [0], "why": "<p>формат файла почти тот же, но планировщик Swarm сам распределяет задачи по узлам.<\/p>\n"}, {"id": "bb062ef974", "q": "Зачем в кластере образы берут из реестра (<code>image:<\/code>), а не собирают (<code>build:<\/code>)?", "options": ["Собирать образы запрещено", "Чтобы все узлы запускали один и тот же проверенный образ, не собирая его каждый у себя", "Реестр бесплатный", "build работает только на Windows"], "answer": [1], "why": "<p>собрать один раз и распространить — быстрее и воспроизводимо.<\/p>\n"}, {"id": "fddeed7d5c", "q": "Что будет, если не ограничить память контейнеров на общем хосте?", "options": ["Ничего", "Утечка памяти в одном сервисе может вызвать OOM и убить соседние сервисы", "Docker сам выключит контейнер через час", "Контейнер не запустится"], "answer": [1], "why": "<p>без лимитов все контейнеры делят память хоста, а OOM killer выбирает жертву по размеру.<\/p>\n"}, {"id": "ff5592af7e", "q": "Как вынести различия dev и prod в Compose, не копируя файл целиком?", "options": ["Держать две ветки git", "Базовый <code>compose.yaml<\/code> плюс файлы-дополнения (<code>compose.override.yaml<\/code>, <code>compose.prod.yaml<\/code>)", "Комментировать строки перед деплоем", "Нельзя"], "answer": [1], "why": "<p>копии со временем расходятся. Дополнения переопределяют только то, что действительно отличается.<\/p>\n"}], "cards": [{"id": "4186172f97", "q": "Почему одна служба на контейнер?", "a": "<p>Независимые масштабирование, обновление, перезапуск и логи; контейнер живёт столько, сколько его главный процесс. Несколько служб в одном контейнере требуют супервизора и ломают эту модель.<\/p>\n"}, {"id": "c786f6452d", "q": "Гарантирует ли depends_on, что база готова?", "a": "<p>Простой <code>depends_on<\/code> гарантирует только порядок запуска контейнеров. Готовность — через <code>healthcheck<\/code> у базы и <code>condition: service_healthy<\/code>, плюс повторы подключения в самом приложении.<\/p>\n"}, {"id": "b808cf30c3", "q": "Чем Swarm отличается от Kubernetes?", "a": "<p>Swarm встроен в Docker, прост в установке и настройке, подходит для небольших систем. Kubernetes сложнее, но значительно богаче: экосистема, автомасштабирование, операторы, гибкая сеть и хранилище; стал стандартом индустрии.<\/p>\n"}, {"id": "8f3f318097", "q": "Что такое оверлейная сеть?", "a": "<p>Виртуальная сеть поверх нескольких хостов, позволяющая контейнерам на разных машинах общаться по именам сервисов. Сервисы без опубликованных портов недоступны снаружи.<\/p>\n"}, {"id": "8f73dda7c9", "q": "Как ограничить ресурсы контейнера и зачем?", "a": "<p><code>deploy.resources.limits<\/code> (memory, cpus) в Compose и Swarm. Без лимитов утечка памяти в одном сервисе вызывает OOM на всём хосте и убивает соседей.<\/p>\n"}], "next": "4-2"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

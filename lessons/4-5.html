@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.5 Наблюдаемость в продакшене — DevOps-маршрут</title>
+<meta name="description" content="Урок 4.5: Наблюдаемость в продакшене">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c4)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-4">← 4. Облако и IaC</a>
+    <div class="sidebar-art"><svg class="art art-cloud" viewBox="0 0 240 140" role="img" aria-label="Облако и серверы" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M84 58 C66 58 62 38 80 34 C82 16 108 12 118 26 C128 10 158 14 160 34 C180 34 184 58 164 58 Z"/>
+<path class="flow" d="M122 60 V76 M122 76 H58 V88 M122 76 V88 M122 76 H186 V88"/>
+<g class="srv v1"><rect x="38" y="90" width="40" height="28" rx="4"/><circle class="led l1" cx="70" cy="104" r="2.4"/><path class="dim" d="M45 104 H60"/></g>
+<g class="srv v2"><rect x="102" y="90" width="40" height="28" rx="4"/><circle class="led l2" cx="134" cy="104" r="2.4"/><path class="dim" d="M109 104 H124"/></g>
+<g class="srv v3"><rect x="166" y="90" width="40" height="28" rx="4"/><circle class="led l3" cx="198" cy="104" r="2.4"/><path class="dim" d="M173 104 H188"/></g>
+<text class="lbl" x="18" y="134">terraform apply</text>
+</svg></div>
+    <div class="lesson-number">lesson 4.5 · infra</div>
+    <h1 class="lesson-title">Наблюдаемость в продакшене</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Мониторинг и наблюдаемость</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Стек в Docker Compose</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Конфигурация Prometheus</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Метрики самого приложения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Grafana как код</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Логи: Loki и сборщик</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Трейсы и OpenTelemetry</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Правила алертов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Alertmanager: маршрутизация и тишина</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Усталость от алертов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Runbook и дежурство</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Хранение и масштабирование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Мониторинг в Kubernetes</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В <a href="../lessons/1-4.html">1.4 Метрики и логи</a> разбиралась теория: типы метрик, PromQL, перцентили, SLO. Здесь — как собрать из этого работающую систему для настоящего проекта: развернуть стек рядом с приложением, научить приложение отдавать свои метрики, собрать логи со всех контейнеров в одно место, настроить алерты, которые приходят в мессенджер и не будят зря.</p>
+<p>Вопрос «как вы мониторите свои сервисы» гарантирован на собеседовании, и ответ «у нас есть Grafana» не засчитывается. Ждут понимания, <strong>что</strong> собирается, <strong>откуда</strong>, <strong>как</strong> это превращается в алерт и <strong>что делает дежурный</strong>, когда алерт пришёл.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Наблюдаемость (observability)</strong> — возможность понять, что происходит внутри системы, по её внешним сигналам.</li>
+<li><strong>Три столпа</strong> — метрики, логи и трейсы.</li>
+<li><strong>Экспортер</strong> — программа, которая переводит показатели системы или сервиса в формат Prometheus.</li>
+<li><strong>Скрейп (scrape)</strong> — опрос Prometheus'ом эндпоинта <code>/metrics</code> по расписанию.</li>
+<li><strong>Таргет (target)</strong> — один опрашиваемый эндпоинт.</li>
+<li><strong>Правило алерта</strong> — выражение PromQL плюс условие длительности, при котором загорается алерт.</li>
+<li><strong>Runbook</strong> — инструкция дежурному: что проверить и что сделать при конкретном алерте.</li>
+<li><strong>Трейс</strong> — путь одного запроса через все сервисы с замером времени на каждом участке.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Мониторинг и наблюдаемость</h2><div class="prose"><p><em>Аналогия:</em> мониторинг — приборная панель автомобиля: скорость, топливо, температура. Наблюдаемость — возможность подключить диагностический сканер и понять, почему горит лампочка, даже если такую поломку заранее никто не предусмотрел.</p>
+<p><strong>Мониторинг</strong> отвечает на заранее известные вопросы: работает ли сервис, сколько ошибок, хватает ли места на диске. На каждый такой вопрос заводится метрика и алерт.</p>
+<p><strong>Наблюдаемость</strong> нужна для неизвестных заранее вопросов: «почему у пользователей из одного региона по вечерам медленно открывается корзина». Ответ на такой вопрос складывается из трёх видов данных:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Сигнал</th>
+<th>Что отвечает</th>
+<th>Пример</th>
+<th>Инструменты</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Метрики</strong></td>
+<td>Сколько и как часто</td>
+<td>2% ответов с кодом 500</td>
+<td>Prometheus, VictoriaMetrics</td>
+</tr>
+<tr>
+<td><strong>Логи</strong></td>
+<td>Что именно произошло</td>
+<td>Текст ошибки и контекст запроса</td>
+<td>Loki, ELK</td>
+</tr>
+<tr>
+<td><strong>Трейсы</strong></td>
+<td>Где именно тормозит</td>
+<td>1.8 из 2 секунд — запрос в базу</td>
+<td>Jaeger, Tempo</td>
+</tr>
+</tbody>
+</table></div>
+<p>Рабочий порядок расследования почти всегда один: <strong>метрика</strong> показывает, что что-то не так → <strong>трейс</strong> показывает, в каком сервисе → <strong>логи</strong> этого сервиса показывают, почему.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Стек в Docker Compose</h2><div class="prose"><p><em>Аналогия:</em> диспетчерская, которую ставят рядом с производством: сначала оборудование, потом датчики на станки, потом связь с дежурным.</p>
+<p>Минимальный стек для проекта, запущенного в Compose или Swarm (<a href="../lessons/4-1.html">4.1 Compose и Swarm</a>):</p>
+<pre><code class="language-yaml"># monitoring/docker-compose.yml
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    ports: [&quot;9090:9090&quot;]
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    volumes: [&quot;./alertmanager:/etc/alertmanager&quot;]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin
+    ports: [&quot;3000:3000&quot;]
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    pid: host
+    volumes: [&quot;/:/host:ro,rslave&quot;]
+    command: [&quot;--path.rootfs=/host&quot;]
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+volumes:
+  prom_data:
+  grafana_data:
+</code></pre>
+<p>Кто за что отвечает:</p>
+<ul>
+<li><strong>node-exporter</strong> — метрики самой машины: процессор, память, диски, сеть. Всё, что в <a href="../lessons/1-1.html">1.1 Linux</a> смотрели через <code>top</code>, <code>free</code> и <code>df</code>.</li>
+<li><strong>cAdvisor</strong> — метрики каждого контейнера: сколько памяти и процессора потребляет, сколько раз перезапускался.</li>
+<li><strong>Prometheus</strong> — опрашивает всех и хранит временные ряды.</li>
+<li><strong>Alertmanager</strong> — получает сработавшие алерты и рассылает уведомления.</li>
+<li><strong>Grafana</strong> — дашборды.</li>
+</ul>
+<p>Версии образов зафиксированы — тот же принцип, что для любых зависимостей: <code>latest</code> однажды обновится и сломает конфиг.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Не выставляй стек мониторинга в интернет</summary><div class="callout-body"><p>Prometheus и экспортеры по умолчанию не требуют авторизации и отдают подробности об инфраструктуре: версии ПО, имена хостов, внутренние адреса. Наружу открывается только Grafana — за nginx с HTTPS (<a href="../lessons/1-2.html">1.2 Сети</a>) и с нормальным паролем. Остальное живёт во внутренней сети: оверлейной в Swarm (<a href="../lessons/4-1.html#s-8">4.1 Compose и Swarm</a>, §8) или приватной подсети облака (<a href="../lessons/4-2.html#s-4">4.2 Облако</a>, §4).</p>
+</div></details></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Конфигурация Prometheus</h2><div class="prose"><p><em>Аналогия:</em> маршрутный лист обходчика: какие точки посетить, как часто и что записать.</p>
+<pre><code class="language-yaml"># prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: [&quot;alertmanager:9093&quot;]
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: [&quot;localhost:9090&quot;]
+
+  - job_name: node
+    static_configs:
+      - targets: [&quot;node-exporter:9100&quot;]
+        labels: { env: prod }
+
+  - job_name: cadvisor
+    static_configs:
+      - targets: [&quot;cadvisor:8080&quot;]
+
+  - job_name: app
+    metrics_path: /metrics
+    static_configs:
+      - targets: [&quot;app:8000&quot;]
+</code></pre>
+<p>Проверить, что всё опрашивается: страница <strong>Status → Targets</strong> в веб-интерфейсе Prometheus. Каждый таргет должен быть в состоянии <code>UP</code>. Автоматически у каждого таргета появляется метрика <code>up</code> — 1 или 0, и это первая метрика, на которую ставят алерт.</p>
+<p><strong>Обнаружение сервисов.</strong> Статический список работает, пока машин мало. В облаке и в Kubernetes таргеты появляются и исчезают постоянно, поэтому используют service discovery: Prometheus сам спрашивает у Docker Swarm, облака или Kubernetes, какие сервисы сейчас существуют, и опрашивает их. В Kubernetes это делается через ServiceMonitor (<a href="../lessons/5-2.html#s-10">5.2 Kubernetes в работе</a>, §10).</p>
+<p>Проверка конфига перед перезапуском — по тому же принципу, что <code>nginx -t</code>:</p>
+<pre><code class="language-bash">docker run --rm -v $PWD/prometheus:/etc/prometheus --entrypoint promtool \
+  prom/prometheus:v3.5.0 check config /etc/prometheus/prometheus.yml
+</code></pre>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Метрики самого приложения</h2><div class="prose"><p><em>Аналогия:</em> датчики на станке говорят, что он включён и горячий. Сколько деталей он сделал и сколько из них брак — знает только сам станок.</p>
+<p>node-exporter и cAdvisor видят приложение снаружи: память, процессор, перезапуски. Но главные вопросы — сколько запросов, сколько ошибок, как быстро отвечаем — может ответить только само приложение. Для этого в код добавляют клиентскую библиотеку Prometheus:</p>
+<pre><code class="language-python"># app.py — Flask из урока 2.5
+from prometheus_client import Counter, Histogram, make_wsgi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+import time
+
+REQUESTS = Counter(&quot;http_requests_total&quot;, &quot;Число запросов&quot;,
+                   [&quot;method&quot;, &quot;endpoint&quot;, &quot;status&quot;])
+LATENCY = Histogram(&quot;http_request_duration_seconds&quot;, &quot;Время ответа&quot;,
+                    [&quot;endpoint&quot;], buckets=[.05, .1, .25, .5, 1, 2.5, 5])
+
+@app.before_request
+def start_timer():
+    request.start = time.perf_counter()
+
+@app.after_request
+def record(response):
+    endpoint = request.url_rule.rule if request.url_rule else &quot;unknown&quot;
+    LATENCY.labels(endpoint).observe(time.perf_counter() - request.start)
+    REQUESTS.labels(request.method, endpoint, response.status_code).inc()
+    return response
+
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {&quot;/metrics&quot;: make_wsgi_app()})
+</code></pre>
+<p>Обрати внимание на метку <code>endpoint</code>: в неё идёт <strong>шаблон маршрута</strong> (<code>/orders/&lt;id&gt;</code>), а не фактический путь (<code>/orders/123456</code>). Иначе каждый заказ создаст новый временной ряд — это ровно та катастрофа с кардинальностью, что разбиралась в <a href="../lessons/1-4.html#s-6">1.4 Метрики и логи</a>, §6.</p>
+<p>Для типовых сервисов готовые экспортеры уже есть, писать ничего не нужно:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Что</th>
+<th>Экспортер</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL</td>
+<td><code>postgres_exporter</code> — соединения, долгие транзакции, репликация</td>
+</tr>
+<tr>
+<td>nginx</td>
+<td><code>nginx-prometheus-exporter</code> — запросы, активные соединения</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td><code>redis_exporter</code></td>
+</tr>
+<tr>
+<td>Доступность снаружи</td>
+<td><code>blackbox_exporter</code> — HTTP-проверки, сроки сертификатов, DNS</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>blackbox_exporter</code> особенно полезен: он проверяет сервис <strong>так же, как пользователь</strong> — снаружи, по HTTPS. Сервис может считать себя здоровым, а пользователь видеть ошибку сертификата; поймает это только внешняя проверка. Сюда же — алерт на истекающий сертификат за 14 дней (<a href="../lessons/1-2.html">1.2 Сети</a>).</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Grafana как код</h2><div class="prose"><p><em>Аналогия:</em> типовая планировка приборной панели. Если панель собирали руками и она потерялась, повторить её точно никто не сможет.</p>
+<p>Дашборды, собранные мышкой в интерфейсе, живут только в базе Grafana. Удалили том — дашборды пропали; поднимаете второе окружение — собирай заново. Решение — <strong>provisioning</strong>: источники данных и дашборды описываются файлами и подгружаются при старте.</p>
+<pre><code class="language-yaml"># grafana/provisioning/datasources/prometheus.yml
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+  - name: Loki
+    type: loki
+    url: http://loki:3100
+</code></pre>
+<pre><code class="language-yaml"># grafana/provisioning/dashboards/default.yml
+apiVersion: 1
+providers:
+  - name: default
+    folder: Infrastructure
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+</code></pre>
+<p>В папку <code>json</code> кладут экспортированные дашборды. Готовые дашборды для node-exporter (ID 1860 «Node Exporter Full») и cAdvisor берут из каталога grafana.com и дорабатывают под себя.</p>
+<p>Хороший дашборд сервиса отвечает на четыре золотых сигнала (<a href="../lessons/1-4.html#s-10">1.4 Метрики и логи</a>, §10) в верхнем ряду — трафик, ошибки, задержка, насыщение — а подробности ниже. Человек, которого разбудил алерт, должен за 10 секунд понять, что горит.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Логи: Loki и сборщик</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы обходить десять кабинетов и читать журналы на каждом столе, все журналы собирают в одном архиве с поиском.</p>
+<p>Пока сервис один и живёт на одной машине, хватает <code>docker logs</code> и <code>journalctl</code> (<a href="../lessons/1-1.html">1.1 Linux</a>). Когда контейнеров десятки на нескольких узлах, искать ошибку по машинам невозможно. Логи собирают централизованно.</p>
+<p><strong>Loki</strong> — хранилище логов от создателей Grafana. Ключевая идея: он <strong>не индексирует текст</strong> логов, только метки (сервис, контейнер, окружение). Поэтому он в разы дешевле ELK по ресурсам, а поиск по тексту работает как <code>grep</code> внутри выбранного набора потоков.</p>
+<p>Логи в Loki доставляет агент на каждом узле. Сейчас рекомендованный агент — <strong>Grafana Alloy</strong> (бывший Promtail объявлен устаревшим):</p>
+<pre><code class="language-yaml">  loki:
+    image: grafana/loki:3.5.0
+    command: -config.file=/etc/loki/local-config.yaml
+
+  alloy:
+    image: grafana/alloy:v1.10.0
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: run /etc/alloy/config.alloy
+</code></pre>
+<p>Запросы пишутся на LogQL — он похож на PromQL:</p>
+<pre><code class="language-logql"># все ошибки сервиса app за выбранный период
+{service=&quot;app&quot;} |= &quot;ERROR&quot;
+
+# разобрать JSON-лог и отфильтровать медленные запросы
+{service=&quot;app&quot;} | json | duration_ms &gt; 1000
+
+# метрика из логов: число ошибок в минуту по сервисам
+sum by (service) (count_over_time({env=&quot;prod&quot;} |= &quot;ERROR&quot; [1m]))
+</code></pre>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Логи в JSON</summary><div class="callout-body"><p>Структурированные логи в JSON (<a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>) разбираются одной командой <code>| json</code>, и по любому полю можно фильтровать. Обычные текстовые логи приходится разбирать регулярными выражениями. Если приложение ваше — логируйте в JSON в stdout, а не в файлы внутри контейнера.</p>
+</div></details>
+<p>Те же правила кардинальности действуют и здесь: в метки Loki идут сервис, окружение, уровень, но <strong>не</strong> идентификаторы пользователей и запросов — они остаются в тексте лога.</p>
+<p><strong>ELK</strong> (Elasticsearch, Logstash, Kibana) — более старый и тяжёлый вариант с полнотекстовым индексом. Встречается в крупных компаниях; для junior достаточно знать, чем он отличается от Loki: мощный поиск ценой большого потребления памяти и диска.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Трейсы и OpenTelemetry</h2><div class="prose"><p><em>Аналогия:</em> трекинг посылки. Видно не только, что она пришла за пять дней, но и что четыре из них она пролежала на одном складе.</p>
+<p>В микросервисной системе один запрос пользователя проходит через несколько сервисов: шлюз, сервис заказов, сервис оплаты, базу. Метрика показывает, что запрос медленный. Трейс показывает, <strong>на каком участке</strong> время потеряно.</p>
+<p>Трейс состоит из <strong>спанов</strong> — отрезков работы с началом, концом и именем. Все спаны одного запроса связаны общим <code>trace_id</code>, который сервисы передают друг другу в HTTP-заголовке.</p>
+<p><strong>OpenTelemetry</strong> — открытый стандарт и набор библиотек для сбора трейсов, метрик и логов. Он вытесняет закрытые решения отдельных вендоров: приложение инструментируется один раз, а куда отправлять данные (Jaeger, Grafana Tempo, облачный сервис), решает конфигурация коллектора.</p>
+<pre><code class="language-bash">pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install
+opentelemetry-instrument --service_name shop-api python app.py
+</code></pre>
+<p>Автоматическая инструментация сама создаёт спаны для входящих HTTP-запросов, запросов в базу и исходящих вызовов — без изменения кода.</p>
+<p>Для junior достаточно понимать, что такое трейс и спан, зачем нужен <code>trace_id</code>, и что <code>trace_id</code> полезно писать в каждую строку лога — тогда из трейса можно одним кликом перейти к логам этого запроса.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Правила алертов</h2><div class="prose"><p><em>Аналогия:</em> пожарная сигнализация. Срабатывает на дым, а не на каждую зажжённую спичку — иначе её просто отключат.</p>
+<pre><code class="language-yaml"># prometheus/rules/basic.yml
+groups:
+  - name: basic
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;{{ $labels.job }} на {{ $labels.instance }} недоступен&quot;
+          runbook_url: &quot;https://wiki.example.com/runbooks/target-down&quot;
+
+      - alert: DiskWillFillIn4Hours
+        expr: predict_linear(node_filesystem_avail_bytes{fstype!~&quot;tmpfs|overlay&quot;}[1h], 4*3600) &lt; 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;Диск {{ $labels.mountpoint }} на {{ $labels.instance }} заполнится через ~4 часа&quot;
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~&quot;5..&quot;}[5m]))
+            / sum(rate(http_requests_total[5m])) &gt; 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Доля ошибок 5xx выше 5%&quot;
+
+      - alert: ContainerRestarting
+        expr: increase(container_restart_count[15m]) &gt; 3
+        labels:
+          severity: warning
+</code></pre>
+<p>Что здесь важно:</p>
+<ul>
+<li><strong><code>for</code></strong> — условие должно держаться указанное время, прежде чем алерт загорится. Защищает от ложных срабатываний на кратковременные всплески.</li>
+<li><strong><code>predict_linear</code></strong> — вместо порога «диск заполнен на 90%» предсказывает, когда место кончится. Диск на 95% с плоским графиком не опасен; диск на 60%, растущий на гигабайт в минуту, — опасен прямо сейчас.</li>
+<li><strong><code>severity</code></strong> — по нему Alertmanager решит, куда слать.</li>
+<li><strong><code>runbook_url</code></strong> — ссылка на инструкцию дежурному (§11).</li>
+</ul>
+<p>Проверка правил: <code>promtool check rules rules/*.yml</code>. Её стоит поставить в CI рядом с остальными линтерами.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Alertmanager: маршрутизация и тишина</h2><div class="prose"><p><em>Аналогия:</em> диспетчер вызовов. Звонок о пожаре — сразу дежурному расчёту; сообщение о перегоревшей лампочке — в журнал, завхозу утром.</p>
+<p>Prometheus только определяет, что алерт горит. Что с ним делать — решает Alertmanager:</p>
+<pre><code class="language-yaml"># alertmanager/alertmanager.yml
+route:
+  receiver: telegram-warnings
+  group_by: [alertname, job]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers: [severity=&quot;critical&quot;]
+      receiver: telegram-oncall
+      repeat_interval: 30m
+
+receivers:
+  - name: telegram-oncall
+    telegram_configs:
+      - bot_token_file: /etc/alertmanager/secrets/bot_token
+        chat_id: -1001234567890
+        send_resolved: true
+  - name: telegram-warnings
+    telegram_configs:
+      - bot_token_file: /etc/alertmanager/secrets/bot_token
+        chat_id: -1009876543210
+
+inhibit_rules:
+  - source_matchers: [alertname=&quot;TargetDown&quot;]
+    target_matchers: [severity=&quot;warning&quot;]
+    equal: [instance]
+</code></pre>
+<p>Ключевые механизмы:</p>
+<ul>
+<li><strong>Группировка</strong> (<code>group_by</code>). Если упало 30 контейнеров, придёт одно сообщение с тридцатью строками, а не тридцать сообщений.</li>
+<li><strong>Маршруты.</strong> Критичное — в канал дежурного с частыми повторами, предупреждения — в общий канал раз в четыре часа.</li>
+<li><strong>Подавление</strong> (<code>inhibit_rules</code>). Если узел недоступен целиком, не нужно отдельно сообщать, что на нём кончается диск и не отвечает каждый сервис.</li>
+<li><strong>Тишина (silences).</strong> На время плановых работ алерты временно выключают через интерфейс или <code>amtool</code> — с указанием причины и срока.</li>
+<li><strong><code>send_resolved</code></strong> — сообщение, когда проблема ушла. Без него непонятно, закончился ли инцидент.</li>
+</ul>
+<p>Токен бота — секрет, поэтому он читается из файла, а не пишется в конфиг (<a href="../lessons/6-2.html">6.2 DevSecOps</a>).</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Усталость от алертов</h2><div class="prose"><p><em>Аналогия:</em> мальчик, который кричал «волки». На десятый ложный крик на настоящий уже никто не обернётся.</p>
+<p>Самая частая болезнь систем мониторинга — не нехватка алертов, а их избыток. Когда в канал ежедневно приходят десятки сообщений, которые «ну это всегда так», на них перестают смотреть, и настоящая авария тонет в шуме.</p>
+<p>Правила, которые проверяют на собеседованиях:</p>
+<ul>
+<li><strong>Каждый алерт требует действия.</strong> Если по алерту нечего делать — это не алерт, а строчка на дашборде.</li>
+<li><strong>Алертить на симптомы, а не на причины.</strong> «Пользователи получают ошибки» — повод будить человека. «Процессор на 90%» — нет, если пользователи этого не замечают.</li>
+<li><strong>Критичность по последствиям.</strong> <code>critical</code> — сломано сейчас и влияет на пользователей, будит ночью. <code>warning</code> — сломается, если ничего не сделать, разбирается в рабочее время.</li>
+<li><strong>Алерты на бюджет ошибок.</strong> Вместо порогов на каждую метрику — алерт на скорость расходования бюджета ошибок из SLO (<a href="../lessons/1-4.html#s-9">1.4 Метрики и логи</a>, §9). Это самый зрелый подход, описанный в Google SRE Workbook.</li>
+<li><strong>Регулярный разбор.</strong> Раз в месяц пройтись по сработавшим алертам: какие были ложными, какие проигнорированы. Ложные — подкрутить или удалить.</li>
+</ul>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Runbook и дежурство</h2><div class="prose"><p><em>Аналогия:</em> инструкция у огнетушителя: короткая, понятная, читается в стрессе за десять секунд.</p>
+<p>Алерт без инструкции будит человека, который потом полчаса вспоминает, что вообще проверять. <strong>Runbook</strong> — короткий документ для каждого алерта:</p>
+<pre><code class="language-markdown"># TargetDown
+
+## Что значит
+Prometheus не может опросить таргет 2 минуты подряд.
+
+## Влияние
+Если это app — пользователи, вероятно, получают ошибки.
+
+## Что проверить
+1. Жив ли контейнер: `docker service ps app` / `kubectl get pods`
+2. Логи за последние 10 минут: Grafana → Explore → {service=&quot;app&quot;}
+3. Не закончилась ли память: панель Node Exporter → Memory
+
+## Что сделать
+- Контейнер в цикле перезапусков → откатить последний релиз (см. урок 3.2-CICD, §15)
+- Узел недоступен → проверить в консоли облака, пересоздать
+
+## Кому эскалировать
+Владелец сервиса: команда shop-backend
+</code></pre>
+<p>Рядом с дежурством живёт культура <strong>разбора инцидентов (postmortem)</strong>: после серьёзной аварии пишется документ — что произошло, хронология, почему, что сделаем, чтобы не повторилось. Главный принцип — <strong>без поиска виноватых (blameless)</strong>: цель понять, как система позволила человеку ошибиться, а не наказать. Подробнее о дежурствах — в <a href="../lessons/0-1.html#s-20">0.1 Git</a>, §20.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Хранение и масштабирование</h2><div class="prose"><p><em>Аналогия:</em> архив. Свежие документы лежат на столе, за прошлый год — в шкафу, старше — в подвале.</p>
+<p>Prometheus хранит данные локально, и по умолчанию недолго (15 дней). Для небольшого проекта этого хватает. Когда нужно больше:</p>
+<ul>
+<li><strong>Долгое хранение и общая картина</strong> по нескольким Prometheus — VictoriaMetrics, Thanos или Grafana Mimir. Prometheus отправляет в них данные через <code>remote_write</code>. VictoriaMetrics особенно популярна в российских компаниях за экономичность.</li>
+<li><strong>Агрегация заранее</strong> — recording rules: тяжёлые запросы вычисляются по расписанию и сохраняются как новые метрики. Дашборды открываются мгновенно, а не считают час данных при каждом обновлении.</li>
+</ul>
+<pre><code class="language-yaml">- record: job:http_requests:rate5m
+  expr: sum by (job) (rate(http_requests_total[5m]))
+</code></pre>
+<ul>
+<li><strong>Мониторинг мониторинга.</strong> Если Prometheus упал, алертов не будет вообще — и тишина выглядит как «всё хорошо». Поэтому нужен внешний сторожевой алерт: правило <code>vector(1)</code> с именем <code>Watchdog</code>, которое горит <strong>всегда</strong>, и внешний сервис, который поднимает тревогу, если этот алерт перестал приходить.</li>
+</ul>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Мониторинг в Kubernetes</h2><div class="prose"><p><em>Аналогия:</em> та же диспетчерская, только станки сами переезжают по цеху, и обходчику нужна карта, которая обновляется на лету.</p>
+<p>В кластере стек ставится одним Helm-чартом <strong>kube-prometheus-stack</strong> (<a href="../lessons/5-3.html">5.3 Helm и Kustomize</a>): Prometheus Operator, Alertmanager, Grafana с готовыми дашбордами, node-exporter на каждом узле (DaemonSet) и kube-state-metrics — состояние объектов кластера (сколько подов в каком статусе, сколько реплик готово).</p>
+<p>Таргеты описываются не списком адресов, а объектами <strong>ServiceMonitor</strong> и <strong>PodMonitor</strong>, правила — объектами <strong>PrometheusRule</strong> (<a href="../lessons/5-2.html#s-10">5.2 Kubernetes в работе</a>, §10). Добавил сервис с ServiceMonitor — Prometheus сам начал его опрашивать.</p>
+<p>Метрики, без которых не обходится ни один кластер:</p>
+<ul>
+<li>Поды в <code>CrashLoopBackOff</code> и число перезапусков.</li>
+<li>Поды, убитые за превышение лимита памяти (<code>OOMKilled</code>) — сигнал, что <code>limits</code> подобраны неверно (<a href="../lessons/5-1.html#s-12">5.1 Kubernetes</a>, §12).</li>
+<li>Ноды в состоянии <code>NotReady</code>.</li>
+<li>Расхождение желаемого и фактического числа реплик у Deployment.</li>
+</ul>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>15</b>/19 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Наблюдаемость — <strong>метрики</strong> (сколько), <strong>логи</strong> (что), <strong>трейсы</strong> (где). Расследование идёт в этом порядке.</li>
+<li>Базовый стек: <strong>node-exporter</strong> (машина), <strong>cAdvisor</strong> (контейнеры), <strong>Prometheus</strong> (сбор), <strong>Alertmanager</strong> (уведомления), <strong>Grafana</strong> (дашборды). Наружу открыта только Grafana.</li>
+<li>Метрика <code>up</code> и страница Targets — первое, что проверяют.</li>
+<li>Метрики приложения — через клиентскую библиотеку; в метки — шаблон маршрута, а не реальный путь.</li>
+<li><strong>blackbox_exporter</strong> проверяет сервис снаружи, как пользователь, и следит за сертификатами.</li>
+<li>Дашборды и источники данных — <strong>как код</strong> через provisioning.</li>
+<li><strong>Loki</strong> индексирует только метки, текст ищется как grep. Логи — в JSON в stdout.</li>
+<li><strong>OpenTelemetry</strong> — стандарт для трейсов; <code>trace_id</code> пишут в логи.</li>
+<li>Алерты — с <code>for</code>, на <strong>симптомы</strong>, каждый требует действия и имеет <strong>runbook</strong>.</li>
+<li>Alertmanager: группировка, маршруты по severity, подавление, тишина на время работ.</li>
+<li><code>predict_linear</code> лучше фиксированного порога для дисков.</li>
+<li>Нужен <strong>Watchdog</strong>: молчание мониторинга не означает, что всё хорошо.</li>
+<li>В Kubernetes — kube-prometheus-stack, ServiceMonitor и PrometheusRule.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>16</b>/19 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Все задания урока — раздел «Мониторинг» в <a href="../projects/p2.html">P2</a>.</li>
+<li>Задание 4 (алерты в Telegram) удобно сделать через своего бота из <a href="../projects/m3.html">M3</a>.</li>
+</ul>
+</div></details><article class="task" data-task="e67ed01bce"><h3>Задание 1 — стек на одной машине</h3><p>Подними <code>monitoring/docker-compose.yml</code> из §2 на виртуалке рядом с приложением из <a href="../lessons/4-1.html">4.1 Compose и Swarm</a>.<br />
+<strong>Проверка:</strong> в Prometheus на странице Targets все таргеты <code>UP</code>; в Grafana импортирован дашборд 1860 и показывает память и диск машины.</p>
+<label class="task-done"><input type="checkbox" data-task-check="e67ed01bce"> Сделала руками и проверила</label></article><article class="task" data-task="e19dbde56f"><h3>Задание 2 — метрики приложения</h3><p>Добавь в Flask-приложение из <a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> счётчик запросов и гистограмму времени ответа (§4). Нагрузи его через <code>hey</code> или <code>ab</code> (<a href="../lessons/1-4.html#s-11">1.4 Метрики и логи</a>, §11).<br />
+<strong>Проверка:</strong> в Grafana есть панель с RPS, долей ошибок и p95 времени ответа: <code>histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))</code>. Запрос по <code>/orders/1</code> и <code>/orders/2</code> даёт <strong>один</strong> ряд с <code>endpoint=&quot;/orders/&lt;id&gt;&quot;</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="e19dbde56f"> Сделала руками и проверила</label></article><article class="task" data-task="9c4b2e64ea"><h3>Задание 3 — логи в Loki</h3><p>Добавь Loki и Alloy, собери логи всех контейнеров.<br />
+<strong>Проверка:</strong> в Grafana → Explore запрос <code>{service=&quot;app&quot;} |= &quot;ERROR&quot;</code> находит ошибку, которую ты специально вызвал. Построй панель «ошибки в минуту» через <code>count_over_time</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="9c4b2e64ea"> Сделала руками и проверила</label></article><article class="task" data-task="0dd3f71a35"><h3>Задание 4 — алерты в Telegram</h3><p>Создай бота через @BotFather, настрой Alertmanager с двумя маршрутами (critical и warning). Добавь правила <code>TargetDown</code>, <code>HighErrorRate</code>, <code>DiskWillFillIn4Hours</code>.<br />
+<strong>Проверка:</strong> останови контейнер приложения — через ~2 минуты приходит сообщение о <code>TargetDown</code>, после запуска — сообщение <code>RESOLVED</code>. Поставь silence на 10 минут и убедись, что повторная остановка не присылает уведомление.</p>
+<label class="task-done"><input type="checkbox" data-task-check="0dd3f71a35"> Сделала руками и проверила</label></article><article class="task" data-task="1f6a556411"><h3>Задание 5 — runbook и разбор</h3><p>Напиши runbook для каждого своего алерта по шаблону из §11 и положи в репозиторий. Устрой учебную «аварию» (заполни диск через <code>fallocate</code>) и напиши короткий postmortem: хронология, причина, что изменить.<br />
+<strong>Проверка:</strong> коллега или ты через неделю по runbook находит и устраняет проблему, не задавая вопросов.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1f6a556411"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>17</b>/19 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>18</b>/19 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>19</b>/19 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-4.html">1.4 Метрики и логи</a> — теория: типы метрик, PromQL, перцентили, SLO</li>
+<li><a href="../lessons/1-1.html">1.1 Linux</a> — то, что node-exporter собирает автоматически</li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — инструментирование Flask и логи в JSON</li>
+<li><a href="../lessons/4-1.html">4.1 Compose и Swarm</a> — где разворачивается стек</li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a> — Prometheus Operator и ServiceMonitor</li>
+<li><a href="../lessons/5-3.html">5.3 Helm и Kustomize</a> — kube-prometheus-stack</li>
+<li><a href="../lessons/6-2.html">6.2 DevSecOps</a> — секреты для бота и доступ к мониторингу</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Prometheus: https://prometheus.io/docs/</li>
+<li>Документация Grafana Loki: https://grafana.com/docs/loki/latest/</li>
+<li>Grafana Alloy: https://grafana.com/docs/alloy/latest/</li>
+<li>OpenTelemetry: https://opentelemetry.io/docs/</li>
+<li>Google SRE Book, «Monitoring Distributed Systems»: https://sre.google/sre-book/monitoring-distributed-systems/</li>
+<li>Google SRE Workbook, «Alerting on SLOs»: https://sre.google/workbook/alerting-on-slos/</li>
+<li>Awesome Prometheus alerts: https://samber.github.io/awesome-prometheus-alerts/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="4-4.html">← 4.4 Terraform: инфраструктура как код</a><a class="lesson-jump" href="5-1.html">5.1 Kubernetes с нуля →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "4-5", "number": "4.5", "title": "Наблюдаемость в продакшене", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["e67ed01bce", "e19dbde56f", "9c4b2e64ea", "0dd3f71a35", "1f6a556411"], "quiz": [{"id": "e24c9490ad", "q": "В каком порядке обычно расследуют проблему с помощью наблюдаемости?", "options": ["Логи → трейсы → метрики", "Метрики показывают, что сломалось → трейсы показывают где → логи объясняют почему", "Только логи", "Трейсы → метрики → логи"], "answer": [1], "why": "<p>метрики дёшевы и видят картину целиком, детали ищут уже в узком месте.<\/p>\n"}, {"id": "0b4cdb97bd", "q": "Чем Loki отличается от Elasticsearch?", "options": ["Loki хранит метрики", "Loki индексирует только метки потоков, а текст ищет перебором — это намного дешевле по ресурсам", "Loki не умеет искать по тексту", "Ничем"], "answer": [1], "why": "<p>Elasticsearch строит полнотекстовый индекс — быстрый сложный поиск ценой памяти и диска.<\/p>\n"}, {"id": "bfad6ab314", "q": "Какой алерт на диск лучше?", "options": ["«Заполнено больше 90%»", "<code>predict_linear<\/code>: «при текущей скорости место кончится через 4 часа»", "«Заполнено больше 50%»", "Алерт на диск не нужен"], "answer": [1], "why": "<p>диск на 95% с плоским графиком не опасен, а диск на 60%, растущий на гигабайт в минуту, — опасен прямо сейчас.<\/p>\n"}, {"id": "8eb3fbd746", "q": "Что делает Alertmanager? Выбери все.", "options": ["Группирует похожие алерты в одно сообщение", "Маршрутизирует алерты по получателям в зависимости от меток", "Позволяет поставить тишину на время плановых работ", "Собирает метрики с экспортеров"], "answer": [0, 1, 2], "why": "<p>собирает метрики Prometheus. Alertmanager решает, кому и как сообщить о сработавшем правиле.<\/p>\n"}, {"id": "7be26c6ca1", "q": "Зачем Watchdog-алерт, который горит всегда?", "options": ["Чтобы проверить Telegram", "Если он перестал приходить во внешнюю систему, значит сломался сам мониторинг", "Чтобы нагрузить Prometheus", "Он не нужен"], "answer": [1], "why": "<p>молчание мониторинга выглядит как «всё хорошо». Сторожевой сигнал отличает тишину от поломки.<\/p>\n"}, {"id": "a93572d152", "q": "На что стоит ставить алерт, который будит дежурного ночью?", "options": ["Загрузка CPU выше 80%", "Пользователи получают ошибки или очень медленные ответы", "Перезапуск любого контейнера", "Любое предупреждение в логе"], "answer": [1], "why": "<p>алертят на симптомы, которые чувствует пользователь. Остальное — дашборд или предупреждение в рабочее время.<\/p>\n"}, {"id": "fe328f157f", "q": "Почему Prometheus и экспортеры не открывают в интернет?", "options": ["Они не работают по HTTP", "По умолчанию у них нет авторизации, и они раскрывают подробности инфраструктуры", "Это запрещено лицензией", "Чтобы не тормозили"], "answer": [1], "why": "<p>наружу открывают только Grafana за nginx с HTTPS и паролем.<\/p>\n"}], "cards": [{"id": "602e34e804", "q": "Как вы мониторите свои сервисы?", "a": "<p>Описать цепочку: метрики машины (node-exporter), контейнеров (cAdvisor) и приложения (клиентская библиотека, четыре золотых сигнала) собирает Prometheus; логи — Loki через агента; внешние проверки — blackbox_exporter. Алерты на симптомы с runbook, маршрутизация через Alertmanager в мессенджер, дашборды как код в Grafana. Если есть SLO — алерты на расход бюджета ошибок.<\/p>\n"}, {"id": "1279b8aa1c", "q": "Чем pull-модель Prometheus отличается от push?", "a": "<p>Prometheus сам опрашивает эндпоинты <code>/metrics<\/code>. Плюсы: сам знает, кто недоступен (<code>up == 0<\/code>), сервисы не знают про мониторинг, легко отлаживать — метрики видны в браузере. Для короткоживущих задач (cron, батчи), которые не доживут до опроса, есть Pushgateway.<\/p>\n"}, {"id": "f39cf19ab6", "q": "Что такое <code>for<\/code> в правиле алерта?", "a": "<p>Время, в течение которого условие должно непрерывно выполняться, прежде чем алерт перейдёт из <code>pending<\/code> в <code>firing<\/code>. Защищает от ложных срабатываний на кратковременные всплески.<\/p>\n"}, {"id": "2d5994f08e", "q": "Чем Loki отличается от ELK?", "a": "<p>Loki индексирует только метки потоков, а текст хранит сжатым и ищет перебором внутри выбранных потоков — дёшево по ресурсам. Elasticsearch строит полнотекстовый индекс — быстрый сложный поиск ценой большого потребления памяти и диска.<\/p>\n"}, {"id": "1afb12a8d0", "q": "Почему нельзя класть user_id в метки?", "a": "<p>Каждое уникальное сочетание меток — отдельный временной ряд. Миллион пользователей — миллион рядов: Prometheus съест память и упадёт. Высококардинальные данные хранят в логах и трейсах.<\/p>\n"}, {"id": "e4977d1eb1", "q": "Что делает Alertmanager, чего не делает Prometheus?", "a": "<p>Группирует алерты, маршрутизирует по получателям в зависимости от меток, подавляет зависимые алерты, поддерживает тишину на время работ, повторяет уведомления и сообщает о разрешении проблемы.<\/p>\n"}, {"id": "d94e78fd18", "q": "Как понять, что сам мониторинг сломался?", "a": "<p>Watchdog-алерт, который горит всегда и отправляется во внешнюю систему (dead man's switch). Если он перестал приходить — мониторинг не работает. Плюс мониторинг Prometheus снаружи или из второго экземпляра.<\/p>\n"}, {"id": "5d24260241", "q": "Что такое трейс и спан?", "a": "<p>Трейс — путь одного запроса через все сервисы. Спан — отдельный участок работы внутри трейса с именем, временем начала и длительностью. Спаны связаны общим <code>trace_id<\/code>, который передаётся между сервисами в заголовках.<\/p>\n"}, {"id": "73890567c7", "q": "Почему алертить на симптомы, а не на причины?", "a": "<p>Потому что пользователям важен результат (ошибки, медленные ответы), а не загрузка процессора. Высокий CPU без влияния на пользователей — не повод будить дежурного. Алерты на причины быстро превращаются в шум, и на них перестают реагировать.<\/p>\n"}, {"id": "2d6d0a2b9f", "q": "Что такое blameless postmortem?", "a": "<p>Разбор инцидента без поиска виноватых: хронология, коренные причины, что изменить в системе и процессах, чтобы ошибка не повторилась. Цель — улучшить систему, а не наказать человека; иначе люди начинают скрывать ошибки.<\/p>\n"}], "next": "5-1"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

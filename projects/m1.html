@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M1 — Скрипт подготовки нового сервера — DevOps-маршрут</title>
+<meta name="description" content="Курс от Linux до Kubernetes: теория, практика руками, тесты и карточки к собеседованию">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="project">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+<main class="narrow project" data-project="m1"><div class="page-kicker">cd projects/m1</div><h1>M1 — Скрипт подготовки нового сервера</h1><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Что получится</summary><div class="callout-body"><p>Bash-скрипт, который за одну команду превращает свежую Ubuntu в аккуратно настроенный сервер: пользователь для работы, SSH только по ключу, файрвол, автообновления безопасности, UTC, синхронизация времени. Повторный запуск ничего не ломает, а результат проверяется отдельным скриптом.</p>
+<p>Маленький проект на выходные, но очень показательный: в нём видно, что ты знаешь базовую безопасность сервера и пишешь bash так, как пишут в командах, — со строгим режимом, функциями, проверками и линтером в CI.</p>
+</div></details>
+<p><strong>Когда делать:</strong> после части 1. <strong>Время:</strong> 1–2 выходных.<br />
+<strong>Уроки:</strong> <a href="../lessons/1-1.html">1.1 Linux</a>, <a href="../lessons/1-2.html">1.2 Сети</a>, <a href="../lessons/1-3.html">1.3 Bash</a>.</p>
+<h2>Требования</h2>
+<h3>Скрипт</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>bootstrap.sh</code> со строгим режимом, функциями и <code>main &quot;$@&quot;</code> (<a href="../lessons/1-3.html#s-2">1.3 Bash</a>, §2 и §4).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Параметры через <code>getopts</code>: имя пользователя, путь к публичному ключу, порты, которые нужно открыть, флаг <code>--dry-run</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Создание пользователя с правом sudo и SSH-ключом (<a href="../lessons/1-1.html#s-4">1.1 Linux</a>, §4 и §11).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>sshd_config</code>: запрет root и паролей, проверка <code>sshd -t</code> перед перезагрузкой.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> ufw: запрет входящих по умолчанию, SSH и указанные порты открыты (<a href="../lessons/1-2.html#s-7">1.2 Сети</a>, §7).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> unattended-upgrades, часовой пояс UTC, проверка синхронизации времени (<a href="../lessons/1-1.html#s-14">1.1 Linux</a>, §14).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Идемпотентность: второй запуск ничего не меняет и сообщает «уже настроено».</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Логи с отметкой времени в stderr, понятные ошибки, ненулевой код выхода при сбое.</li>
+</ul>
+<h3>Проверка</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>verify.sh</code>, который проверяет результат и печатает <code>[ OK ]</code> / <code>[FAIL]</code> по каждому пункту.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Стенд для проверки: Vagrantfile с чистой Ubuntu (<a href="../lessons/4-1.html#s-3">4.1 Compose и Swarm</a>, §3) или любая виртуалка.</li>
+</ul>
+<h3>Репозиторий</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> GitHub Actions: <code>shellcheck</code> на каждый пуш, бейдж статуса в README.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> README: что делает скрипт, как запустить одной командой, что именно меняется на сервере и почему.</li>
+</ul>
+<h2>Готово, когда</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> На чистой виртуалке <code>sudo ./bootstrap.sh -u deploy -k ~/.ssh/id_ed25519.pub</code> настраивает сервер, а <code>verify.sh</code> показывает все <code>[ OK ]</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Повторный запуск проходит без изменений.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>ssh root@...</code> и вход по паролю отклоняются.</li>
+</ul>
+<h2>Что рассказать на собеседовании</h2>
+<ul>
+<li>Почему вход только по ключу и что ещё защищает сервер в первые минуты после создания.</li>
+<li>Как ты сделала скрипт идемпотентным и как это проверяла.</li>
+<li>Когда такой скрипт стоит заменить ролью Ansible (<a href="../lessons/4-3.html#s-10">4.3 Ansible</a>, §10) — и почему M1 хорошо переписать в роль <code>common</code> в проекте P2.</li>
+</ul>
+
+<details class="callout callout-tip"><summary><span class="callout-icon">💡</span>Связано с</summary><div class="callout-body"><ul>
+<li><a href="../projects/portfolio.html">00_Portfolio</a></li>
+<li><a href="../projects/p1.html">P1-Server-Basics</a> — сервер из M1 становится основой P1</li>
+</ul>
+</div></details></div></main>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

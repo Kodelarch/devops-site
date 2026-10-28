@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.11 Продвинутый SQL и эксплуатация базы — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.11: Продвинутый SQL и эксплуатация базы">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.11 · code</div>
+    <h1 class="lesson-title">Продвинутый SQL и эксплуатация базы</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Триггеры: реагируем на изменения автоматически</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Обобщённый триггер на все три события</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">VIEW или FUNCTION?</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Параметризованная функция</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">PL/pgSQL функция-обёртка со сложной логикой</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">VARIADIC — функция с переменным числом аргументов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Рекурсивная функция</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Рекурсивный CTE (WITH RECURSIVE)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Самый быстрый маршрут</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Хранилище данных (DWH): ODS-слой и «неидеальные» данные</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Временная модель данных: «ближайшее значение по времени»</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Оконные функции</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Триггеры: когда лучше без них</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Миграции схемы без простоя</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Бэкапы и восстановление</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Это самый «программистский» урок по SQL: здесь база данных перестаёт быть просто хранилищем, которое отвечает на вопросы, и начинает сама реагировать на события (триггеры), решать задачи, где данные заранее неизвестны (рекурсия), и превращаться в основу для аналитических хранилищ данных (DWH) — то, чем реально занимаются дата-инженеры.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Триггер (trigger)</strong> — код, который база автоматически выполняет в ответ на событие (<code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code>), без явного вызова.</li>
+<li><strong>PL/pgSQL</strong> — процедурный язык PostgreSQL: позволяет писать функции с переменными, циклами и условиями, а не только одним <code>SELECT</code>.</li>
+<li><strong>Рекурсия (в SQL)</strong> — функция или запрос, обращающийся сам к себе, пока не дойдёт до базового случая.</li>
+<li><strong>DWH (Data Warehouse)</strong> — хранилище данных, объединяющее информацию из разных источников для аналитики, в отличие от оперативных баз, обслуживающих текущие транзакции (OLTP).</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Триггеры: реагируем на изменения автоматически</h2><div class="prose"><p><em>Аналогия:</em> триггер — как автоматическая камера видеонаблюдения на складе: она не вмешивается в то, что происходит, но при каждом событии (кто-то занёс товар) сама делает запись в журнал, без участия человека.</p>
+<p>Задача из жизни: в магазине кто-то поменял цену, а через неделю покупатель жалуется, что заплатил больше, чем было на витрине. Чтобы разобраться, нужна история изменений, и проще всего её ведёт сама база.</p>
+<pre><code class="language-sql">CREATE TABLE product_audit (
+    changed_at  timestamptz NOT NULL DEFAULT now(),
+    changed_by  text        NOT NULL DEFAULT current_user,
+    event       char(1)     NOT NULL,          -- I, U или D
+    product_id  bigint      NOT NULL,
+    old_price   numeric(10,2),
+    new_price   numeric(10,2),
+    old_stock   integer,
+    new_stock   integer
+);
+
+CREATE FUNCTION fnc_trg_product_insert_audit() RETURNS trigger AS $$
+BEGIN
+    INSERT INTO product_audit (event, product_id, new_price, new_stock)
+    VALUES ('I', NEW.id, NEW.price, NEW.stock);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_product_insert_audit
+AFTER INSERT ON product
+FOR EACH ROW EXECUTE FUNCTION fnc_trg_product_insert_audit();
+</code></pre>
+<p><code>NEW</code> — специальная переменная внутри триггерной функции, содержащая новую вставленную строку (для <code>DELETE</code>-триггеров вместо неё используется <code>OLD</code> — версия строки до удаления). Триггер настраивается в два шага: сначала функция с логикой, потом сам <code>TRIGGER</code>, который говорит, когда и как эту функцию вызывать. <code>current_user</code> в значении по умолчанию записывает, под каким пользователем базы сделано изменение.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Обобщённый триггер на все три события</h2><div class="prose"><p><em>Аналогия:</em> вместо трёх отдельных камер (на вход, на изменение полки, на вынос товара) — одна камера с логикой «распознай тип события и реагируй по-разному».</p>
+<pre><code class="language-sql">CREATE FUNCTION fnc_trg_product_audit() RETURNS trigger AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO product_audit (event, product_id, new_price, new_stock)
+        VALUES ('I', NEW.id, NEW.price, NEW.stock);
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO product_audit (event, product_id, old_price, new_price, old_stock, new_stock)
+        VALUES ('U', NEW.id, OLD.price, NEW.price, OLD.stock, NEW.stock);
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO product_audit (event, product_id, old_price, old_stock)
+        VALUES ('D', OLD.id, OLD.price, OLD.stock);
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_product_audit
+AFTER INSERT OR UPDATE OR DELETE ON product
+FOR EACH ROW EXECUTE FUNCTION fnc_trg_product_audit();
+</code></pre>
+<p><code>TG_OP</code> — ещё одна специальная переменная, доступная только внутри триггерных функций: строка <code>'INSERT'</code>, <code>'UPDATE'</code> или <code>'DELETE'</code>, показывающая, какое именно событие вызвало срабатывание. Один триггер, привязанный сразу к <code>INSERT OR UPDATE OR DELETE</code>, заменяет собой три отдельных. При <code>UPDATE</code> доступны обе версии строки — <code>OLD</code> и <code>NEW</code>, поэтому в журнал попадает и старая цена, и новая.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>VIEW или FUNCTION?</h2><div class="prose"><p><em>Аналогия:</em> VIEW — это как готовый бланк с одним заранее заданным вопросом; функция — как анкета с полями, которые каждый раз можно заполнить по-своему при вызове.</p>
+<pre><code class="language-sql">CREATE FUNCTION fnc_premium_customers() RETURNS SETOF customer AS $$
+    SELECT * FROM customer WHERE premium;
+$$ LANGUAGE sql;
+
+SELECT * FROM fnc_premium_customers();
+</code></pre>
+<p><code>RETURNS SETOF customer</code> означает «функция возвращает набор строк той же структуры, что и таблица <code>customer</code>» — благодаря этому функцию можно вызывать в <code>FROM</code>, как обычную таблицу. Без параметров такая функция ничем не лучше VIEW. Главное отличие проявляется в следующем разделе: функция может принимать параметры.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Параметризованная функция</h2><div class="prose"><p><em>Аналогия:</em> вместо отдельного бланка на каждый город — один универсальный бланк с полем «укажи город», по умолчанию уже заполненным самым частым вариантом.</p>
+<pre><code class="language-sql">CREATE FUNCTION fnc_customers_in(pcity varchar DEFAULT 'Москва') RETURNS SETOF customer AS $$
+    SELECT * FROM customer WHERE city = pcity;
+$$ LANGUAGE sql;
+
+SELECT * FROM fnc_customers_in(pcity := 'Казань');
+SELECT * FROM fnc_customers_in();  -- вернёт москвичей, значение по умолчанию
+</code></pre>
+<p>Параметр <code>pcity DEFAULT 'Москва'</code> можно не указывать при вызове — тогда подставится значение по умолчанию. Именованная передача аргумента (<code>pcity := 'Казань'</code>) делает вызов понятнее, особенно если параметров несколько.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>PL/pgSQL функция-обёртка со сложной логикой</h2><div class="prose"><p><em>Аналогия:</em> если внутри функции нужно не просто выполнить один <code>SELECT</code>, а сначала что-то проверить, разветвить логику — обычного SQL-запроса недостаточно, нужен уже мини-язык программирования внутри базы.</p>
+<pre><code class="language-sql">CREATE FUNCTION fnc_restock_needed(pthreshold integer DEFAULT 10)
+RETURNS TABLE(store_name varchar, title varchar, stock integer) AS $$
+BEGIN
+    IF pthreshold &lt; 0 THEN
+        RAISE EXCEPTION 'Порог не может быть отрицательным: %', pthreshold;
+    END IF;
+
+    RETURN QUERY
+    SELECT s.name, pr.title, pr.stock
+    FROM product pr
+    JOIN store s ON pr.store_id = s.id
+    WHERE pr.stock &lt; pthreshold
+    ORDER BY pr.stock;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM fnc_restock_needed(8);   -- что пора дозаказать
+</code></pre>
+<p><code>RETURNS TABLE(...)</code> описывает структуру результата прямо в объявлении функции. <code>RETURN QUERY</code> — команда PL/pgSQL «выполни этот SELECT и верни его результат как результат функции целиком», в отличие от <code>RETURN</code> одного значения. <code>RAISE EXCEPTION</code> прерывает функцию с ошибкой — так функция защищается от бессмысленных аргументов так же, как bash-скрипт из <a href="../lessons/1-3.html#s-1">1.3 Bash</a>, §1. Знак <code>%</code> в тексте ошибки заменяется значением параметра.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>VARIADIC — функция с переменным числом аргументов</h2><div class="prose"><p><em>Аналогия:</em> обычная функция ждёт ровно определённое число аргументов, а VARIADIC — как касса, принимающая любое количество товаров в одном чеке, не требуя заранее знать, сколько их будет.</p>
+<pre><code class="language-sql">CREATE FUNCTION fnc_cart_total(VARIADIC ids bigint[]) RETURNS numeric AS $$
+    SELECT COALESCE(SUM(price), 0) FROM product WHERE id = ANY(ids);
+$$ LANGUAGE sql;
+
+SELECT fnc_cart_total(1, 2, 12);               -- 7490 + 3990 + 1290 = 12770
+SELECT fnc_cart_total(VARIADIC ARRAY[1, 2]);    -- тот же вызов, если массив уже готов
+</code></pre>
+<p><code>VARIADIC</code> собирает все переданные аргументы в один массив внутри функции. <code>id = ANY(ids)</code> — «id совпадает с любым элементом массива», аналог <code>IN</code> для массивов. <code>COALESCE(..., 0)</code> защищает от <code>NULL</code> для пустой корзины (<a href="../lessons/2-9.html#s-12">2.9 Агрегация</a>, §12).</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Рекурсивная функция</h2><div class="prose"><p><em>Аналогия:</em> рекурсия — как матрёшка: чтобы открыть самую большую, сначала нужно открыть чуть меньшую внутри неё, и так далее, пока не дойдёшь до самой маленькой, которая уже не открывается (базовый случай).</p>
+<p>Задача, знакомая любому DevOps: база занимает 120 ГБ и растёт на 8% в месяц. Когда кончится диск на 500 ГБ?</p>
+<pre><code class="language-sql">CREATE FUNCTION fnc_storage_forecast(start_gb numeric, growth_pct numeric, months integer)
+RETURNS TABLE(month integer, size_gb numeric) AS $$
+    WITH RECURSIVE forecast(month, size_gb) AS (
+        SELECT 0, start_gb
+        UNION ALL
+        SELECT month + 1, ROUND(size_gb * (1 + growth_pct / 100), 1)
+        FROM forecast
+        WHERE month &lt; months
+    )
+    SELECT month, size_gb FROM forecast;
+$$ LANGUAGE sql;
+
+SELECT * FROM fnc_storage_forecast(120, 8, 24) WHERE size_gb &gt; 500 LIMIT 1;  -- 19-й месяц
+</code></pre>
+<p>Здесь рекурсия оформлена не как классический вызов функции самой себя, а через <code>WITH RECURSIVE</code> — рекурсивный CTE, о котором подробнее в следующем разделе. Каждый шаг берёт размер с предыдущего шага и умножает на коэффициент роста; <code>WHERE month &lt; months</code> — условие остановки, без которого запрос не закончился бы никогда. Та же идея, что у <code>predict_linear</code> в мониторинге (<a href="../lessons/4-5.html#s-8">4.5 Наблюдаемость</a>, §8), только для сложного процента.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Рекурсивный CTE (WITH RECURSIVE)</h2><div class="prose"><p><em>Аналогия:</em> обычный CTE — просто именованный подзапрос; рекурсивный CTE — подзапрос, который на каждом следующем шаге берёт результат <strong>своего же предыдущего шага</strong> и обрабатывает его дальше, пока не выполнится условие остановки.</p>
+<p>Пусть есть таблица сетевых каналов между дата-центрами компании и задержки на каждом:</p>
+<pre><code class="language-sql">CREATE TABLE link (src text, dst text, latency_ms integer);
+INSERT INTO link VALUES
+ ('msk', 'spb', 9), ('spb', 'msk', 9), ('msk', 'kzn', 12), ('kzn', 'msk', 12),
+ ('kzn', 'ekb', 14), ('ekb', 'kzn', 14), ('msk', 'ekb', 28), ('ekb', 'msk', 28),
+ ('ekb', 'nsk', 22), ('nsk', 'ekb', 22);
+
+WITH RECURSIVE routes AS (
+    -- базовый случай: все каналы, выходящие из Москвы
+    SELECT src, dst, latency_ms AS total_ms, ARRAY[src, dst] AS path
+    FROM link WHERE src = 'msk'
+
+    UNION ALL
+
+    -- рекурсивный шаг: продолжаем маршрут ещё одним каналом
+    SELECT r.src, l.dst, r.total_ms + l.latency_ms, r.path || l.dst
+    FROM routes r
+    JOIN link l ON r.dst = l.src
+    WHERE NOT l.dst = ANY(r.path)        -- не возвращаемся туда, где уже были
+)
+SELECT * FROM routes;
+</code></pre>
+<p><code>WITH RECURSIVE</code> состоит из двух частей, соединённых <code>UNION ALL</code>: «базовый случай» (откуда стартуем) и «рекурсивный шаг» (как продолжить маршрут на основе уже накопленного пути). Условие <code>NOT l.dst = ANY(r.path)</code> — защита от бесконечного цикла: без него алгоритм бесконечно ходил бы туда-обратно между Москвой и Петербургом.</p>
+<p>Тот же приём применяют к любым иерархиям: дерево категорий товаров, цепочка руководителей, зависимости между сервисами.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Самый быстрый маршрут</h2><div class="prose"><p><em>Аналогия:</em> навигатор перебирает все дороги и показывает самую быструю — здесь то же самое для сетевых каналов.</p>
+<pre><code class="language-sql">WITH RECURSIVE routes AS (
+    SELECT dst, latency_ms AS total_ms, ARRAY['msk', dst] AS path
+    FROM link WHERE src = 'msk'
+    UNION ALL
+    SELECT l.dst, r.total_ms + l.latency_ms, r.path || l.dst
+    FROM routes r
+    JOIN link l ON r.dst = l.src
+    WHERE NOT l.dst = ANY(r.path)
+)
+SELECT total_ms, array_to_string(path, ' → ') AS route
+FROM routes
+WHERE dst = 'nsk'
+ORDER BY total_ms
+LIMIT 1;                     -- 48 мс: msk → kzn → ekb → nsk
+</code></pre>
+<p>Рекурсивный CTE строит все маршруты без повторов, а финальный <code>SELECT</code> оставляет только ведущие в Новосибирск и берёт самый быстрый. Прямой канал Москва — Екатеринбург (28 мс) проигрывает пути через Казань (12 + 14 = 26 мс) — такие неочевидные результаты и находят перебором.</p>
+<p>Полный перебор растёт очень быстро с числом узлов, поэтому для больших графов используют специальные алгоритмы (Дейкстра и его родственники) или расширения вроде pgRouting. Для десятка узлов рекурсивный CTE справляется мгновенно.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Хранилище данных (DWH): ODS-слой и «неидеальные» данные</h2><div class="prose"><p><em>Аналогия:</em> если данные приходят из трёх разных независимых сервисов, собранных в одно хранилище, — это как сводить три разных списка гостей от трёх разных организаторов вечеринки: где-то кто-то не указал имя, где-то гость вообще не значится ни в одном списке.</p>
+<p>Пусть платежи пишет отдельный сервис оплаты в свою таблицу <code>payment</code> (<code>customer_id</code>, <code>amount</code>, <code>method_id</code>), а аналитик собирает их в хранилище рядом с покупателями и справочником способов оплаты:</p>
+<pre><code class="language-sql">SELECT
+    COALESCE(c.name, 'удалённый покупатель') AS customer,
+    COALESCE(m.name, 'неизвестный способ')   AS method,
+    COUNT(*)                                 AS payments,
+    SUM(p.amount)                            AS volume
+FROM payment p
+LEFT JOIN customer c       ON p.customer_id = c.id
+LEFT JOIN payment_method m ON p.method_id = m.id
+GROUP BY 1, 2
+ORDER BY volume DESC;
+</code></pre>
+<p>ODS (Operational Data Store) — первый слой хранилища данных, куда «сырые» данные попадают почти без изменений из разных источников. Именно здесь чаще всего встречаются несогласованности: платёж есть, а покупателя (уже удалённого или ещё не синхронизированного) — нет. <code>INNER JOIN</code> молча выбросил бы такие платежи, и сумма в отчёте не сошлась бы с банковской выпиской. <code>LEFT JOIN</code> + <code>COALESCE</code> — стандартная связка для таких ситуаций (см. также 2.9, раздел 4). <code>GROUP BY 1, 2</code> — короткая запись «группировать по первому и второму столбцу результата».</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Временная модель данных: «ближайшее значение по времени»</h2><div class="prose"><p><em>Аналогия:</em> чтобы узнать, сколько стоил товар в день покупки, нужен не «текущий ценник», а последний ценник, повешенный до этого дня.</p>
+<p>Цены меняются, а в таблице <code>product</code> хранится только текущая. Если вести историю цен (её как раз наполняет триггер из §2, или отдельная таблица <code>price_history(product_id, price, valid_from)</code>), можно восстановить цену на любой момент:</p>
+<pre><code class="language-sql">SELECT DISTINCT ON (pu.id)
+    pu.id AS purchase_id, pu.purchase_date, ph.price AS price_at_purchase
+FROM purchase pu
+JOIN price_history ph
+  ON ph.product_id = pu.product_id AND ph.valid_from &lt;= pu.purchase_date
+ORDER BY pu.id, ph.valid_from DESC;
+</code></pre>
+<p><code>DISTINCT ON (столбцы)</code> — расширение PostgreSQL: оставляет только первую строку для каждой уникальной комбинации указанных столбцов, согласно <code>ORDER BY</code>. Здесь это даёт «последнюю цену, установленную в день покупки или раньше» — классический паттерн временных (temporal) моделей данных, где важна не только сама величина, но и момент времени, когда она была актуальна. Те же запросы пишут для курсов валют, тарифов и версий конфигурации.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>Оконные функции</h2><div class="prose"><p><em>Аналогия:</em> <code>GROUP BY</code> — как свести отчёт по отделам, потеряв фамилии. Оконная функция — как оставить полный список сотрудников, но приписать рядом с каждым итог по его отделу и место в рейтинге.</p>
+<p>Тема, которая на собеседованиях по SQL идёт сразу после <code>JOIN</code>, и главный инструмент любой аналитики. Ключевое отличие формулируется одной фразой: <strong><code>GROUP BY</code> схлопывает строки, <code>OVER</code> — нет.</strong></p>
+<pre><code class="language-sql">SELECT
+    name,
+    department,
+    salary,
+    SUM(salary)  OVER (PARTITION BY department)                AS отдел_итого,
+    ROUND(100.0 * salary / SUM(salary) OVER (PARTITION BY department), 1) AS доля_в_отделе,
+    RANK()       OVER (PARTITION BY department ORDER BY salary DESC)       AS место_в_отделе
+FROM employees;
+</code></pre>
+<p>Все исходные строки остаются на месте, и к каждой добавляются вычисления по её «окну» — группе строк, к которой она относится.</p>
+<p><strong>Устройство окна.</strong> В скобках после <code>OVER</code> задают две вещи: <code>PARTITION BY</code> — как разбить строки на группы (аналог <code>GROUP BY</code>, но без схлопывания), и <code>ORDER BY</code> — в каком порядке нумеровать и накапливать внутри группы. Пустой <code>OVER ()</code> означает «окно — вся выборка целиком».</p>
+<p><strong>Функции ранжирования</strong> — их три, и разницу спрашивают:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>При одинаковых значениях</th>
+<th>Пример: 100, 100, 90</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ROW_NUMBER()</code></td>
+<td>нумерует подряд, произвольно</td>
+<td>1, 2, 3</td>
+</tr>
+<tr>
+<td><code>RANK()</code></td>
+<td>одинаковый ранг, дальше пропуск</td>
+<td>1, 1, 3</td>
+</tr>
+<tr>
+<td><code>DENSE_RANK()</code></td>
+<td>одинаковый ранг, без пропуска</td>
+<td>1, 1, 2</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Соседние строки</strong> — <code>LAG</code> и <code>LEAD</code> смотрят назад и вперёд:</p>
+<pre><code class="language-sql">SELECT
+    day,
+    revenue,
+    LAG(revenue) OVER (ORDER BY day)                        AS вчера,
+    revenue - LAG(revenue) OVER (ORDER BY day)               AS прирост,
+    ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY day))
+          / NULLIF(LAG(revenue) OVER (ORDER BY day), 0), 1)   AS прирост_проц
+FROM daily_stats;
+</code></pre>
+<p>Это готовый ответ на постоянную задачу «сравнить с предыдущим периодом», для которой раньше приходилось соединять таблицу саму с собой по хитрому условию.</p>
+<p><strong>Накопительный итог</strong> — через рамку окна:</p>
+<pre><code class="language-sql">SELECT
+    day,
+    revenue,
+    SUM(revenue) OVER (ORDER BY day
+                       ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS нарастающим,
+    AVG(revenue) OVER (ORDER BY day
+                       ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)          AS среднее_за_7_дней
+FROM daily_stats;
+</code></pre>
+<p><code>ROWS BETWEEN ... AND ...</code> задаёт, какие именно строки попадают в окно относительно текущей. Скользящее среднее за неделю — типовой приём для сглаживания графиков в мониторинге.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Топ-N внутри каждой группы — классическая задача с собеседования</summary><div class="callout-body"><p>«Выбрать три самых дорогих товара в каждом магазине». Без оконных функций это неудобный запрос с коррелированным подзапросом; с ними — прямолинейно:</p>
+<pre><code class="language-sql">SELECT * FROM (
+    SELECT s.name AS store, pr.title, pr.price,
+           ROW_NUMBER() OVER (PARTITION BY s.id ORDER BY pr.price DESC) AS rn
+    FROM product pr JOIN store s ON pr.store_id = s.id
+) t
+WHERE rn &lt;= 3;
+</code></pre>
+<p>Оконную функцию нельзя использовать в <code>WHERE</code> того же уровня — она вычисляется на шаге <code>SELECT</code>, то есть <strong>после</strong> <code>WHERE</code> (<a href="../lessons/2-6.html#s-1">2.6 SQL-запросы</a>, §1). Поэтому результат оборачивают в подзапрос или CTE и фильтруют снаружи. Это же объясняет, почему <code>WHERE rn &lt;= 3</code> внутри не работает.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Триггеры: когда лучше без них</h2><div class="prose"><p>Раздел 1 показал, как триггеры устроены. Не менее важно понимать, когда их не стоит применять.</p>
+<p>Триггер — <strong>скрытая логика</strong>: разработчик выполняет обычный <code>INSERT</code> и не видит, что при этом сработали три функции, изменившие ещё две таблицы. Отсюда типичные проблемы: неожиданно медленная вставка, циклические срабатывания триггеров друг от друга и трудность отладки — в коде приложения причину не найти, она в базе.</p>
+<p>Уместно: аудит изменений (как в §1–2), поддержка денормализованных счётчиков, автозаполнение служебных полей вроде <code>updated_at</code>.</p>
+<p>Неуместно: бизнес-логика (её место в приложении, где она видна, тестируема и версионируется), обращения к внешним системам, тяжёлые вычисления на каждую строку.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Практическое следствие для эксплуатации</summary><div class="callout-body"><p>Массовая загрузка в таблицу с триггером «на каждую строку» может идти в десятки раз дольше ожидаемого. Перед разовой заливкой больших объёмов триггеры обычно отключают (<code>ALTER TABLE ... DISABLE TRIGGER</code>) и включают обратно после — не забыв воспроизвести то, что они должны были сделать.</p>
+</div></details></div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Миграции схемы без простоя</h2><div class="prose"><p><em>Аналогия:</em> менять рельсы под идущим поездом можно — но только если делать это участками и в правильном порядке.</p>
+<p>Изменения схемы в реальном проекте не выполняют руками в <code>psql</code>. Их оформляют <strong>миграциями</strong> — пронумерованными файлами в репозитории, которые применяются автоматически при выкате: <code>Alembic</code> для Python, <code>Flyway</code> и <code>Liquibase</code> в мире Java, <code>migrate</code> для Go. Каждая миграция версионируется вместе с кодом, и база всегда соответствует той версии приложения, которая её использует.</p>
+<p>Ключевое, что нужно знать про сами изменения: <strong>некоторые из них блокируют таблицу</strong>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Безопасно</th>
+<th>Опасно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ADD COLUMN</code> без <code>NOT NULL</code></td>
+<td><code>ALTER COLUMN ... TYPE</code> — переписывает таблицу</td>
+</tr>
+<tr>
+<td><code>ADD COLUMN ... DEFAULT</code> (PostgreSQL 11+)</td>
+<td><code>SET NOT NULL</code> — полное сканирование</td>
+</tr>
+<tr>
+<td><code>CREATE INDEX CONCURRENTLY</code></td>
+<td><code>CREATE INDEX</code> без <code>CONCURRENTLY</code></td>
+</tr>
+<tr>
+<td><code>DROP COLUMN</code></td>
+<td><code>ADD FOREIGN KEY</code> — проверка всех строк</td>
+</tr>
+<tr>
+<td><code>ADD CONSTRAINT ... NOT VALID</code></td>
+<td><code>RENAME COLUMN</code> — ломает работающий код</td>
+</tr>
+</tbody>
+</table></div>
+<p>Приём с <code>NOT VALID</code> стоит запомнить: ограничение добавляется мгновенно и действует для новых строк, а проверка существующих запускается отдельно командой <code>VALIDATE CONSTRAINT</code>, которая работает без тяжёлой блокировки.</p>
+<p><strong>Переименование столбца без простоя</strong> делается не одной миграцией, а четырьмя выкатами: добавить новый столбец → научить код писать в оба → перелить данные пачками → переключить чтение на новый → удалить старый. Долго, зато в любой момент можно откатиться, и обе версии кода работают одновременно.</p>
+<p>Это и есть главное правило: <strong>во время выката старая и новая версии приложения работают параллельно</strong>, поэтому миграция обязана быть совместима с обеими. Отсюда следует, что удаление столбца и выкат кода, переставшего его использовать, — это два разных релиза, а не один.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Про блокировки в миграциях</summary><div class="callout-body"><p>Блокировка держится до конца транзакции, а миграции обычно выполняются в транзакции целиком. Значит, одна «тяжёлая» команда блокирует таблицу на всё время миграции, включая безобидные соседние шаги. Отсюда практика: выставлять <code>lock_timeout</code> перед миграцией, чтобы она честно падала вместо того, чтобы копить очередь запросов, и разбивать опасные изменения на отдельные шаги.</p>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Бэкапы и восстановление</h2><div class="prose"><p><em>Аналогия:</em> бэкап, который никогда не разворачивали, — это не бэкап, а надежда.</p>
+<p>Два принципиально разных инструмента:</p>
+<pre><code class="language-bash"># логический дамп: SQL-текст, переносимый между версиями
+pg_dump -Fc -d store -f store.dump
+pg_restore -d store_new store.dump
+
+# физическая копия всего кластера, основа для восстановления на момент времени
+pg_basebackup -D /backup/base -Ft -z -P
+</code></pre>
+<p><code>pg_dump</code> делает <strong>логическую</strong> копию: по сути, набор команд для воссоздания данных. Работает без остановки базы, даёт согласованный снимок на момент начала, годится для переноса между версиями PostgreSQL и для выгрузки отдельной таблицы. Минус — восстановление большой базы занимает часы.</p>
+<p><code>pg_basebackup</code> копирует файлы кластера целиком. Вместе с архивом журнала предзаписи (WAL) это даёт <strong>восстановление на момент времени</strong> (PITR): можно откатить базу к состоянию за минуту до того, как кто-то выполнил <code>DELETE</code> без <code>WHERE</code>.</p>
+<p>Три вещи, о которых спрашивают и которые важнее самих команд:</p>
+<p><strong>Проверка восстановления.</strong> Бэкап, который ни разу не разворачивали, с высокой вероятностью не развернётся и в нужный момент. Регулярное автоматическое восстановление на отдельный стенд с проверкой — обязательная часть, а не приятное дополнение.</p>
+<p><strong>RPO и RTO.</strong> Сколько данных допустимо потерять (Recovery Point Objective) и как быстро надо восстановиться (Recovery Time Objective). Ежедневный дамп означает RPO в сутки: авария в 23:00 стоит целого дня работы. Это те же соглашения об уровне сервиса, что SLO из <a href="../lessons/1-4.html#s-9">1.4 Метрики и логи</a>, §9.</p>
+<p><strong>Репликация — не бэкап.</strong> Реплика повторяет всё, включая ошибочный <code>DROP TABLE</code>. Она защищает от отказа сервера, но не от ошибки человека. Нужны обе вещи, и путать их — распространённое и дорогое заблуждение.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Триггер реагирует на события автоматически; NEW/OLD — специальные переменные с новой/старой версией строки, TG_OP — тип события в обобщённом триггере.</li>
+<li>Функция отличается от VIEW тем, что принимает параметры (в том числе со значением по умолчанию и VARIADIC для переменного числа аргументов).</li>
+<li>PL/pgSQL нужен, когда одного SQL-запроса недостаточно — там есть переменные, IF, RETURN QUERY.</li>
+<li>WITH RECURSIVE = базовый случай + рекурсивный шаг, соединённые UNION ALL; всегда нужно условие остановки, иначе бесконечный цикл.</li>
+<li>ODS-слой хранилища данных получает «сырые», часто неполные и несогласованные данные из разных источников — LEFT JOIN + COALESCE защищают от потери строк при пропусках.</li>
+<li>DISTINCT ON — способ выбрать «последнюю актуальную запись на момент времени» без сложных подзапросов.</li>
+<li><strong>Оконные функции</strong>: <code>GROUP BY</code> схлопывает строки, <code>OVER</code> — нет. <code>PARTITION BY</code> задаёт группу, <code>ORDER BY</code> — порядок внутри неё.</li>
+<li><code>ROW_NUMBER</code> нумерует подряд, <code>RANK</code> пропускает после одинаковых, <code>DENSE_RANK</code> не пропускает. <code>LAG</code>/<code>LEAD</code> смотрят на соседние строки.</li>
+<li>Оконную функцию нельзя использовать в <code>WHERE</code> того же уровня — она вычисляется после него; оборачивай в подзапрос или CTE.</li>
+<li>Триггеры — скрытая логика: годятся для аудита и служебных полей, не годятся для бизнес-правил. Перед массовой заливкой их отключают.</li>
+<li>Миграции — файлы в репозитории, а не команды руками. <code>ALTER COLUMN TYPE</code>, <code>SET NOT NULL</code>, <code>ADD FOREIGN KEY</code> блокируют таблицу; <code>ADD CONSTRAINT ... NOT VALID</code> — нет.</li>
+<li>Во время выката старый и новый код работают одновременно, поэтому переименование столбца — четыре релиза, а не один.</li>
+<li><code>pg_dump</code> — логическая копия для переноса, <code>pg_basebackup</code> + WAL — восстановление на момент времени. <strong>Реплика не является бэкапом.</strong> Бэкап, который не разворачивали, не считается бэкапом.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 5 (бэкап по расписанию и проверка восстановления) — раздел «Эксплуатация» в <a href="../projects/p1.html">P1</a>.</li>
+<li>Задание 4 (миграции без простоя) пригодится в <a href="../projects/p3.html">P3</a>: там миграции запускаются отдельной задачей перед выкаткой.</li>
+</ul>
+</div></details><article class="task" data-task="63f850c1e0"><h3>Задание 1 — аудит через триггер</h3><p>Сделай таблицу аудита и триггер, который записывает в неё INSERT, UPDATE и DELETE по таблице <code>customer</code> со старым и новым значением в JSONB (<code>to_jsonb(OLD)</code>, <code>to_jsonb(NEW)</code>).<br />
+<strong>Проверка:</strong> после трёх операций в аудите три записи с правильным типом операции.</p>
+<label class="task-done"><input type="checkbox" data-task-check="63f850c1e0"> Сделала руками и проверила</label></article><article class="task" data-task="6d7142f06a"><h3>Задание 2 — оконные функции</h3><p>Для каждой покупки выведи порядковый номер покупки этого покупателя, сумму нарастающим итогом и разницу в цене с предыдущей покупкой (<code>ROW_NUMBER</code>, <code>SUM() OVER</code>, <code>LAG</code>).<br />
+<strong>Проверка:</strong> результат проверен вручную для одного покупателя.</p>
+<label class="task-done"><input type="checkbox" data-task-check="6d7142f06a"> Сделала руками и проверила</label></article><article class="task" data-task="fdbde87539"><h3>Задание 3 — рекурсивный CTE</h3><p>Создай таблицу с иерархией (сотрудники и руководители или категории) и выведи всё дерево с уровнем вложенности и путём.<br />
+<strong>Проверка:</strong> при цикле в данных запрос не зависает (ограничение глубины или проверка пути).</p>
+<label class="task-done"><input type="checkbox" data-task-check="fdbde87539"> Сделала руками и проверила</label></article><article class="task" data-task="834bfb19e7"><h3>Задание 4 — миграция без простоя</h3><p>Переименуй столбец, не ломая работающее приложение: добавить новый, писать в оба, перенести данные пачками, переключить чтение, удалить старый. Миграции — через Alembic, Flyway или файлы с номерами.<br />
+<strong>Проверка:</strong> каждый шаг — отдельная миграция, которую можно применить и откатить; индекс создан через <code>CREATE INDEX CONCURRENTLY</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="834bfb19e7"> Сделала руками и проверила</label></article><article class="task" data-task="662c4e97aa"><h3>Задание 5 — бэкап и восстановление</h3><p>Сделай бэкап базы через <code>pg_dump -Fc</code>, удали таблицу и восстанови её <code>pg_restore</code> в отдельную базу. Настрой ежедневный бэкап по cron с хранением 7 копий.<br />
+<strong>Проверка:</strong> восстановление действительно выполнено и данные сверены; без этого бэкап не считается рабочим.</p>
+<label class="task-done"><input type="checkbox" data-task-check="662c4e97aa"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-9.html">2.9 Агрегация</a> — агрегаты, которые оконные функции применяют без схлопывания</li>
+<li><a href="../lessons/2-10.html">2.10 Транзакции</a> — блокировки, из-за которых миграции опасны</li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — приложение, чьи миграции выкатываются вместе с кодом</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — где миграции выполняются автоматически</li>
+<li><a href="../lessons/1-4.html">1.4 Метрики и логи</a> — RPO и RTO как разновидность SLO</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация PostgreSQL, PL/pgSQL: https://www.postgresql.org/docs/current/plpgsql.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-10.html">← 2.10 SQL: транзакции и блокировки</a><a class="lesson-jump" href="3-1.html">3.1 Docker →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-11", "number": "2.11", "title": "Продвинутый SQL и эксплуатация базы", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["63f850c1e0", "6d7142f06a", "fdbde87539", "834bfb19e7", "662c4e97aa"], "quiz": [{"id": "58dd786ab4", "q": "В триггерной функции на UPDATE какие переменные доступны?", "options": ["Только NEW", "Только OLD", "И OLD (до изменения), и NEW (после)", "Ни одна"], "answer": [2], "why": "<p>при INSERT есть только NEW, при DELETE — только OLD, при UPDATE — обе версии строки.<\/p>\n"}, {"id": "6d833f789b", "q": "Чем оконная функция отличается от GROUP BY?", "options": ["Оконная функция сохраняет все строки и добавляет к каждой вычисление по её группе", "Оконная функция работает только с датами", "GROUP BY не может считать суммы", "Ничем"], "answer": [0], "why": "<p>GROUP BY схлопывает строки группы в одну, OVER — нет.<\/p>\n"}, {"id": "cc150588f5", "q": "Значения 100, 100, 90. Что вернёт <code>RANK()<\/code> при сортировке по убыванию?", "options": ["1, 2, 3", "1, 1, 3", "1, 1, 2", "3, 2, 1"], "answer": [1], "why": "<p>RANK даёт одинаковый ранг равным и пропускает следующий. DENSE_RANK вернул бы 1, 1, 2, а ROW_NUMBER — 1, 2, 3.<\/p>\n"}, {"id": "a07ee0bd3a", "q": "Что обязательно должно быть в рекурсивном CTE?", "options": ["ORDER BY", "Базовый случай, рекурсивный шаг через UNION ALL и условие остановки", "Индекс на таблице", "Оконная функция"], "answer": [1], "why": "<p>без условия остановки или защиты от циклов запрос будет выполняться бесконечно.<\/p>\n"}, {"id": "86693f66e9", "q": "Реплика базы — это бэкап?", "options": ["Да, это лучший вид бэкапа", "Нет: ошибочный DELETE или DROP мгновенно повторится и на реплике", "Да, если реплика в другом дата-центре", "Только для PostgreSQL"], "answer": [1], "why": "<p>реплика защищает от отказа сервера, бэкап — от потери данных. Это разные задачи.<\/p>\n"}, {"id": "52386b4066", "q": "Как добавить индекс на большую таблицу в продакшене, не блокируя запись?", "options": ["<code>CREATE INDEX<\/code> в часы низкой нагрузки", "<code>CREATE INDEX CONCURRENTLY<\/code>", "Сначала удалить таблицу", "Через триггер"], "answer": [1], "why": "<p>обычный CREATE INDEX блокирует запись в таблицу на всё время построения.<\/p>\n"}, {"id": "fcf0daaffc", "q": "Когда бэкап можно считать рабочим?", "options": ["Когда файл бэкапа создан", "Когда размер файла больше нуля", "Когда из него реально восстановили базу и проверили данные", "Когда бэкап лежит в облаке"], "answer": [2], "why": "<p>непроверенный бэкап часто оказывается пустым, неполным или несовместимым — узнают об этом в день аварии.<\/p>\n"}], "cards": [{"id": "24db0363c3", "q": "Чем оконная функция отличается от GROUP BY?", "a": "<p>GROUP BY схлопывает строки группы в одну. Оконная функция считает значение по набору строк, но сохраняет каждую строку в результате.<\/p>\n"}, {"id": "2759b92270", "q": "Чем pg_dump отличается от физического бэкапа?", "a": "<p><code>pg_dump<\/code> — логическая копия одной базы в SQL или собственном формате, удобна для переноса и выборочного восстановления. Физический бэкап (<code>pg_basebackup<\/code>, WAL-архив) копирует файлы кластера и позволяет восстановление на момент времени (PITR).<\/p>\n"}, {"id": "d04a63de2f", "q": "Реплика — это бэкап?", "a": "<p>Нет. Ошибочный DELETE или DROP мгновенно повторится на реплике. Реплика защищает от отказа сервера, бэкап — от потери данных.<\/p>\n"}, {"id": "0c5f5203fc", "q": "Как проверить, что бэкапы рабочие?", "a": "<p>Регулярно восстанавливать их в отдельное окружение и проверять данные, желательно автоматически. Непроверенный бэкап считается отсутствующим.<\/p>\n"}, {"id": "ad2473e901", "q": "Когда триггеры — плохая идея?", "a": "<p>Когда в них прячется бизнес-логика: её не видно из кода приложения, сложно тестировать и отлаживать, триггеры замедляют массовые операции. Подходят для аудита и технических инвариантов.<\/p>\n"}, {"id": "cd0f08f9f3", "q": "Как добавить индекс на большую таблицу в продакшене?", "a": "<p><code>CREATE INDEX CONCURRENTLY<\/code> — не блокирует запись, но работает дольше и не может выполняться внутри транзакции. Если упадёт, остаётся невалидный индекс, который нужно удалить и создать заново.<\/p>\n"}, {"id": "3df49c9fe0", "q": "Что такое RPO и RTO?", "a": "<p>RPO — сколько данных допустимо потерять (интервал между бэкапами). RTO — за какое время нужно восстановить работу. От них зависит выбор стратегии бэкапов.<\/p>\n"}], "next": "3-1"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

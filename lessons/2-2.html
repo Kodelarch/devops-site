@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.2 Python для автоматизации — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.2: Python для автоматизации">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.2 · code</div>
+    <h1 class="lesson-title">Python для автоматизации</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Ввод-вывод: скрипт в конвейере</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Строки и парсинг вручную</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Обход в глубину: зависимости сервисов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Рекурсия и запоминание результатов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">JSON и структуры данных</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Множества: сравнить два сервера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Перебор вариантов: itertools</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Обработка ошибок и валидация ввода</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Сложность алгоритма: почему это не мелочь</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Регулярные выражения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Дата и время</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">collections: Counter и defaultdict</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Генераторы и ленивая обработка</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">subprocess — запуск команд из Python</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>DevOps редко пишет Python-приложения с нуля, но постоянно пишет скрипты автоматизации, парсеры логов и мелкие утилиты — и все они опираются ровно на эти базовые кирпичики: ввод-вывод, работа со строками/числами, обход структур данных.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>stdin/stdout</strong> — стандартные потоки ввода и вывода; <code>sys.stdin</code> и <code>input()</code> читают из stdin, <code>print()</code> пишет в stdout.</li>
+<li><strong>Рекурсия</strong> — функция, вызывающая сама себя на более простой версии задачи, пока не дойдёт до тривиального случая.</li>
+<li><strong>Кэширование результатов (мемоизация)</strong> — вместо пересчёта одного и того же несколько раз результат один раз сохраняется и переиспользуется.</li>
+<li><strong>Множество (set)</strong> — коллекция без дубликатов; быстрый способ ответить «сколько здесь разных значений».</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Ввод-вывод: скрипт в конвейере</h2><div class="prose"><p><em>Аналогия:</em> программа — это чёрный ящик с одной дверью на вход и одной на выход. Если дверь стандартная, ящик можно поставить в любой конвейер рядом с <code>grep</code>, <code>sort</code> и <code>awk</code>.</p>
+<p>Большинство утилит DevOps читают данные из stdin и пишут в stdout — тогда их можно соединять конвейером (<a href="../lessons/1-1.html#s-9">1.1 Linux</a>, §9). Python-скрипт умеет то же самое:</p>
+<pre><code class="language-python">import sys
+
+total = 0
+for line in sys.stdin:                  # читаем построчно, сколько бы строк ни было
+    size_kb, path = line.split(maxsplit=1)
+    total += int(size_kb)
+
+print(f&quot;Всего: {total / 1024 / 1024:.2f} ГБ&quot;)
+</code></pre>
+<pre><code class="language-bash">du -k /var/log/* | python3 sum_sizes.py
+</code></pre>
+<p><code>for line in sys.stdin</code> читает ввод строка за строкой и не держит его целиком в памяти — скрипт одинаково работает и на десяти строках, и на десяти миллионах. <code>line.split(maxsplit=1)</code> разбивает строку по пробелам, но не больше одного раза: путь с пробелами внутри останется целым. <code>int(size_kb)</code> переводит текст в число — из stdin всегда приходят строки.</p>
+<p><code>:.2f</code> в f-строке — тот же принцип, что и <code>printf &quot;%.2f&quot;</code> в bash (<a href="../lessons/1-3.html#s-6">1.3 Bash</a>, §6): фиксированное количество знаков после запятой. Для чтения одной строки с клавиатуры есть <code>input()</code>, но в скриптах автоматизации он встречается редко: скрипт, который ждёт ответа человека, нельзя запустить из cron или пайплайна.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Строки и парсинг вручную</h2><div class="prose"><p><em>Аналогия:</em> <code>int(&quot;42&quot;)</code> где-то внутри буквально читает строку слева направо, как человек. Написать разбор самому — хорошее упражнение на то, что обычно скрыто внутри готовой функции, и регулярная рабочая задача, когда готовой функции нет.</p>
+<p>В конфигах и выводе утилит размеры пишут по-человечески: <code>512M</code>, <code>1.5G</code>, <code>20K</code>. Чтобы сравнить их с порогом, нужны байты:</p>
+<pre><code class="language-python">UNITS = {&quot;&quot;: 1, &quot;K&quot;: 1024, &quot;M&quot;: 1024**2, &quot;G&quot;: 1024**3, &quot;T&quot;: 1024**4}
+
+def parse_size(text: str) -&gt; int:
+    text = text.strip().upper().removesuffix(&quot;B&quot;)   # '1.5gb' -&gt; '1.5G'
+    number, unit = text, &quot;&quot;
+    if text and text[-1] in UNITS:
+        number, unit = text[:-1], text[-1]
+    if not number:
+        raise ValueError(f&quot;не указано число: {text!r}&quot;)
+    return int(float(number) * UNITS[unit])
+
+parse_size(&quot;1.5G&quot;)   # 1610612736
+parse_size(&quot;512M&quot;)   # 536870912
+</code></pre>
+<p><code>text[-1]</code> — последний символ строки, <code>text[:-1]</code> — всё, кроме последнего. <code>removesuffix(&quot;B&quot;)</code> убирает необязательную букву B, если она есть. <code>{text!r}</code> в f-строке печатает значение в кавычках — в сообщении об ошибке сразу видно, если строка была пустой или с лишними пробелами. Словарь <code>UNITS</code> вместо цепочки <code>if/elif</code> — привычный приём: добавить новую единицу — значит добавить одну строку.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Обход в глубину: зависимости сервисов</h2><div class="prose"><p><em>Аналогия:</em> выключили базу — что ещё сломается? Чтобы ответить, идёшь от базы к сервисам, которые от неё зависят, потом к сервисам, которые зависят от них, и так далее, пока цепочка не кончится.</p>
+<p>Зависимости удобно хранить словарём «сервис → от кого он зависит» и обходить <strong>в глубину</strong> (DFS):</p>
+<pre><code class="language-python">DEPENDS_ON = {
+    &quot;frontend&quot;: [&quot;api&quot;],
+    &quot;api&quot;: [&quot;postgres&quot;, &quot;redis&quot;, &quot;auth&quot;],
+    &quot;auth&quot;: [&quot;postgres&quot;],
+    &quot;worker&quot;: [&quot;redis&quot;, &quot;postgres&quot;],
+    &quot;postgres&quot;: [],
+    &quot;redis&quot;: [],
+}
+
+def affected_by(failed: str) -&gt; set[str]:
+    &quot;&quot;&quot;Все сервисы, которые сломаются вслед за failed.&quot;&quot;&quot;
+    result = set()
+    def visit(service):
+        for name, deps in DEPENDS_ON.items():
+            if service in deps and name not in result:
+                result.add(name)
+                visit(name)              # идём глубже: кто зависит от этого
+    visit(failed)
+    return result
+
+affected_by(&quot;postgres&quot;)   # {'api', 'auth', 'worker', 'frontend'}
+</code></pre>
+<p>Функция <code>visit</code> вызывает сама себя для каждого найденного зависимого сервиса — так обход уходит вглубь цепочки. Проверка <code>name not in result</code> — защита от повторов и бесконечного цикла, если в зависимостях есть кольцо. Тот же обход используют Docker Compose (<code>depends_on</code>), systemd (<code>After=</code>) и Terraform, когда решают, в каком порядке поднимать сервисы (<a href="../lessons/4-4.html#s-1">4.4 Terraform</a>, §1).</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Рекурсия и запоминание результатов</h2><div class="prose"><p><em>Аналогия:</em> чтобы найти файл в дереве папок, открываешь папку, а в ней — каждую вложенную папку тем же способом. Одно правило, применённое к самому себе, обходит дерево любой глубины.</p>
+<p>Конфиги в YAML и JSON — это вложенные словари. Часто их нужно «распрямить» в плоский список ключей — например, чтобы сравнить два окружения построчно:</p>
+<pre><code class="language-python">def flatten(config: dict, prefix: str = &quot;&quot;) -&gt; dict:
+    flat = {}
+    for key, value in config.items():
+        path = f&quot;{prefix}.{key}&quot; if prefix else key
+        if isinstance(value, dict):
+            flat.update(flatten(value, path))     # вложенный словарь — рекурсия
+        else:
+            flat[path] = value
+    return flat
+
+flatten({&quot;db&quot;: {&quot;host&quot;: &quot;10.0.2.21&quot;, &quot;port&quot;: 5432}, &quot;debug&quot;: False})
+# {'db.host': '10.0.2.21', 'db.port': 5432, 'debug': False}
+</code></pre>
+<p>У рекурсии всегда два случая: <strong>базовый</strong> (значение — не словарь, просто записываем) и <strong>рекурсивный</strong> (словарь — разбираем тем же способом). Без базового случая функция вызывала бы себя бесконечно, пока Python не остановит её ошибкой <code>RecursionError</code>.</p>
+<p>Вторая идея раздела — <strong>не считать одно и то же дважды</strong>. Если функция дорогая (запрос к API, DNS, тяжёлый расчёт), а вызывают её с одними и теми же аргументами, результат запоминают:</p>
+<pre><code class="language-python">from functools import lru_cache
+import socket
+
+@lru_cache(maxsize=1024)
+def resolve(host: str) -&gt; str:
+    return socket.gethostbyname(host)     # сетевой запрос — только при первом вызове
+
+for line in log_lines:
+    ip = resolve(line.host)               # повторные имена берутся из памяти
+</code></pre>
+<p><code>@lru_cache</code> — декоратор: он оборачивает функцию и хранит результаты последних 1024 разных вызовов. Этот же приём в алгоритмах называют <strong>динамическим программированием</strong>: сохранить решение подзадачи и переиспользовать, вместо того чтобы пересчитывать. Ограничение одно: так можно кэшировать только функции, результат которых зависит лишь от аргументов.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>JSON и структуры данных</h2><div class="prose"><p><em>Аналогия:</em> JSON — это просто вложенные словари и списки Python, только записанные текстом для передачи между программами. Почти любой API и почти любая утилита с флагом <code>--output json</code> говорит на нём.</p>
+<pre><code class="language-python">import json
+
+with open(&quot;inventory.json&quot;, encoding=&quot;utf-8&quot;) as f:
+    servers = json.load(f)
+# [{&quot;name&quot;: &quot;web-1&quot;, &quot;zone&quot;: &quot;a&quot;, &quot;ram_gb&quot;: 4, &quot;role&quot;: &quot;web&quot;}, ...]
+
+big = [s for s in servers if s[&quot;ram_gb&quot;] &gt;= 8]
+big.sort(key=lambda s: (s[&quot;zone&quot;], -s[&quot;ram_gb&quot;]))
+
+print(json.dumps(big, indent=2, ensure_ascii=False))
+</code></pre>
+<p><code>sort(key=...)</code> сортирует по конкретному полю словаря: параметр <code>key</code> принимает функцию, которая для каждого элемента вычисляет значение для сравнения. <code>lambda s: (s[&quot;zone&quot;], -s[&quot;ram_gb&quot;])</code> — короткая безымянная функция, которая возвращает кортеж: сначала сортировка по зоне, а внутри зоны — по памяти по убыванию (минус переворачивает порядок для чисел). <code>lambda</code> уместна для таких коротких одноразовых функций, которые нужны только в одном месте. <code>ensure_ascii=False</code> — чтобы русские буквы не превращались в <code>\uXXXX</code>.</p>
+<p>Запись <code>[s for s in servers if ...]</code> — списковое включение с условием (<a href="../lessons/2-1.html#s-9">2.1 Python</a>, §9): новый список только из подходящих элементов.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Множества: сравнить два сервера</h2><div class="prose"><p><em>Аналогия:</em> два списка гостей сверяют не построчно, а как множества: кто есть в обоих, кто только в первом, кто только во втором.</p>
+<p>«На staging работает, на prod нет» — часто потому, что окружения разошлись. Множества сравнивают их одной строкой:</p>
+<pre><code class="language-python">import subprocess
+
+def packages(host: str) -&gt; set[str]:
+    out = subprocess.run([&quot;ssh&quot;, host, &quot;dpkg-query&quot;, &quot;-W&quot;, &quot;-f=${Package}\\n&quot;],
+                         capture_output=True, text=True, check=True).stdout
+    return set(out.split())
+
+staging, prod = packages(&quot;staging-1&quot;), packages(&quot;prod-1&quot;)
+
+print(&quot;только на staging:&quot;, sorted(staging - prod))
+print(&quot;только на prod:   &quot;, sorted(prod - staging))
+print(&quot;общих пакетов:&quot;, len(staging &amp; prod))
+</code></pre>
+<p><code>-</code> — разность множеств (что есть в первом, но нет во втором), <code>&amp;</code> — пересечение, <code>|</code> — объединение. Перевод списка в <code>set</code> к тому же убирает дубликаты: <code>len(set(items))</code> — самый быстрый способ узнать число уникальных значений. Как устроен вызов внешней команды через <code>subprocess</code>, разобрано в §14.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Перебор вариантов: itertools</h2><div class="prose"><p><em>Аналогия:</em> подобрать из нескольких тарифов облака такой набор машин, чтобы хватило мощности и вышло дешевле всего, — как собрать покупку из разных упаковок товара с минимальной итоговой ценой.</p>
+<p>Когда вариантов немного, честный перебор — нормальное решение. <code>itertools</code> делает его без вложенных циклов:</p>
+<pre><code class="language-python">from itertools import combinations_with_replacement
+
+FLAVORS = [            # (название, vCPU, рублей в месяц)
+    (&quot;s-2&quot;, 2, 1900),
+    (&quot;s-4&quot;, 4, 3500),
+    (&quot;s-8&quot;, 8, 6600),
+]
+
+def cheapest(required_cpu: int, max_machines: int = 3):
+    best = None
+    for n in range(1, max_machines + 1):
+        for combo in combinations_with_replacement(FLAVORS, n):
+            cpu = sum(f[1] for f in combo)
+            cost = sum(f[2] for f in combo)
+            if cpu &gt;= required_cpu and (best is None or cost &lt; best[0]):
+                best = (cost, [f[0] for f in combo])
+    return best
+
+cheapest(10)   # (8500, ['s-2', 's-8'])
+</code></pre>
+<p><code>combinations_with_replacement(FLAVORS, n)</code> перебирает все наборы из <code>n</code> тарифов, где один тариф может повторяться: <code>(s-2, s-2)</code>, <code>(s-2, s-4)</code> и так далее, без повторения одного и того же набора в другом порядке. <code>sum(f[1] for f in combo)</code> — сумма по генератору (<a href="../lessons/2-1.html#s-9">2.1 Python</a>, §9). Рядом в модуле есть <code>combinations</code> (без повторов), <code>permutations</code> (с учётом порядка) и <code>product</code> (все сочетания из нескольких списков).</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Обработка ошибок и валидация ввода</h2><div class="prose"><p><em>Аналогия:</em> хороший скрипт не падает молча и не падает с непонятной трассировкой — он говорит человеческим языком, что именно не так со входными данными.</p>
+<pre><code class="language-python">import sys
+
+try:
+    n = int(input())
+    if n &lt;= 0:
+        raise ValueError(&quot;ожидалось натуральное число&quot;)
+except ValueError as e:
+    print(f&quot;Ошибка ввода: {e}&quot;, file=sys.stderr)
+    sys.exit(1)
+</code></pre>
+<p>Важно проверять <strong>именно то</strong>, что просит задача, а не ловить любое исключение молча. Две детали, отличающие рабочий скрипт от учебного: сообщение уходит в <code>stderr</code> (<code>file=sys.stderr</code>), чтобы не смешиваться с полезным выводом, и завершение идёт через <code>sys.exit(1)</code>, а не через встроенный <code>exit()</code> — последний предназначен для интерактивной консоли и в скриптах его использовать не принято.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Сложность алгоритма: почему это не мелочь</h2><div class="prose"><p><em>Аналогия:</em> искать нужную книгу в куче на полу (проверяя каждую по очереди) и искать её в библиотеке с алфавитным каталогом — работа с одной и той же целью, но по времени это две разные вселенные, когда книг миллион, а не десять.</p>
+<p>Big O — это способ сказать, как время работы программы растёт с ростом объёма данных, не привязываясь к конкретному железу.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Обозначение</th>
+<th>Что значит</th>
+<th>Пример из этого урока</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O(1)</td>
+<td>не зависит от размера входа</td>
+<td>взять элемент по индексу списка</td>
+</tr>
+<tr>
+<td>O(n)</td>
+<td>растёт линейно</td>
+<td>пройти список один раз</td>
+</tr>
+<tr>
+<td>O(n²)</td>
+<td>растёт квадратично</td>
+<td>для каждого сервиса перебрать все остальные (§3)</td>
+</tr>
+<tr>
+<td>O(2ⁿ)</td>
+<td>взрывной рост</td>
+<td>перебор всех подмножеств тарифов (§7) при большом их числе</td>
+</tr>
+</tbody>
+</table></div>
+<p>Обход из §3 устроен на O(n²): для каждого найденного сервиса он перебирает весь словарь. Для десятка сервисов это неважно, для тысяч — заметно, и тогда заранее строят обратный словарь «сервис → кто от него зависит», чтобы каждый шаг стоил O(1). Перебор из §7 растёт ещё быстрее: каждый новый тариф умножает число вариантов, поэтому полный перебор годится, только пока вариантов десятки, а не тысячи. Кэш из §4 существует ровно затем, чтобы не платить дважды за одинаковую работу.</p>
+<p><img loading="lazy" src="../assets/diagrams/app1-basics-bigo.webp" alt="" /></p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Лайфхак</summary><div class="callout-body"><p>На собеседовании фраза «какая сложность у вашего решения?» — почти всегда следующий вопрос после «работает ли код». Уметь на глаз оценить, что вложенный цикл — это O(n²), а <code>set()</code> — O(1) на проверку присутствия элемента, — базовый навык, который ждут даже от Python-скриптов автоматизации, а не только от алгоритмических задач.</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Регулярные выражения</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-basics-regex.svg" alt="" /><br />
+<em>Аналогия:</em> регулярка — это шаблон-трафарет, который прикладывают к тексту: где совпало по форме, оттуда и вынимают содержимое.</p>
+<p>Для DevOps это главный инструмент разбора логов: строки в них почти всегда имеют жёсткую структуру, но разбить их простым <code>split()</code> не выйдёт — мешают поля в кавычках с пробелами внутри.</p>
+<pre><code class="language-python">import re
+
+LOG = re.compile(
+    r'(?P&lt;ip&gt;\S+) \S+ \S+ \[(?P&lt;time&gt;[^\]]+)\] '
+    r'&quot;(?P&lt;method&gt;\w+) (?P&lt;path&gt;\S+)[^&quot;]*&quot; (?P&lt;code&gt;\d{3}) (?P&lt;size&gt;\d+)'
+)
+
+line = '203.0.113.5 - - [21/Jul/2026:14:32:10 +0000] &quot;GET /index.html HTTP/1.1&quot; 200 512'
+m = LOG.match(line)
+if m:
+    print(m[&quot;ip&quot;], m[&quot;code&quot;], m[&quot;path&quot;])     # 203.0.113.5 200 /index.html
+</code></pre>
+<p>Кирпичики, из которых всё собирается: <code>\d</code> — цифра, <code>\s</code> — пробельный символ, <code>\w</code> — буква или цифра, <code>\S</code> — любой непробельный (заглавная буква означает «наоборот»). Дальше идут количественные: <code>+</code> — один или больше, <code>*</code> — ноль или больше, <code>?</code> — ноль или один, <code>{3}</code> — ровно три. Квадратные скобки задают набор символов, а <code>^</code> внутри них означает «кроме»: <code>[^\]]+</code> читается как «сколько угодно любых символов, кроме закрывающей скобки».</p>
+<p><code>(?P&lt;имя&gt;...)</code> — <strong>именованная группа</strong>: то, что попало внутрь, потом достаётся по имени через <code>m[&quot;ip&quot;]</code>. Без имён пришлось бы считать группы по номерам и путаться при каждой правке шаблона.</p>
+<p>Префикс <code>r</code> перед строкой (<code>r'...'</code>) отключает обработку обратного слеша самим Python — без него <code>\d</code> пришлось бы писать как <code>\\d</code>. В регулярках его пишут всегда.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Жадность</summary><div class="callout-body"><p>По умолчанию <code>.+</code> захватывает <strong>как можно больше</strong>: на строке с двумя парами кавычек шаблон <code>&quot;.+&quot;</code> съест всё от первой кавычки до последней. Лечится либо ленивым вариантом <code>.+?</code>, либо, что надёжнее, точным описанием «всё, кроме кавычки» — <code>[^&quot;]+</code>. Это причина примерно половины загадок вида «регулярка вроде правильная, но вытаскивает не то».</p>
+</div></details>
+<p>Полезные функции: <code>re.match</code> проверяет с начала строки, <code>re.search</code> ищет в любом месте, <code>re.findall</code> возвращает все совпадения списком, <code>re.sub</code> заменяет. Скомпилированный через <code>re.compile</code> шаблон работает быстрее, если применяется в цикле к миллионам строк.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Дата и время</h2><div class="prose"><p><em>Аналогия:</em> время в логах — это текст, а сравнивать и вычитать можно только настоящие даты. Между ними нужен переводчик.</p>
+<pre><code class="language-python">from datetime import datetime, timedelta, timezone
+
+# из строки лога в объект
+t = datetime.strptime(&quot;21/Jul/2026:14:32:10 +0000&quot;, &quot;%d/%b/%Y:%H:%M:%S %z&quot;)
+
+# обратно в текст
+t.strftime(&quot;%Y-%m-%d %H:%M&quot;)          # '2026-07-21 14:32'
+
+# арифметика
+now = datetime.now(timezone.utc)
+hour_ago = now - timedelta(hours=1)
+if t &gt; hour_ago:
+    print(&quot;свежая запись&quot;)
+
+# сколько прошло
+delta = now - t
+print(delta.total_seconds())
+</code></pre>
+<p><code>strptime</code> — «строку в дату» (p = parse), <code>strftime</code> — «дату в строку» (f = format). Порядок букв путается постоянно, мнемоника простая: <strong>p</strong>arse читает, <strong>f</strong>ormat пишет.</p>
+<p><code>timedelta</code> — промежуток времени; его можно складывать с датами и вычитать из них. Именно так фильтруют логи «за последний час», не разбирая строки вручную.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Часовые пояса — источник тихих багов</summary><div class="callout-body"><p><code>datetime.now()</code> без аргумента возвращает «наивное» время без пояса, и сравнить его с датой из лога, где пояс указан, нельзя — Python выдаст <code>TypeError</code>. Правило для серверного кода: работать всегда в UTC и с осведомлёнными о поясе объектами — <code>datetime.now(timezone.utc)</code>. Это то же соображение, из-за которого на серверах ставят UTC (<a href="../lessons/1-1.html#s-14">1.1 Linux</a>, §14): иначе логи с разных машин невозможно сопоставить.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>collections: Counter и defaultdict</h2><div class="prose"><p><em>Аналогия:</em> готовые контейнеры под задачи, которые иначе приходится собирать руками каждый раз заново.</p>
+<pre><code class="language-python">from collections import Counter, defaultdict
+
+codes = [200, 404, 200, 500, 200, 404]
+
+# было
+counts = {}
+for c in codes:
+    counts[c] = counts.get(c, 0) + 1
+
+# стало
+counts = Counter(codes)              # Counter({200: 3, 404: 2, 500: 1})
+counts.most_common(2)                 # [(200, 3), (404, 2)]
+
+# группировка без проверок «а есть ли уже такой ключ»
+by_ip = defaultdict(list)
+for ip, path in requests:
+    by_ip[ip].append(path)            # список создаётся сам при первом обращении
+</code></pre>
+<p><code>Counter</code> — словарь, который умеет считать, и его <code>most_common(n)</code> сразу выдаёт топ-N. Это буквально готовая замена связке <code>sort | uniq -c | sort -rn | head</code> из <a href="../lessons/1-4.html">1.4 Метрики и логи</a>, только результат остаётся структурой данных, с которой можно работать дальше.</p>
+<p><code>defaultdict(list)</code> избавляет от вечной проверки «есть ли уже такой ключ» перед добавлением в список. Аргумент — функция, создающая значение по умолчанию: <code>list</code> для списков, <code>int</code> для счётчиков, <code>set</code> для множеств.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Генераторы и ленивая обработка</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-basics-generators.svg" alt="" /><br />
+<em>Аналогия:</em> список — цистерна, которую надо целиком заполнить, прежде чем начать пить. Генератор — кран: вода идёт по мере надобности, и в трубе всегда ровно один стакан.</p>
+<p>Разница проявляется на больших файлах, а логи в эксплуатации бывают на десятки гигабайт:</p>
+<pre><code class="language-python">lines = [l for l in open(&quot;huge.log&quot;)]     # ✘ весь файл в память — скрипт убьёт OOM killer
+lines = (l for l in open(&quot;huge.log&quot;))      # ✔ по строке за раз, память постоянна
+</code></pre>
+<p>Одна круглая скобка вместо квадратной решает, упадёт скрипт или нет. Свой генератор пишут через <code>yield</code>:</p>
+<pre><code class="language-python">def errors(path):
+    &quot;&quot;&quot;Отдаёт по одной строке с ошибкой, не загружая файл целиком.&quot;&quot;&quot;
+    with open(path, encoding=&quot;utf-8&quot;) as f:
+        for line in f:
+            if &quot; 5&quot; in line:
+                yield line.rstrip()
+
+for line in errors(&quot;/var/log/nginx/access.log&quot;):
+    print(line)
+</code></pre>
+<p><code>yield</code> — как <code>return</code>, но функция не завершается, а «замирает» до следующего запроса значения. Такие функции удобно составлять в цепочки: один генератор читает, второй фильтрует, третий разбирает — и всё это работает потоком, ничего не накапливая.</p>
+<p>Цена: генератор можно пройти <strong>только один раз</strong>, и у него нет длины — <code>len()</code> выдаст ошибку. Нужно пройти дважды или узнать количество — данные придётся материализовать в список.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>subprocess — запуск команд из Python</h2><div class="prose"><p><em>Аналогия:</em> мост между двумя мирами: Python хорош в логике и структурах данных, а системные утилиты — в работе с системой. <code>subprocess</code> позволяет пользоваться и тем и другим.</p>
+<pre><code class="language-python">import subprocess
+
+result = subprocess.run(
+    [&quot;systemctl&quot;, &quot;is-active&quot;, &quot;nginx&quot;],
+    capture_output=True, text=True, timeout=10
+)
+print(result.returncode)      # 0 если активен
+print(result.stdout.strip())   # 'active'
+
+# упасть, если команда вернула ошибку
+subprocess.run([&quot;nginx&quot;, &quot;-t&quot;], check=True)
+</code></pre>
+<p>Что здесь важно. Команда передаётся <strong>списком аргументов</strong>, а не одной строкой — так пробелы и спецсимволы в путях не ломают разбор. <code>capture_output=True</code> забирает вывод вместо печати на экран, <code>text=True</code> отдаёт его строками, а не байтами. <code>timeout</code> спасает от зависшей навсегда команды. <code>check=True</code> возбуждает исключение при ненулевом коде — аналог <code>set -e</code>.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>shell=True — дыра в безопасности</summary><div class="callout-body"><pre><code class="language-python">subprocess.run(f&quot;ping -c 1 {host}&quot;, shell=True)   # ✘ никогда так не делай
+</code></pre>
+<p>С <code>shell=True</code> строка передаётся оболочке целиком, и если <code>host</code> пришёл извне, значение <code>8.8.8.8; rm -rf /</code> выполнится буквально. Это классическая инъекция команд. Правильно — списком: <code>subprocess.run([&quot;ping&quot;, &quot;-c&quot;, &quot;1&quot;, host])</code>; тогда значение попадает как один аргумент и оболочка не участвует вовсе.</p>
+</div></details>
+<p>Практическая граница: если задача решается штатной библиотекой Python — решай ею, а не вызовом утилиты. <code>shutil.disk_usage()</code> надёжнее, чем разбор вывода <code>df</code>, а <code>pathlib</code> — чем вызов <code>find</code>. <code>subprocess</code> берут там, где готового аналога нет: <code>systemctl</code>, <code>docker</code>, <code>kubectl</code>, <code>git</code>.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>16</b>/20 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Скрипт читает <code>sys.stdin</code> построчно и пишет в stdout — тогда его можно ставить в конвейер рядом с <code>grep</code> и <code>awk</code>.</li>
+<li>Рекурсия — базовый случай плюс вызов себя для вложенной части; обход в глубину находит всё, что зависит от упавшего сервиса. <code>@lru_cache</code> — «не пересчитывай то, что уже посчитал».</li>
+<li><code>set()</code> — мгновенный подсчёт уникальных значений и сравнение окружений через <code>-</code>, <code>&amp;</code>, <code>|</code>.</li>
+<li>Проверяй конкретные ошибки ввода и сообщай о них в stderr с кодом выхода 1, а не лови все исключения подряд.</li>
+<li>Когда вариантов мало — честный перебор (<code>itertools</code>) проще и надёжнее, чем преждевременная оптимизация.</li>
+<li>Регулярки: <code>\d \s \w</code> и количественные <code>+ * ? {n}</code>; именованные группы <code>(?P&lt;имя&gt;...)</code>; префикс <code>r'...'</code> всегда; помни про жадность <code>.+</code>.</li>
+<li><code>strptime</code> читает строку в дату, <code>strftime</code> пишет дату в строку. На серверах работай в UTC с поясом, иначе сравнение дат упадёт.</li>
+<li><code>Counter</code> — готовая замена <code>sort | uniq -c | sort -rn</code>, <code>defaultdict(list)</code> — группировка без проверок на существование ключа.</li>
+<li>Круглые скобки вместо квадратных превращают список в генератор: память постоянна на файле любого размера. Цена — один проход и отсутствие <code>len()</code>.</li>
+<li><code>subprocess.run</code> — только списком аргументов. <code>shell=True</code> с внешними данными — инъекция команд.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>17</b>/20 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Регулярные выражения, <code>subprocess</code> и работа со временем из заданий 2–5 — всё это понадобится в <a href="../projects/m2.html">M2</a>: утилита разбирает даты сертификатов и формирует отчёт.</li>
+</ul>
+</div></details><article class="task" data-task="a462da763f"><h3>Задание 1 — парсинг конфигурации</h3><p>Напиши функцию, которая разбирает строки <code>KEY=value</code> с комментариями <code>#</code> и пустыми строками в словарь, а некорректные строки сообщает с номером строки.<br />
+<strong>Проверка:</strong> pytest-тесты на пустой файл, комментарии, значение со знаком <code>=</code> внутри, строку без <code>=</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="a462da763f"> Сделала руками и проверила</label></article><article class="task" data-task="dcab286bbd"><h3>Задание 2 — регулярные выражения по логам</h3><p>Регулярным выражением с именованными группами разбери строку лога nginx на IP, дату, метод, путь, код и размер.<br />
+<strong>Проверка:</strong> выражение проверено на regex101 и в коде на 5 разных строках, включая строку с запросом <code>-</code> (битый запрос).</p>
+<label class="task-done"><input type="checkbox" data-task-check="dcab286bbd"> Сделала руками и проверила</label></article><article class="task" data-task="428983ddd7"><h3>Задание 3 — генератор для большого файла</h3><p>Напиши генератор, который отдаёт только строки с ошибками 5xx из лога, и посчитай через <code>collections.Counter</code> самые частые пути.<br />
+<strong>Проверка:</strong> обработка файла на 2 ГБ не увеличивает память процесса больше чем на несколько мегабайт (<code>/usr/bin/time -v</code>).</p>
+<label class="task-done"><input type="checkbox" data-task-check="428983ddd7"> Сделала руками и проверила</label></article><article class="task" data-task="244cb4ec99"><h3>Задание 4 — subprocess</h3><p>Из Python вызови <code>df -P</code>, разбери вывод и выведи разделы, занятые больше чем на 80%. Используй <code>subprocess.run</code> со списком аргументов, <code>check=True</code>, <code>capture_output=True</code>, <code>text=True</code>.<br />
+<strong>Проверка:</strong> при несуществующей команде скрипт ловит исключение и пишет понятную ошибку; нигде нет <code>shell=True</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="244cb4ec99"> Сделала руками и проверила</label></article><article class="task" data-task="d63fb17b91"><h3>Задание 5 — время в UTC</h3><p>Напиши функцию, которая принимает время из лога (<code>10/Oct/2026:13:55:36 +0300</code>) и возвращает его в UTC в формате ISO 8601.<br />
+<strong>Проверка:</strong> тест с тремя разными часовыми поясами даёт ожидаемые значения.</p>
+<label class="task-done"><input type="checkbox" data-task-check="d63fb17b91"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>18</b>/20 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>19</b>/20 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>20</b>/20 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-1.html">2.1 Python</a> — язык с нуля, если что-то здесь непонятно</li>
+<li><a href="../lessons/2-3.html">2.3 Параллельность</a> — следующий уровень задач</li>
+<li><a href="../lessons/1-4.html">1.4 Метрики и логи</a> — те же логи, но разбираемые через awk</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Python: https://docs.python.org/3/</li>
+<li>Документация модуля <code>re</code>: https://docs.python.org/3/library/re.html</li>
+<li>Документация <code>subprocess</code>: https://docs.python.org/3/library/subprocess.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-1.html">← 2.1 Python с нуля</a><a class="lesson-jump" href="2-3.html">2.3 Параллельность и асинхронность в Python →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-2", "number": "2.2", "title": "Python для автоматизации", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["a462da763f", "dcab286bbd", "428983ddd7", "244cb4ec99", "d63fb17b91"], "quiz": [{"id": "a0b9f8bdc4", "q": "Почему <code>for line in sys.stdin<\/code> лучше, чем <code>sys.stdin.read()<\/code> для больших входных данных?", "options": ["Он быстрее загружает весь файл", "Он читает построчно и не держит весь ввод в памяти", "Он автоматически разбирает JSON", "<code>read()<\/code> не работает с конвейерами"], "answer": [1], "why": "<p>построчное чтение работает одинаково на десяти строках и на десяти гигабайтах.<\/p>\n"}, {"id": "85952d3729", "q": "Какая сложность у проверки <code>x in some_set<\/code>?", "options": ["O(n)", "O(n²)", "O(1) в среднем", "O(log n)"], "answer": [2], "why": "<p>множества и словари построены на хеш-таблицах. Для списка та же проверка стоит O(n).<\/p>\n"}, {"id": "d7f3f11b1c", "q": "Что делает декоратор <code>@lru_cache<\/code>?", "options": ["Ограничивает время работы функции", "Запоминает результаты вызовов и при тех же аргументах возвращает их без пересчёта", "Записывает вызовы в лог", "Запускает функцию в отдельном потоке"], "answer": [1], "why": "<p>это мемоизация. Подходит только для функций, результат которых зависит лишь от аргументов.<\/p>\n"}, {"id": "ee5971cbeb", "q": "Как безопасно запустить внешнюю команду из Python?", "options": ["<code>os.system(&quot;ls &quot; + path)<\/code>", "<code>subprocess.run(&quot;ls &quot; + path, shell=True)<\/code>", "<code>subprocess.run([&quot;ls&quot;, path], check=True)<\/code>", "<code>eval(&quot;ls &quot; + path)<\/code>"], "answer": [2], "why": "<p>список аргументов не проходит через оболочку, поэтому спецсимволы в <code>path<\/code> не превратятся в команды.<\/p>\n"}, {"id": "73084013f9", "q": "Что вернёт <code>{&quot;a&quot;, &quot;b&quot;, &quot;c&quot;} - {&quot;b&quot;, &quot;c&quot;, &quot;d&quot;}<\/code>?", "options": ["<code>{&quot;a&quot;}<\/code>", "<code>{&quot;d&quot;}<\/code>", "<code>{&quot;a&quot;, &quot;d&quot;}<\/code>", "<code>{&quot;b&quot;, &quot;c&quot;}<\/code>"], "answer": [0], "why": "<p>разность множеств — элементы, которые есть в первом, но нет во втором. Так сравнивают, например, пакеты на двух серверах.<\/p>\n"}, {"id": "0fcf77e80c", "q": "Чем генератор отличается от списка?", "options": ["Генератор быстрее сортируется", "Генератор выдаёт значения по одному и не хранит всю последовательность в памяти", "Генератор можно обходить сколько угодно раз", "У генератора есть <code>len()<\/code>"], "answer": [1], "why": "<p>генератор ленивый: память постоянна на любом объёме, но пройти его можно только один раз.<\/p>\n"}, {"id": "68f820de8a", "q": "Почему в регулярных выражениях Python пишут строку с префиксом <code>r'...'<\/code>?", "options": ["Так регулярка работает быстрее", "Чтобы Python не обрабатывал обратные слеши и <code>\\d<\/code> не пришлось писать как <code>\\\\d<\/code>", "Это обязательный синтаксис модуля <code>re<\/code>", "Чтобы поиск был без учёта регистра"], "answer": [1], "why": "<p>«сырая» строка передаёт обратные слеши в регулярное выражение как есть.<\/p>\n"}], "cards": [{"id": "9f3e5a813b", "q": "Что такое генератор и зачем он нужен?", "a": "<p>Функция с <code>yield<\/code>, которая отдаёт значения по одному, не держа всю последовательность в памяти. Нужна для обработки больших файлов и потоков данных.<\/p>\n"}, {"id": "c15b021999", "q": "Какая сложность у поиска в списке и в множестве?", "a": "<p>Список — O(n), перебор. Множество и словарь — O(1) в среднем. Проверка <code>x in list<\/code> в цикле по большому списку даёт O(n²).<\/p>\n"}, {"id": "f0f0f373ab", "q": "Почему 0.1 + 0.2 != 0.3?", "a": "<p>Числа с плавающей точкой хранятся в двоичном виде, и 0.1 не представляется точно. Для денег используют <code>Decimal<\/code> или целые копейки; для сравнения float — <code>math.isclose<\/code>.<\/p>\n"}, {"id": "94d9c55e80", "q": "Чем опасен <code>subprocess<\/code> с <code>shell=True<\/code>?", "a": "<p>Строка интерпретируется оболочкой, и пользовательские данные в ней позволяют выполнить произвольную команду (инъекция). Безопаснее передавать список аргументов без оболочки.<\/p>\n"}, {"id": "a80cabba9b", "q": "Что делает Counter и defaultdict?", "a": "<p><code>Counter<\/code> считает частоты элементов и умеет <code>most_common(n)<\/code>. <code>defaultdict<\/code> создаёт значение по умолчанию для отсутствующего ключа — не нужно проверять <code>if key in d<\/code>.<\/p>\n"}, {"id": "755e485c83", "q": "Почему время на сервере хранят в UTC?", "a": "<p>Нет перехода на летнее время, логи разных серверов сопоставимы, нет неоднозначных моментов. В местное время переводят только при показе пользователю.<\/p>\n"}, {"id": "02d7bde196", "q": "Чем <code>json.load<\/code> отличается от <code>json.loads<\/code>?", "a": "<p><code>load<\/code> читает из файлового объекта, <code>loads<\/code> — из строки. Аналогично <code>dump<\/code> и <code>dumps<\/code>.<\/p>\n"}], "next": "2-3"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

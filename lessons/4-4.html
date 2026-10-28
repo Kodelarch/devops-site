@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.4 Terraform: инфраструктура как код — DevOps-маршрут</title>
+<meta name="description" content="Урок 4.4: Terraform: инфраструктура как код">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c4)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-4">← 4. Облако и IaC</a>
+    <div class="sidebar-art"><svg class="art art-cloud" viewBox="0 0 240 140" role="img" aria-label="Облако и серверы" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M84 58 C66 58 62 38 80 34 C82 16 108 12 118 26 C128 10 158 14 160 34 C180 34 184 58 164 58 Z"/>
+<path class="flow" d="M122 60 V76 M122 76 H58 V88 M122 76 V88 M122 76 H186 V88"/>
+<g class="srv v1"><rect x="38" y="90" width="40" height="28" rx="4"/><circle class="led l1" cx="70" cy="104" r="2.4"/><path class="dim" d="M45 104 H60"/></g>
+<g class="srv v2"><rect x="102" y="90" width="40" height="28" rx="4"/><circle class="led l2" cx="134" cy="104" r="2.4"/><path class="dim" d="M109 104 H124"/></g>
+<g class="srv v3"><rect x="166" y="90" width="40" height="28" rx="4"/><circle class="led l3" cx="198" cy="104" r="2.4"/><path class="dim" d="M173 104 H188"/></g>
+<text class="lbl" x="18" y="134">terraform apply</text>
+</svg></div>
+    <div class="lesson-number">lesson 4.4 · infra</div>
+    <h1 class="lesson-title">Terraform: инфраструктура как код</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Декларативный подход</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Язык HCL: блоки и ссылки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Рабочий цикл: init, plan, apply, destroy</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Состояние: память Terraform</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Удалённое состояние и блокировки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Переменные, локальные значения и выходы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Несколько одинаковых ресурсов: count и for_each</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Источники данных: читать, а не создавать</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Модули: переиспользование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Импорт и дрейф</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Terraform в CI/CD</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Terraform и Ansible вместе</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Типичные ошибки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В <a href="../lessons/4-2.html">4.2 Облако</a> машины, сети и базы создавались командами или кликами в консоли облака. Через месяц такой работы никто не может сказать, какие ресурсы существуют, зачем они нужны и как воссоздать окружение с нуля. Стоит потерять один аккаунт или случайно удалить сеть — и восстановление превращается в археологию.</p>
+<p>Terraform описывает инфраструктуру в текстовых файлах: какие сети, машины, балансировщики и базы должны существовать. Инструмент сам сравнивает описание с реальностью и создаёт, меняет или удаляет ресурсы, чтобы привести облако к описанному виду. Описание лежит в git, проходит ревью и воспроизводит окружение одной командой.</p>
+<p>Terraform — стандарт де-факто для инфраструктуры как кода: он есть почти в каждой вакансии, где упоминается облако. После смены лицензии в 2023 году сообщество выпустило совместимый открытый форк <strong>OpenTofu</strong>; команды и синтаксис у них одинаковые, и всё, что написано ниже, применимо к обоим.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>IaC (Infrastructure as Code)</strong> — описание инфраструктуры в файлах вместо ручных действий.</li>
+<li><strong>Провайдер</strong> — плагин, который знает API конкретного облака или сервиса.</li>
+<li><strong>Ресурс (resource)</strong> — объект, которым управляет Terraform: машина, сеть, запись DNS.</li>
+<li><strong>Источник данных (data source)</strong> — объект, который Terraform только читает, но не создаёт.</li>
+<li><strong>Состояние (state)</strong> — файл, где Terraform помнит, какие ресурсы он создал и с какими параметрами.</li>
+<li><strong>План (plan)</strong> — список изменений, которые Terraform собирается сделать.</li>
+<li><strong>Модуль</strong> — переиспользуемый набор ресурсов с входными переменными и выходными значениями.</li>
+<li><strong>Дрейф (drift)</strong> — расхождение реальной инфраструктуры с описанием в коде.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Декларативный подход</h2><div class="prose"><p><em>Аналогия:</em> заказ в ресторане. Ты говоришь «хочу пасту карбонара», а не «поставь кастрюлю, налей воды, включи огонь». Как именно её приготовить — забота кухни.</p>
+<p>Есть два способа описывать инфраструктуру:</p>
+<ul>
+<li><strong>Императивный</strong> — последовательность команд: «создай сеть, затем подсеть, затем машину». Скрипт на bash с вызовами <code>yc</code> или <code>aws</code>. Повторный запуск создаст вторую копию всего, а удалить лишнее он не умеет.</li>
+<li><strong>Декларативный</strong> — описание результата: «должна быть сеть, в ней подсеть, в подсети две машины». Инструмент сам вычисляет, какие действия нужны, чтобы реальность совпала с описанием.</li>
+</ul>
+<p>Terraform декларативный. Это даёт три важных свойства:</p>
+<p><strong>Повторный запуск безопасен.</strong> Если всё уже создано, Terraform ничего не делает — та же идемпотентность, что в <a href="../lessons/4-3.html#s-6">4.3 Ansible</a>, §6.</p>
+<p><strong>Удаление — тоже изменение кода.</strong> Убрал ресурс из файла — Terraform удалит его из облака. Скрипты так не умеют, и именно поэтому в облаке копятся забытые ресурсы, о которых шла речь в <a href="../lessons/4-2.html#s-10">4.2 Облако</a>, §10.</p>
+<p><strong>Порядок вычисляется сам.</strong> Terraform строит граф зависимостей: подсеть ссылается на сеть, значит сеть создаётся первой. Независимые ресурсы создаются параллельно.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Язык HCL: блоки и ссылки</h2><div class="prose"><p><em>Аналогия:</em> анкета с полями. Каждый блок — отдельная анкета, а поля одной анкеты могут ссылаться на номер другой.</p>
+<p>Конфигурация пишется на HCL (HashiCorp Configuration Language) в файлах <code>.tf</code>. Terraform читает все <code>.tf</code> в каталоге как одно целое, поэтому их разбивают по смыслу:</p>
+<pre><code>infra/
+  versions.tf     # версии Terraform и провайдеров
+  providers.tf    # настройки провайдеров
+  variables.tf    # входные переменные
+  network.tf      # сеть
+  compute.tf      # машины
+  outputs.tf      # выходные значения
+  terraform.tfvars
+</code></pre>
+<p>Минимальная конфигурация для Yandex Cloud:</p>
+<pre><code class="language-hcl"># versions.tf
+terraform {
+  required_version = &quot;&gt;= 1.6&quot;
+  required_providers {
+    yandex = {
+      source  = &quot;yandex-cloud/yandex&quot;
+      version = &quot;~&gt; 0.130&quot;
+    }
+  }
+}
+
+# providers.tf
+provider &quot;yandex&quot; {
+  folder_id = var.folder_id
+  zone      = &quot;ru-central1-a&quot;
+}
+
+# network.tf
+resource &quot;yandex_vpc_network&quot; &quot;main&quot; {
+  name = &quot;main&quot;
+}
+
+resource &quot;yandex_vpc_subnet&quot; &quot;private_a&quot; {
+  name           = &quot;private-a&quot;
+  zone           = &quot;ru-central1-a&quot;
+  network_id     = yandex_vpc_network.main.id
+  v4_cidr_blocks = [&quot;10.0.1.0/24&quot;]
+}
+</code></pre>
+<p>Строка <code>network_id = yandex_vpc_network.main.id</code> — ссылка: «возьми ID той сети, которую создашь выше». По таким ссылкам Terraform и строит граф зависимостей. Формат ссылки всегда <code>&lt;тип_ресурса&gt;.&lt;имя&gt;.&lt;атрибут&gt;</code>.</p>
+<p>Для AWS всё выглядит так же, меняются только имена типов ресурсов (<code>aws_vpc</code>, <code>aws_subnet</code>, <code>aws_instance</code>). Принципы из <a href="../lessons/4-2.html">4.2 Облако</a> переносятся один в один.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Рабочий цикл: init, plan, apply, destroy</h2><div class="prose"><p><em>Аналогия:</em> ремонт по смете. Сначала смета (plan), её согласование, потом работы (apply). Никто не начинает ломать стены без сметы.</p>
+<pre><code class="language-bash">terraform init        # скачать провайдеры, настроить бэкенд состояния
+terraform fmt         # отформатировать код
+terraform validate    # проверить синтаксис и ссылки
+terraform plan        # показать, что будет сделано
+terraform apply       # применить (снова покажет план и спросит подтверждение)
+terraform destroy     # удалить всё, что описано
+</code></pre>
+<p>Вывод <code>plan</code> — главное, что нужно научиться читать:</p>
+<pre><code>  # yandex_compute_instance.web[1] will be created
+  + resource &quot;yandex_compute_instance&quot; &quot;web&quot; { ... }
+
+  # yandex_vpc_subnet.private_a will be updated in-place
+  ~ resource &quot;yandex_vpc_subnet&quot; &quot;private_a&quot; { ... }
+
+  # yandex_compute_instance.db must be replaced
+-/+ resource &quot;yandex_compute_instance&quot; &quot;db&quot; { ... }
+
+Plan: 1 to add, 1 to change, 1 to destroy.
+</code></pre>
+<ul>
+<li><code>+</code> — создать.</li>
+<li><code>~</code> — изменить на месте, ресурс сохранится.</li>
+<li><code>-/+</code> — <strong>пересоздать</strong>: удалить старый и создать новый. Для машины с данными это потеря данных.</li>
+<li><code>-</code> — удалить.</li>
+</ul>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Всегда читай план перед apply</summary><div class="callout-body"><p>Некоторые параметры нельзя изменить у существующего ресурса — например, зону размещения машины или имя базы. Terraform в таком случае тихо планирует пересоздание. Строчка <code>must be replaced</code> у базы данных означает удаление базы со всем содержимым. Правило: <strong><code>apply</code> только после того, как прочитал план целиком</strong>, а в CI план выводится в merge request и смотрится на ревью.</p>
+</div></details>
+<p>Для защиты критичных ресурсов есть блок <code>lifecycle</code>:</p>
+<pre><code class="language-hcl">resource &quot;yandex_mdb_postgresql_cluster&quot; &quot;main&quot; {
+  # ...
+  lifecycle {
+    prevent_destroy = true   # plan упадёт с ошибкой, если ресурс решат удалить
+  }
+}
+</code></pre>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Состояние: память Terraform</h2><div class="prose"><p><em>Аналогия:</em> инвентарная книга склада. Без неё на складе лежат вещи, но непонятно, какие из них твои, а какие соседа.</p>
+<p>После <code>apply</code> Terraform записывает в файл <code>terraform.tfstate</code>, какие ресурсы он создал, их ID в облаке и все атрибуты. При следующем <code>plan</code> он сравнивает три вещи: код, состояние и реальность.</p>
+<p>Отсюда следствия, которые важно понимать:</p>
+<ul>
+<li><strong>Terraform управляет только тем, что есть в состоянии.</strong> Машину, созданную руками в консоли, он не видит и не тронет.</li>
+<li><strong>Потеря состояния — катастрофа.</strong> Ресурсы в облаке останутся, но Terraform о них забудет и при следующем <code>apply</code> попытается создать их заново (с конфликтами имён) или оставит висеть без управления.</li>
+<li><strong>Состояние содержит секреты.</strong> Пароли баз, ключи и токены хранятся в нём открытым текстом. Поэтому <code>terraform.tfstate</code> <strong>никогда не коммитят в git</strong>.</li>
+</ul>
+<pre><code class="language-gitignore"># .gitignore
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars        # если в них есть секреты
+crash.log
+</code></pre>
+<p>Но <code>.terraform.lock.hcl</code> коммитят обязательно: в нём зафиксированы точные версии провайдеров, как <code>package-lock.json</code> или <code>requirements.txt</code> с версиями.</p>
+
+<figure class="explain" data-anim="terraform-plan"><figcaption><span class="explain-tag">▶ схема</span>Код, state и облако: plan и apply на практике</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Удалённое состояние и блокировки</h2><div class="prose"><p><em>Аналогия:</em> общая тетрадь учёта, которая лежит в сейфе у администратора. Записать в неё может только один человек одновременно — остальные ждут.</p>
+<p>Пока с инфраструктурой работает один человек, локальный файл состояния терпим. В команде он не работает: у каждого своя версия, и два одновременных <code>apply</code> портят инфраструктуру.</p>
+<p>Решение — <strong>удалённый бэкенд</strong>: состояние хранится в объектном хранилище (<a href="../lessons/4-2.html#s-6">4.2 Облако</a>, §6), а для блокировки используется отдельный механизм.</p>
+<pre><code class="language-hcl">terraform {
+  backend &quot;s3&quot; {
+    bucket       = &quot;my-company-tfstate&quot;
+    key          = &quot;prod/network/terraform.tfstate&quot;
+    region       = &quot;ru-central1&quot;
+    endpoints    = { s3 = &quot;https://storage.yandexcloud.net&quot; }
+    use_lockfile = true      # блокировка через объект в бакете
+    skip_region_validation      = true
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+  }
+}
+</code></pre>
+<p>Требования к бакету для состояния:</p>
+<ul>
+<li><strong>Версионирование включено</strong> — чтобы откатиться, если состояние испортилось.</li>
+<li><strong>Доступ закрыт</strong> — состояние содержит секреты.</li>
+<li><strong>Шифрование включено.</strong></li>
+</ul>
+<p>Блокировка гарантирует, что пока один <code>apply</code> идёт, второй дождётся или упадёт с понятной ошибкой. В GitLab есть встроенный HTTP-бэкенд для состояния Terraform — удобно, если инфраструктура и так живёт в GitLab (<a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>).</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Переменные, локальные значения и выходы</h2><div class="prose"><p><em>Аналогия:</em> функция в программировании: параметры на входе, вычисления внутри, результат на выходе.</p>
+<p><strong>Входные переменные</strong> делают конфигурацию настраиваемой:</p>
+<pre><code class="language-hcl"># variables.tf
+variable &quot;folder_id&quot; {
+  type        = string
+  description = &quot;ID каталога в Yandex Cloud&quot;
+}
+
+variable &quot;web_count&quot; {
+  type    = number
+  default = 2
+  validation {
+    condition     = var.web_count &gt;= 1 &amp;&amp; var.web_count &lt;= 10
+    error_message = &quot;От 1 до 10 веб-серверов.&quot;
+  }
+}
+
+variable &quot;db_password&quot; {
+  type      = string
+  sensitive = true      # не печатать в выводе plan/apply
+}
+</code></pre>
+<p>Значения задаются в <code>terraform.tfvars</code>, флагом <code>-var</code> или переменными окружения <code>TF_VAR_имя</code>. Последний способ удобен для секретов в CI.</p>
+<p><strong>Локальные значения</strong> — вычисления внутри конфигурации, чтобы не повторяться:</p>
+<pre><code class="language-hcl">locals {
+  common_labels = {
+    project = &quot;shop&quot;
+    env     = var.env
+    owner   = &quot;devops&quot;
+  }
+}
+</code></pre>
+<p>Те самые обязательные теги из <a href="../lessons/4-2.html#s-10">4.2 Облако</a>, §10 — описанные один раз и проставленные на все ресурсы.</p>
+<p><strong>Выходы</strong> — то, что конфигурация отдаёт наружу:</p>
+<pre><code class="language-hcl"># outputs.tf
+output &quot;web_ips&quot; {
+  value = yandex_compute_instance.web[*].network_interface[0].ip_address
+}
+</code></pre>
+<p>После <code>apply</code> их показывает <code>terraform output</code>. Типичное использование — передать адреса созданных машин в инвентарь Ansible.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Несколько одинаковых ресурсов: count и for_each</h2><div class="prose"><p><em>Аналогия:</em> печать визиток. Не рисовать каждую вручную, а задать шаблон и количество.</p>
+<pre><code class="language-hcl"># count: N одинаковых ресурсов, обращение по номеру
+resource &quot;yandex_compute_instance&quot; &quot;web&quot; {
+  count = var.web_count
+  name  = &quot;web-${count.index + 1}&quot;
+  # ...
+}
+
+# for_each: ресурс на каждый элемент словаря, обращение по ключу
+variable &quot;subnets&quot; {
+  default = {
+    a = { zone = &quot;ru-central1-a&quot;, cidr = &quot;10.0.1.0/24&quot; }
+    b = { zone = &quot;ru-central1-b&quot;, cidr = &quot;10.0.2.0/24&quot; }
+  }
+}
+
+resource &quot;yandex_vpc_subnet&quot; &quot;private&quot; {
+  for_each       = var.subnets
+  name           = &quot;private-${each.key}&quot;
+  zone           = each.value.zone
+  v4_cidr_blocks = [each.value.cidr]
+  network_id     = yandex_vpc_network.main.id
+}
+</code></pre>
+<p>Выбор между ними важнее, чем кажется:</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>count и удаление из середины</summary><div class="callout-body"><p>С <code>count</code> ресурсы адресуются по номеру: <code>web[0]</code>, <code>web[1]</code>, <code>web[2]</code>. Если удалить элемент из середины списка, номера сдвинутся, и Terraform решит <strong>пересоздать</strong> все ресурсы после него. С <code>for_each</code> адрес — ключ (<code>private[&quot;a&quot;]</code>), и удаление одного элемента не трогает остальные. Правило: <code>count</code> — для действительно одинаковых ресурсов, где важно только количество; <code>for_each</code> — когда у каждого есть своё имя или параметры.</p>
+</div></details>
+<p>Подсети в двух зонах из примера — это ровно правило «минимум две зоны доступности» из <a href="../lessons/4-2.html#s-2">4.2 Облако</a>, §2, записанное кодом.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Источники данных: читать, а не создавать</h2><div class="prose"><p><em>Аналогия:</em> справочник. Ты не издаёшь его, а только смотришь нужный номер.</p>
+<p>Не всё нужно создавать. Образ ОС, существующая сеть, созданная другой командой, текущий каталог — их нужно только прочитать:</p>
+<pre><code class="language-hcl">data &quot;yandex_compute_image&quot; &quot;ubuntu&quot; {
+  family = &quot;ubuntu-2404-lts&quot;
+}
+
+resource &quot;yandex_compute_instance&quot; &quot;web&quot; {
+  boot_disk {
+    initialize_params {
+      image_id = data.yandex_compute_image.ubuntu.id   # всегда свежий образ семейства
+    }
+  }
+  # ...
+}
+</code></pre>
+<p>Источник данных выполняется при каждом <code>plan</code> и возвращает актуальное значение. С образами это палка о двух концах: при выходе нового образа Terraform захочет пересоздать машины. Для продакшена образ часто фиксируют конкретным ID.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Модули: переиспользование</h2><div class="prose"><p><em>Аналогия:</em> типовой проект — тот же принцип, что и роли в <a href="../lessons/4-3.html#s-10">4.3 Ansible</a>, §10.</p>
+<p>Модуль — каталог с <code>.tf</code> файлами, который вызывают из другой конфигурации с параметрами:</p>
+<pre><code class="language-hcl">module &quot;network&quot; {
+  source  = &quot;./modules/network&quot;
+  name    = &quot;prod&quot;
+  subnets = var.subnets
+}
+
+module &quot;web&quot; {
+  source    = &quot;./modules/vm-group&quot;
+  count_vm  = 3
+  subnet_id = module.network.subnet_ids[&quot;a&quot;]
+}
+</code></pre>
+<p>Внутри модуля — свои <code>variables.tf</code> (вход) и <code>outputs.tf</code> (выход). Модули бывают локальные, из git-репозитория (<code>source = &quot;git::https://...?ref=v1.2.0&quot;</code>) или из публичного реестра.</p>
+<p>Типичная структура проекта с несколькими окружениями:</p>
+<pre><code>modules/
+  network/
+  vm-group/
+  postgres/
+envs/
+  dev/      main.tf  terraform.tfvars  backend.tf
+  staging/  main.tf  terraform.tfvars  backend.tf
+  prod/     main.tf  terraform.tfvars  backend.tf
+</code></pre>
+<p>Код ресурсов описан один раз в модулях, окружения отличаются только параметрами и <strong>отдельным файлом состояния</strong>. Отдельное состояние на окружение — принципиально: ошибка в dev не должна уметь задеть prod.</p>
+<p>Ещё одно правило: <strong>версию модуля фиксируют</strong>. Модуль, подключённый из ветки <code>main</code>, однажды изменится, и следующий <code>plan</code> неожиданно захочет пересоздать половину инфраструктуры.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Импорт и дрейф</h2><div class="prose"><p><em>Аналогия:</em> инвентаризация. Что-то на складе есть, но в книге не записано — значит, надо внести. Что-то записано, но переложено — надо вернуть на место.</p>
+<p><strong>Импорт.</strong> Ресурс уже существует (создан руками до появления Terraform), и его нужно взять под управление:</p>
+<pre><code class="language-hcl">import {
+  to = yandex_vpc_network.main
+  id = &quot;enp1234567890abcdef&quot;
+}
+</code></pre>
+<p>После <code>terraform plan -generate-config-out=generated.tf</code> Terraform сам напишет описание ресурса по его текущему состоянию. Сгенерированный код потом причёсывают руками.</p>
+<p><strong>Дрейф.</strong> Кто-то поменял ресурс в консоли облака — открыл порт в группе безопасности «на минутку». Следующий <code>plan</code> покажет изменение: Terraform захочет вернуть всё как в коде. Это и хорошо (дрейф виден), и опасно (если правка была аварийной и нужной, её затрут).</p>
+<p>Для регулярной проверки дрейфа в CI запускают <code>terraform plan -detailed-exitcode</code> по расписанию: код выхода <code>2</code> означает, что реальность расходится с кодом.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Правило команды про ручные правки</summary><div class="callout-body"><p>Ручная правка в консоли допустима только в аварии — и сразу после неё изменение переносится в код. Иначе следующий <code>apply</code> от коллеги молча откатит твой фикс в самый неподходящий момент.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Terraform в CI/CD</h2><div class="prose"><p><em>Аналогия:</em> двухэтапное согласование: сначала смету смотрят на совещании, подписывают — и только потом начинаются работы.</p>
+<p>Типовой пайплайн для инфраструктуры:</p>
+<pre><code class="language-yaml">stages: [validate, plan, apply]
+
+validate:
+  stage: validate
+  script:
+    - terraform fmt -check
+    - terraform init -backend=false
+    - terraform validate
+
+plan:
+  stage: plan
+  script:
+    - terraform init
+    - terraform plan -out=tfplan
+  artifacts:
+    paths: [tfplan]
+
+apply:
+  stage: apply
+  script:
+    - terraform init
+    - terraform apply tfplan     # применяется ровно тот план, что смотрели
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == &quot;main&quot;
+</code></pre>
+<p>Ключевые моменты:</p>
+<ul>
+<li><strong>План сохраняется в файл</strong> (<code>-out</code>) и применяется именно он. Иначе между ревью и <code>apply</code> кто-то мог поменять инфраструктуру, и применится не то, что смотрели.</li>
+<li><strong>Apply — вручную</strong> и только из основной ветки, по аналогии со стадией staging в <a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>.</li>
+<li><strong>Учётные данные облака</strong> — у раннера через сервисный аккаунт с ограниченными правами или через защищённые переменные (<a href="../lessons/3-2.html#s-11">3.2 CI-CD</a>, §11). Ни в коем случае не в репозитории.</li>
+<li>В merge request выводят план — ревьюер видит не только код, но и что именно изменится в облаке.</li>
+</ul>
+<p>Для проверки безопасности конфигурации существуют сканеры вроде <strong>Checkov</strong>, <strong>tfsec</strong> (сейчас часть <strong>Trivy</strong>): они находят открытые наружу группы безопасности, публичные бакеты и незашифрованные диски до того, как ресурсы созданы (<a href="../lessons/6-2.html">6.2 DevSecOps</a>).</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Terraform и Ansible вместе</h2><div class="prose"><p><em>Аналогия:</em> бригада строителей сдаёт дом с ключами и планом, а отделочники по этому плану заходят в каждую квартиру.</p>
+<p>Типовая связка из <a href="../lessons/4-3.html#s-13">4.3 Ansible</a>, §13:</p>
+<ol>
+<li>Terraform создаёт сеть, машины, балансировщик и базу.</li>
+<li>Выходные значения (IP машин) превращаются в инвентарь Ansible.</li>
+<li>Ansible настраивает машины.</li>
+</ol>
+<p>Связать можно разными способами: шаблоном инвентаря через ресурс <code>local_file</code>, динамическим инвентарём Ansible по тегам облака или выводом <code>terraform output -json</code>, который читает скрипт. Самый чистый вариант для облака — <strong>динамический инвентарь по тегам</strong>: Terraform ставит на машины теги <code>role=web</code>, Ansible по этим тегам их находит, и прямой связи между инструментами нет.</p>
+<p>Начальную настройку машины (создать пользователя, положить SSH-ключ) часто делают ещё при создании через <strong>cloud-init</strong> — параметр <code>user_data</code> в описании машины. Остальное — Ansible.</p>
+<pre><code class="language-hcl">resource &quot;yandex_compute_instance&quot; &quot;web&quot; {
+  metadata = {
+    user-data = templatefile(&quot;${path.module}/cloud-init.yaml&quot;, {
+      ssh_key = file(&quot;~/.ssh/id_ed25519.pub&quot;)
+    })
+  }
+}
+</code></pre>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Типичные ошибки</h2><div class="prose"><p><em>Аналогия:</em> список «как не надо», собранный из чужих инцидентов.</p>
+<ul>
+<li><strong>Состояние в git.</strong> Вместе с паролями от баз. Удалить из истории потом очень сложно (<a href="../lessons/0-1.html">0.1 Git</a>).</li>
+<li><strong>Одно состояние на всё.</strong> Dev, staging и prod в одном файле — один неудачный <code>apply</code> задевает всё сразу.</li>
+<li><strong><code>apply</code> без чтения плана.</strong> Особенно опасно с <code>-auto-approve</code> в скриптах.</li>
+<li><strong>Версии провайдеров не зафиксированы.</strong> Новая мажорная версия провайдера меняет поведение, и <code>plan</code> внезапно предлагает пересоздать половину ресурсов.</li>
+<li><strong>Ручные правки в консоли.</strong> Дрейф копится, и следующий <code>apply</code> либо всё откатит, либо упадёт.</li>
+<li><strong>Секреты в <code>.tfvars</code> в репозитории.</strong> Секреты — через переменные окружения, хранилище секретов или с <code>sensitive = true</code>.</li>
+<li><strong>Забытый <code>destroy</code> после учебного стенда.</strong> Счёт от облака придёт в любом случае (<a href="../lessons/4-2.html#s-10">4.2 Облако</a>, §10).</li>
+</ul>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>15</b>/19 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Terraform <strong>декларативный</strong>: описываешь результат, инструмент сам вычисляет действия и порядок по ссылкам между ресурсами.</li>
+<li>Цикл: <code>init</code> → <code>plan</code> → <code>apply</code>. <strong>План читают целиком</strong>, особенно строки <code>must be replaced</code>.</li>
+<li><strong>Состояние</strong> — память Terraform. Не коммитится в git, содержит секреты, хранится в удалённом бэкенде с версионированием и блокировкой.</li>
+<li><code>.terraform.lock.hcl</code> <strong>коммитят</strong>, версии провайдеров и модулей фиксируют.</li>
+<li>Переменные — вход, <code>locals</code> — вычисления, <code>outputs</code> — результат. Секреты помечают <code>sensitive</code>.</li>
+<li><code>for_each</code> безопаснее <code>count</code>, когда у ресурсов есть свои имена: удаление из середины не пересоздаёт соседей.</li>
+<li>Модули убирают повторы; окружения отличаются параметрами и <strong>отдельным состоянием</strong>.</li>
+<li>Существующие ресурсы берут под управление через <code>import</code>, дрейф ловят регулярным <code>plan</code>.</li>
+<li>В CI: план сохраняется в файл, <code>apply</code> применяет именно его, вручную и только из main.</li>
+<li>Terraform создаёт инфраструктуру, Ansible её настраивает, cloud-init делает первичную настройку машины.</li>
+<li>Защита критичных ресурсов — <code>prevent_destroy</code>. Учебные стенды — <code>destroy</code> после занятия.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>16</b>/19 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Все задания урока — Terraform-часть <a href="../projects/p2.html">P2</a>: сеть в двух зонах, машины, удалённое состояние, модули и связка с Ansible.</li>
+</ul>
+</div></details><article class="task" data-task="0a82d21d30"><h3>Задание 1 — первая сеть</h3><p>Создай аккаунт в Yandex Cloud (грант на старт) и сервисный аккаунт с ролью <code>editor</code> на каталог. Опиши в Terraform сеть и две подсети в разных зонах через <code>for_each</code>.<br />
+<strong>Проверка:</strong> <code>terraform plan</code> показывает <code>3 to add</code>; после <code>apply</code> повторный <code>plan</code> — <code>No changes</code>. В консоли облака видны сеть и подсети.</p>
+<label class="task-done"><input type="checkbox" data-task-check="0a82d21d30"> Сделала руками и проверила</label></article><article class="task" data-task="573c2b38a2"><h3>Задание 2 — машины и группа безопасности</h3><p>Добавь две машины через <code>count</code> с образом Ubuntu из источника данных, группу безопасности, разрешающую 22 только с твоего IP и 80 отовсюду, и cloud-init с твоим SSH-ключом. Выведи публичные IP через <code>output</code>.<br />
+<strong>Проверка:</strong> <code>terraform output web_ips</code> показывает два адреса, <code>ssh ubuntu@&lt;ip&gt;</code> пускает по ключу, с чужого IP порт 22 недоступен.</p>
+<label class="task-done"><input type="checkbox" data-task-check="573c2b38a2"> Сделала руками и проверила</label></article><article class="task" data-task="17679afcb5"><h3>Задание 3 — удалённое состояние</h3><p>Создай бакет в Object Storage с версионированием и перенеси туда состояние (<code>terraform init -migrate-state</code>).<br />
+<strong>Проверка:</strong> локального <code>terraform.tfstate</code> больше нет, в бакете лежит объект состояния; запусти <code>apply</code> в двух терминалах одновременно — второй должен упереться в блокировку.</p>
+<label class="task-done"><input type="checkbox" data-task-check="17679afcb5"> Сделала руками и проверила</label></article><article class="task" data-task="ae89e6a505"><h3>Задание 4 — модуль и два окружения</h3><p>Вынеси сеть и машины в модуль <code>modules/web-stack</code>, создай <code>envs/dev</code> и <code>envs/prod</code> с разным числом машин и разными ключами состояния в бакете.<br />
+<strong>Проверка:</strong> <code>apply</code> в dev не показывает в плане ничего, что относится к prod.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ae89e6a505"> Сделала руками и проверила</label></article><article class="task" data-task="ab8fddafe2"><h3>Задание 5 — связка с Ansible</h3><p>Сгенерируй инвентарь Ansible из <code>terraform output -json</code> (скриптом или ресурсом <code>local_file</code>) и прогони роль <code>common</code> из <a href="../lessons/4-3.html">4.3 Ansible</a>.<br />
+<strong>Проверка:</strong> одна последовательность <code>terraform apply &amp;&amp; ansible-playbook ...</code> поднимает настроенный стенд с нуля. В конце — <strong><code>terraform destroy</code></strong> и проверка в консоли, что ничего не осталось.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ab8fddafe2"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>17</b>/19 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>18</b>/19 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>19</b>/19 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/4-2.html">4.2 Облако</a> — ресурсы, которые здесь описываются кодом</li>
+<li><a href="../lessons/4-3.html">4.3 Ansible</a> — настройка созданных машин</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — пайплайн и защищённые переменные</li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a> — ручные стадии и окружения</li>
+<li><a href="../lessons/6-2.html">6.2 DevSecOps</a> — сканирование конфигураций и секреты</li>
+<li><a href="../lessons/0-1.html">0.1 Git</a> — ревью инфраструктурных изменений</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Terraform: https://developer.hashicorp.com/terraform/docs</li>
+<li>OpenTofu: https://opentofu.org/docs/</li>
+<li>Провайдер Yandex Cloud: https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs</li>
+<li>Terraform в Yandex Cloud: https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-quickstart</li>
+<li>Checkov: https://www.checkov.io/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="4-3.html">← 4.3 Ansible: настройка серверов кодом</a><a class="lesson-jump" href="4-5.html">4.5 Наблюдаемость в продакшене →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "4-4", "number": "4.4", "title": "Terraform: инфраструктура как код", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["0a82d21d30", "573c2b38a2", "17679afcb5", "ae89e6a505", "ab8fddafe2"], "quiz": [{"id": "2448355f6a", "q": "Что хранит state-файл Terraform?", "options": ["Исходный код конфигурации", "Соответствие ресурсов в коде реальным объектам в облаке: их ID и атрибуты", "Логи apply", "Список пользователей облака"], "answer": [1], "why": "<p>без state Terraform не знает, что уже создал, и не может посчитать изменения.<\/p>\n"}, {"id": "be43d28650", "q": "Какие файлы НЕ коммитят в git? Выбери все.", "options": ["<code>terraform.tfstate<\/code>", "<code>.terraform/<\/code>", "<code>.terraform.lock.hcl<\/code>", "<code>main.tf<\/code>"], "answer": [0, 1], "why": "<p>state содержит секреты, <code>.terraform/<\/code> — скачанные провайдеры. Lock-файл с версиями провайдеров, наоборот, коммитят.<\/p>\n"}, {"id": "b8930e7341", "q": "Что означает <code>-/+<\/code> в выводе <code>terraform plan<\/code>?", "options": ["Ресурс изменится на месте", "Ресурс будет удалён и создан заново", "Ресурс будет импортирован", "Ничего не изменится"], "answer": [1], "why": "<p>некоторые параметры нельзя изменить у существующего ресурса. Для базы это потеря данных — план читают целиком.<\/p>\n"}, {"id": "d8858dadd4", "q": "Зачем удалённому бэкенду состояния блокировка?", "options": ["Чтобы state нельзя было прочитать", "Чтобы два одновременных apply не испортили инфраструктуру и состояние", "Чтобы ускорить plan", "Это требование облака"], "answer": [1], "why": "<p>второй запуск дождётся первого или упадёт с понятной ошибкой.<\/p>\n"}, {"id": "08750f9813", "q": "Чем <code>for_each<\/code> лучше <code>count<\/code> для подсетей с именами?", "options": ["Удаление одного элемента не пересоздаёт остальные ресурсы", "for_each быстрее", "count не поддерживает переменные", "Ничем"], "answer": [0], "why": "<p>у count адрес — номер, и удаление из середины сдвигает номера. У for_each адрес — ключ.<\/p>\n"}, {"id": "3483f0f4f4", "q": "Кто-то открыл порт в группе безопасности через консоль облака. Как Terraform это обнаружит?", "options": ["Никак", "Следующий <code>terraform plan<\/code> покажет расхождение (дрейф)", "Пришлёт письмо", "Сам удалит ресурс"], "answer": [1], "why": "<p>plan сравнивает код, state и реальность. Регулярный plan в CI ловит такие ручные правки.<\/p>\n"}, {"id": "741e22e328", "q": "Почему в CI применяют сохранённый план (<code>apply tfplan<\/code>), а не новый <code>apply<\/code>?", "options": ["Так быстрее", "Применится ровно то, что смотрели на ревью, даже если инфраструктура успела измениться", "Иначе не работает блокировка", "Это обязательный синтаксис"], "answer": [1], "why": "<p>между ревью и применением кто-то мог поменять облако, и новый apply сделал бы не то, что одобрили.<\/p>\n"}], "cards": [{"id": "62b149278b", "q": "Что такое state в Terraform и зачем он нужен?", "a": "<p>Файл, где Terraform хранит соответствие между ресурсами в коде и реальными объектами в облаке (ID, атрибуты). Без него Terraform не знает, что он уже создал, и не может вычислить изменения. Хранится удалённо, с блокировкой и версионированием, в git не коммитится.<\/p>\n"}, {"id": "efd648d303", "q": "Что будет, если два человека одновременно запустят apply?", "a": "<p>Без блокировки — гонка: оба прочитают одно состояние, внесут изменения, и одно перезапишет другое, а инфраструктура разойдётся с состоянием. Поэтому используют удалённый бэкенд с блокировкой: второй запуск дождётся или упадёт.<\/p>\n"}, {"id": "c37109132e", "q": "Чем count отличается от for_each?", "a": "<p><code>count<\/code> создаёт N ресурсов, адресуемых по индексу; удаление из середины сдвигает индексы и пересоздаёт ресурсы. <code>for_each<\/code> создаёт ресурс на каждый ключ словаря или множества, адрес стабилен, удаление одного элемента не трогает остальные.<\/p>\n"}, {"id": "882e94f82c", "q": "Что такое дрейф и как его обнаружить?", "a": "<p>Расхождение реальной инфраструктуры с кодом, обычно из-за ручных правок. Обнаруживается через <code>terraform plan<\/code> (в CI — регулярно, с <code>-detailed-exitcode<\/code>, где код 2 означает изменения).<\/p>\n"}, {"id": "6193497014", "q": "Как взять под управление ресурс, созданный вручную?", "a": "<p>Блоком <code>import<\/code> (или командой <code>terraform import<\/code>) с указанием адреса в коде и ID в облаке, затем описать ресурс в коде (можно сгенерировать через <code>-generate-config-out<\/code>) и добиться, чтобы <code>plan<\/code> показывал отсутствие изменений.<\/p>\n"}, {"id": "b6b4162e73", "q": "Чем Terraform отличается от Ansible?", "a": "<p>Terraform декларативно управляет жизненным циклом инфраструктуры (создание, изменение, удаление) и хранит состояние. Ansible настраивает уже существующие машины и состояния не хранит. Их используют вместе.<\/p>\n"}, {"id": "e2a2dfcd4a", "q": "Где хранить секреты для Terraform?", "a": "<p>Не в коде и не в <code>.tfvars<\/code> в репозитории. Передавать через переменные окружения <code>TF_VAR_*<\/code> из защищённых переменных CI или читать из хранилища секретов через источник данных. Переменные помечать <code>sensitive = true<\/code>. Помнить, что секреты всё равно попадут в state, поэтому state шифруется и закрывается.<\/p>\n"}, {"id": "0f5bcc85e6", "q": "Что значит <code>-/+<\/code> в выводе plan?", "a": "<p>Ресурс будет пересоздан: удалён и создан заново, потому что меняется параметр, который нельзя изменить на месте. Для ресурсов с данными это потеря данных. От случайного удаления защищает <code>lifecycle { prevent_destroy = true }<\/code>.<\/p>\n"}, {"id": "7bb8c66906", "q": "Что такое модуль и зачем фиксировать его версию?", "a": "<p>Переиспользуемый набор ресурсов с входными переменными и выходами. Версию фиксируют, чтобы изменения в модуле не попадали в инфраструктуру неожиданно — обновление модуля должно быть осознанным изменением с отдельным планом.<\/p>\n"}, {"id": "61c70edae6", "q": "Terraform или OpenTofu?", "a": "<p>OpenTofu — открытый форк Terraform после смены лицензии в 2023 году, совместимый по синтаксису и командам. Для изучения разницы почти нет; выбор определяется политикой компании.<\/p>\n"}], "next": "4-5"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

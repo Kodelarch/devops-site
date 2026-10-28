@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1.3 Bash-скрипты для администрирования — DevOps-маршрут</title>
+<meta name="description" content="Урок 1.3: Bash-скрипты для администрирования">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c1)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-1">← 1. Linux и сети</a>
+    <div class="sidebar-art"><svg class="art art-linux" viewBox="0 0 240 140" role="img" aria-label="Сервер и сеть" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect x="18" y="22" width="76" height="96" rx="7"/>
+<rect class="dim" x="28" y="34" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="61" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="88" width="56" height="18" rx="3"/>
+<circle class="led l1" cx="74" cy="43" r="2.6"/>
+<circle class="led l2" cx="74" cy="70" r="2.6"/>
+<circle class="led l3" cx="74" cy="97" r="2.6"/>
+<path class="dim" d="M35 43 H58 M35 70 H52 M35 97 H62"/>
+<path class="dim" d="M94 70 H160"/>
+<rect class="packet p1" x="96" y="66" width="8" height="8" rx="2"/>
+<rect class="packet p2" x="96" y="66" width="8" height="8" rx="2"/>
+<circle cx="192" cy="70" r="32"/>
+<ellipse class="dim" cx="192" cy="70" rx="13" ry="32"/>
+<path class="dim" d="M160 70 H224 M164 54 H220 M164 86 H220"/>
+<text class="lbl" x="26" y="134">$ ssh prod</text>
+</svg></div>
+    <div class="lesson-number">lesson 1.3 · linux</div>
+    <h1 class="lesson-title">Bash-скрипты для администрирования</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Параметры скрипта и валидация</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Строгий режим: три опции, которые надо писать всегда</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Кавычки — источник багов номер один</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Функции и структура скрипта</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Информация о системе</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Сеть и память</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Запись в файл и вопрос пользователю</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Цветной вывод в терминале</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Конфигурационные файлы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Поиск и анализ файловой системы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Именованные флаги: getopts</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Уборка за собой: trap и mktemp</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Отладка и shellcheck</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Логирование и идемпотентность</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Когда bash пора менять на Python</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В уроке 1.1 команды вводились в терминале по одной. Это нормально, когда что-то делается один раз. Но если одну и ту же последовательность из десяти команд приходится повторять каждый день — вручную набирать их снова и снова неудобно и легко ошибиться.</p>
+<p>Bash-скрипт — текстовый файл, в котором записаны команды по порядку, но которые выполняются все сразу и без участия человека. Этот урок учит писать такие файлы по-настоящему: с параметрами, с проверкой ввода, с цветным выводом и с чтением настроек из конфига. Сквозной пример урока — скрипт <code>healthcheck.sh</code>, который проверяет диск, память и службы сервера и сообщает о проблемах. Такие скрипты пишут в любой команде: для деплоя, бэкапов, проверок и сбора информации о серверах.</p>
+<p>Три вещи из этого урока отличают рабочий скрипт от учебного, и спрашивают именно про них: <strong>строгий режим</strong> (без него скрипт молча продолжает работать после ошибки), <strong>кавычки</strong> (источник багов номер один) и <strong>shellcheck</strong> (линтер, который ловит и то и другое автоматически).</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Позиционный параметр</strong> — значение, переданное скрипту при запуске: <code>./script.sh привет</code> кладёт «привет» в <code>$1</code>.</li>
+<li><strong>Валидация ввода</strong> — проверка, что переданные данные осмысленны, до того как их использовать.</li>
+<li><strong>Код завершения (exit code)</strong> — число, которым скрипт отчитывается о результате: <code>0</code> — успех, любое другое — ошибка.</li>
+<li><strong>ANSI escape-код</strong> — невидимая последовательность символов, которую терминал распознаёт как команду сменить цвет.</li>
+<li><strong>Хеш файла</strong> — «отпечаток пальца» содержимого: изменился хоть байт — хеш другой.</li>
+<li><strong>Идемпотентность</strong> — свойство скрипта давать один и тот же результат, сколько раз его ни запусти.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Параметры скрипта и валидация</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do3-params.webp" alt="" /><br />
+<em>Аналогия:</em> официант принимает заказ, но прежде чем нести его на кухню, проверяет — есть ли такое блюдо в меню и понятно ли, что именно имелось в виду. Так же и скрипт: сначала получает «заказ» через параметры, а затем обязан проверить, что заказ вообще осмысленный.</p>
+<p>Первая версия <code>healthcheck.sh</code> принимает один параметр — порог заполнения диска в процентах — и должна отказаться работать, если порог не передан или не похож на число от 1 до 100.</p>
+<p>Всё, что написано после имени файла при запуске, становится доступно скрипту в специальных переменных. Первый аргумент попадает в <code>$1</code>, второй в <code>$2</code> и так далее. <code>$0</code> — имя самого файла скрипта. <code>$#</code> — количество переданных аргументов.</p>
+<pre><code class="language-bash">#!/bin/bash
+threshold=&quot;$1&quot;       # первый параметр, переданный при запуске
+
+if [ -z &quot;$threshold&quot; ]; then
+  echo &quot;Использование: $0 &lt;порог диска, %&gt;&quot; &gt;&amp;2
+  exit 1
+fi
+
+if ! [[ &quot;$threshold&quot; =~ ^[0-9]+$ ]] || [ &quot;$threshold&quot; -lt 1 ] || [ &quot;$threshold&quot; -gt 100 ]; then
+  echo &quot;Ошибка: порог должен быть числом от 1 до 100, получено '$threshold'&quot; &gt;&amp;2
+  exit 1
+fi
+
+echo &quot;Порог диска: ${threshold}%&quot;
+</code></pre>
+<p>Разберём построчно, потому что здесь сразу несколько важных мелочей.</p>
+<p>Первая строка <code>#!/bin/bash</code> называется <strong>шебанг</strong> (shebang) — это не комментарий, хотя и начинается с <code>#</code>. Она сообщает системе, какой программой исполнять файл.</p>
+<p><code>threshold=&quot;$1&quot;</code> кладёт первый параметр в переменную с понятным именем, чтобы дальше не путаться в безликих <code>$1</code>, <code>$2</code>. Обрати внимание на кавычки — <code>&quot;$1&quot;</code>. Это обязательная привычка, и почему именно — в разделе 3.</p>
+<p><code>if [ -z &quot;$threshold&quot; ]; then ... fi</code> — проверка условия. Флаг <code>-z</code> проверяет «строка пустая?» (от zero length). Если параметр не передали, печатается подсказка, как запускать скрипт, и вызывается <code>exit 1</code>.</p>
+<p>Число после <code>exit</code> — <strong>код завершения</strong>: <code>0</code> означает «всё прошло успешно», любое другое (обычно <code>1</code>) — «что-то пошло не так». Это принципиально: CI/CD-пайплайны (уроки <a href="../lessons/3-2.html">3.2 CI-CD</a> и <a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>) проверяют именно этот код, чтобы решить, останавливать ли цепочку.</p>
+<p>Конструкция <code>&gt;&amp;2</code> перенаправляет сообщение в <strong>поток ошибок</strong> вместо обычного вывода. Мелочь, которая отличает аккуратный скрипт: тогда <code>./script.sh &gt; result.txt</code> положит в файл только полезный результат, а ошибки останутся на экране, где их видно.</p>
+<p>Вторая проверка сложнее: <code>[[ &quot;$threshold&quot; =~ ^[0-9]+$ ]]</code>. Двойные квадратные скобки <code>[[ ]]</code> — расширенная форма условия, которая, в отличие от одинарных <code>[ ]</code>, понимает регулярные выражения через оператор <code>=~</code>. Шаблон <code>^[0-9]+$</code> читается так: <code>^</code> — начало строки, <code>[0-9]+</code> — одна или несколько цифр подряд, <code>$</code> — конец строки. Вместе — «вся строка состоит только из цифр». Восклицательный знак перед ней переворачивает условие: ошибка, если строка <strong>не</strong> число. Дальше <code>-lt</code> (less than) и <code>-gt</code> (greater than) сравнивают уже как числа. Порядок важен: сначала убеждаемся, что это число, и только потом сравниваем — иначе <code>[ &quot;abc&quot; -lt 1 ]</code> само упадёт с ошибкой.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Строгий режим: три опции, которые надо писать всегда</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do3-strict-mode.svg" alt="" /><br />
+<em>Аналогия:</em> конвейер на заводе, где сломанная деталь едет дальше по линии, потому что никто не поставил датчик. В конце сборки получается изделие, которое считается годным.</p>
+<p>Главное, что нужно знать про bash: <strong>по умолчанию он не останавливается на ошибке</strong>. Если посреди скрипта команда упала, следующая строка всё равно выполнится, а сам скрипт в конце отчитается кодом <code>0</code> — «всё хорошо».</p>
+<p>Для скрипта деплоя это означает буквально следующее: сборка не собралась, но образ всё равно собрался из старого кода, и этот старый код уехал в прод. Пайплайн при этом зелёный.</p>
+<p>Лечится тремя опциями в начале любого рабочего скрипта:</p>
+<pre><code class="language-bash">#!/bin/bash
+set -euo pipefail
+</code></pre>
+<ul>
+<li><strong><code>-e</code></strong> — завершиться сразу, как только любая команда вернула ненулевой код.</li>
+<li><strong><code>-u</code></strong> — завершиться при обращении к необъявленной переменной. Спасает от классики: опечатка в имени переменной превращает <code>rm -rf &quot;$DIR/&quot;</code> в <code>rm -rf &quot;/&quot;</code>.</li>
+<li><strong><code>-o pipefail</code></strong> — учитывать падение любой команды в конвейере, а не только последней. Без него <code>curl не-существует | grep что-то</code> считается успешным, потому что <code>grep</code> отработал нормально.</li>
+</ul>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Когда -e мешает</summary><div class="callout-body"><p>У <code>set -e</code> есть особенность: он завершит скрипт и там, где ненулевой код — это нормальный ответ. Например, <code>grep</code>, не нашедший совпадений, возвращает <code>1</code>. Если такое поведение ожидаемо, команду явно помечают:</p>
+<pre><code class="language-bash">if grep -q &quot;ERROR&quot; app.log; then ... fi     # внутри if -e не срабатывает
+count=$(grep -c &quot;ERROR&quot; app.log || true)      # || true гасит ненулевой код
+</code></pre>
+<p>Знание этого нюанса на собеседовании выделяет: значит, человек реально писал скрипты со строгим режимом, а не просто слышал про него.</p>
+</div></details>
+<p>Проверить результат последней команды вручную можно через <code>$?</code>:</p>
+<pre><code class="language-bash">systemctl is-active --quiet nginx
+if [ $? -ne 0 ]; then echo &quot;nginx лежит&quot; &gt;&amp;2; fi
+</code></pre>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Кавычки — источник багов номер один</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do3-quoting.svg" alt="" /><br />
+<em>Аналогия:</em> без кавычек bash читает значение переменной не как единое имя, а как список слов, разделённых пробелами — примерно как если бы почтальон разнёс «улица Красных Зорь» по трём разным адресам.</p>
+<pre><code class="language-bash">file=&quot;отчёт за март.txt&quot;
+
+rm $file      # bash видит три аргумента: «отчёт», «за», «март.txt»
+rm &quot;$file&quot;    # bash видит один аргумент — то, что и требовалось
+</code></pre>
+<p>Правило простое и без исключений для новичка: <strong>любая подстановка переменной берётся в двойные кавычки</strong>. <code>&quot;$file&quot;</code>, <code>&quot;$1&quot;</code>, <code>&quot;$(date)&quot;</code>. Единственная ситуация, где кавычки не нужны — когда ты осознанно хочешь разбиения на слова, и такое встречается редко.</p>
+<p>Отдельная пара, про которую спрашивают:</p>
+<pre><code class="language-bash">process &quot;$@&quot;    # каждый аргумент передаётся отдельным словом — почти всегда это
+process &quot;$*&quot;    # все аргументы склеиваются в одну строку — почти никогда не это
+</code></pre>
+<p>И ещё одна привычка из того же ряда: <strong>не парсить вывод <code>ls</code></strong>. Имена файлов могут содержать пробелы и переводы строк, поэтому <code>for f in $(ls)</code> ломается на первом же «отчёт за март.txt». Правильно — через шаблон:</p>
+<pre><code class="language-bash">for f in /var/log/*.log; do    # ✔ подстановка имён файлов самим bash
+  echo &quot;$f&quot;
+done
+</code></pre>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Функции и структура скрипта</h2><div class="prose"><p><em>Аналогия:</em> рецепт, где вместо «нарезать, посолить, обжарить, повторить для второго ингредиента, повторить для третьего» написано «подготовить(ингредиент)» и трижды вызвано.</p>
+<p>Как только скрипт перевалил за полсотни строк, его пора разбивать на функции — иначе через месяц в нём не разберётся даже автор.</p>
+<pre><code class="language-bash">#!/bin/bash
+set -euo pipefail
+
+readonly LOG_DIR=&quot;/var/log/myapp&quot;     # readonly — константу нельзя случайно перезаписать
+
+log() {
+  echo &quot;[$(date +'%F %T')] $*&quot; &gt;&amp;2
+}
+
+die() {
+  log &quot;ОШИБКА: $*&quot;
+  exit 1
+}
+
+check_disk() {
+  local threshold=&quot;$1&quot;                # local — переменная видна только внутри функции
+  local usage
+  usage=$(df --output=pcent / | tail -1 | tr -dc '0-9')
+
+  if (( usage &gt; threshold )); then
+    log &quot;Диск занят на ${usage}%, порог ${threshold}%&quot;
+    return 1
+  fi
+  return 0
+}
+
+main() {
+  [ $# -eq 1 ] || die &quot;Использование: $0 &lt;порог в процентах&gt;&quot;
+  check_disk &quot;$1&quot; || die &quot;Проверка диска не пройдена&quot;
+  log &quot;Всё в порядке&quot;
+}
+
+main &quot;$@&quot;
+</code></pre>
+<p>Разбор ключевых приёмов. Слово <code>local</code> перед переменной внутри функции делает её видимой только там — без него все переменные в bash глобальные, и функция может незаметно затереть чужое значение. <code>readonly</code> защищает константы от случайной перезаписи. <code>return 1</code> из функции работает как <code>exit</code>, но завершает только функцию, а не весь скрипт — вызывающий код проверяет результат через <code>||</code> или <code>if</code>.</p>
+<p>Приём <code>main &quot;$@&quot;</code> в конце — распространённый способ оформления: вся логика лежит в функциях, а последняя строка запускает точку входа, передавая ей все аргументы. Читать такой скрипт удобно сверху вниз, а <code>main</code> внизу показывает сценарий целиком.</p>
+<p>Отдельно про <code>(( ))</code>: это арифметическое сравнение, внутри которого числа сравниваются как числа и не нужен знак <code>$</code> перед именами переменных. Для строк используют <code>[[ ]]</code>, для чисел удобнее <code>(( ))</code>.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Информация о системе</h2><div class="prose"><p><em>Аналогия:</em> чек-ап у врача — есть стандартный набор показателей, которые снимают одними приборами у любого пациента. В Linux то же самое: набор команд, дающих одну и ту же информацию о любой машине.</p>
+<pre><code class="language-bash">hostname                                        # сетевое имя машины
+whoami                                           # текущий пользователь
+date -Iseconds                                    # 2026-10-26T21:30:05+00:00
+uptime -p                                          # время работы, читаемо
+awk '{print $1}' /proc/uptime                       # аптайм в секундах
+grep PRETTY_NAME /etc/os-release                     # тип и версия ОС
+nproc                                                 # число ядер процессора
+</code></pre>
+<p><code>hostname</code> печатает имя, под которым машина видна в сети. <code>whoami</code> показывает текущего пользователя — пригодится, чтобы предупредить, если скрипт запущен не от того, от кого должен.</p>
+<p>Команда <code>date</code> умеет форматировать вывод по шаблону через <code>+&quot;...&quot;</code>: <code>%F</code> — дата в виде <code>2026-10-26</code>, <code>%T</code> — время, <code>%s</code> — секунды с 1970 года (удобно для вычислений). <code>-Iseconds</code> печатает дату в формате ISO 8601 с часовым поясом — его и стоит использовать в логах: такие строки однозначны и правильно сортируются как текст.</p>
+<p><code>/proc/uptime</code> — не обычный файл, а часть особой файловой системы <code>/proc</code>, через которую ядро показывает состояние системы в виде файлов. Никакого файла на диске нет — содержимое генерируется на лету при каждом обращении.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Время в скриптах — в UTC</summary><div class="callout-body"><p>Если скрипт пишет время в лог, пиши его в UTC (<code>date -u -Iseconds</code>): логи с разных серверов тогда можно сопоставлять без пересчёта поясов. Почему серверы вообще живут в UTC — в <a href="../lessons/1-1.html#s-14">1.1 Linux</a>, §14.</p>
+</div></details></div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Сеть и память</h2><div class="prose"><p><em>Аналогия:</em> <code>ip a</code> — паспортный стол: перечисляет все «удостоверения» машины и их адреса. <code>free</code> и <code>df</code> — весы: сколько уже съедено из общего объёма.</p>
+<pre><code class="language-bash">ip -4 addr show | grep inet          # IP-адреса и маски на интерфейсах
+ip route | grep default                # шлюз по умолчанию
+</code></pre>
+<p>Вертикальная черта <code>|</code> — <strong>пайп</strong>: берёт вывод команды слева и передаёт его на вход команде справа вместо печати в терминал. <code>ip -4 addr show</code> печатает много строк, а <code>grep inet</code> оставляет только те, где есть слово <code>inet</code>.</p>
+<p>Для <code>healthcheck.sh</code> нужны не красивые числа, а проценты, которые можно сравнить с порогом:</p>
+<pre><code class="language-bash">mem_used=$(free | awk '/Mem:/ {printf &quot;%d&quot;, ($2-$7)/$2*100}')   # занято памяти, %
+disk_used=$(df --output=pcent / | tail -1 | tr -dc '0-9')       # занято диска, %
+load=$(awk '{print $1}' /proc/loadavg)                            # load average за минуту
+</code></pre>
+<p><code>awk</code> — маленький язык, заточенный под построчную обработку текста: читает ввод строка за строкой и умеет находить в каждой «столбцы» (слова через пробел), доступные как <code>$1</code>, <code>$2</code>, <code>$3</code> — не путать с параметрами скрипта, это нумерация внутри самого <code>awk</code>. В примере <code>/Mem:/</code> — условие «сработать на строке, где есть Mem:», а <code>{printf ...}</code> — действие: из общей памяти (<code>$2</code>) вычесть доступную (<code>$7</code>, колонка <code>available</code> — почему именно она, разобрано в <a href="../lessons/1-1.html#s-6">1.1 Linux</a>, §6) и перевести в проценты.</p>
+<p><code>printf</code> даёт больше контроля над форматом, чем <code>echo</code>: <code>%d</code> — целое число, <code>%.1f</code> — дробное с одним знаком после запятой, <code>\n</code> — перевод строки. <code>tr -dc '0-9'</code> удаляет из строки всё, кроме цифр: от <code>df</code> приходит <code> 42%</code>, а для сравнения нужно <code>42</code>.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Проще, чем кажется</summary><div class="callout-body"><p>Многие значения можно получить без арифметики: <code>free -h</code> и <code>df -h</code> сразу печатают человекочитаемые единицы. Ручной пересчёт через <code>awk</code> нужен, когда результат идёт не человеку, а дальше в скрипт — например, чтобы сравнить с порогом.</p>
+</div></details></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Запись в файл и вопрос пользователю</h2><div class="prose"><p><em>Аналогия:</em> конец анкеты с вопросом «сохранить ваши ответы?» — и в зависимости от ответа файл либо создаётся, либо нет.</p>
+<pre><code class="language-bash">read -rp &quot;Сохранить отчёт в файл? (y/n): &quot; answer
+if [[ &quot;$answer&quot; =~ ^[YyДд]$ ]]; then
+  filename=&quot;report-$(hostname)-$(date +%F_%H%M%S).txt&quot;
+  printf '%s\n' &quot;$report&quot; &gt; &quot;$filename&quot;
+  echo &quot;Сохранено в $filename&quot;
+fi
+</code></pre>
+<p><code>read</code> останавливает скрипт и ждёт ввода с клавиатуры. Флаг <code>-p &quot;текст&quot;</code> печатает подсказку в той же строке. Флаг <code>-r</code> стоит писать всегда: без него <code>read</code> съедает обратные слеши во введённом тексте — это одна из тех мелочей, на которые ругается shellcheck.</p>
+<p>Конструкция <code>$(date ...)</code> — <strong>подстановка команды</strong>: выполнить то, что внутри скобок, и подставить результат сюда как текст. Так каждый запуск создаёт файл с уникальным именем, а формат <code>%F_%H%M%S</code> (год-месяц-день) сортируется по времени обычной сортировкой имён.</p>
+<p>Вопрос пользователю уместен только в ручном режиме. Скрипт, который запускается по расписанию, ничего не спрашивает: всё нужное он получает из параметров или конфига (§9 и §11).</p>
+<p>Символ <code>&gt;</code> — <strong>перенаправление вывода</strong> в файл: содержимое полностью заменяется. Двойной <code>&gt;&gt;</code> дописывает в конец, не стирая старое.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Цветной вывод в терминале</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do3-ansi-colors.webp" alt="" /><br />
+<em>Аналогия:</em> ANSI-коды — не буквы и не рисунок, а команда терминалу: «дальше печатай другим цветом, пока не скажу вернуться». Сам текст не меняется — меняется отображение.</p>
+<pre><code class="language-bash">RED=$'\033[0;31m'
+YELLOW=$'\033[0;33m'
+GREEN=$'\033[0;32m'
+NC=$'\033[0m'   # No Color — сброс к обычному
+
+echo &quot;${GREEN}[ OK ]${NC} диск занят на 42%&quot;
+echo &quot;${YELLOW}[WARN]${NC} память занята на 85%&quot;
+echo &quot;${RED}[FAIL]${NC} служба nginx не запущена&quot;
+</code></pre>
+<p><code>\033</code> — управляющий символ escape, сообщающий терминалу «дальше не текст, а команда». <code>[0;31m</code> — сама команда, где <code>31</code> — красный цвет текста, <code>0</code> — сбросить остальные стили перед применением. <code>\033[0m</code> — «вернуть всё по умолчанию»; его обязательно ставят после цветного фрагмента, иначе цвет «протечёт» на весь последующий вывод, включая вывод совсем других команд.</p>
+<p>Запись <code>$'...'</code> (доллар перед одинарной кавычкой) интерпретирует escape-последовательности сразу при присваивании — тогда не нужен флаг <code>-e</code> у каждого <code>echo</code>. Вариант с <code>RED='\033[0;31m'</code> и <code>echo -e</code> тоже работает, но требует помнить про флаг.</p>
+<p>Цветные метки <code>[ OK ]</code>, <code>[WARN]</code>, <code>[FAIL]</code> — привычный формат в выводе служебных утилит: глаз сразу находит проблему среди десятка строк. Фон задаётся отдельным кодом, например <code>\033[41m</code> — красный фон.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Цвет не всегда уместен</summary><div class="callout-body"><p>Когда вывод скрипта уходит не на экран, а в файл или в лог CI, ANSI-коды попадают туда как мусорные символы. Аккуратный скрипт проверяет, что вывод действительно идёт в терминал:</p>
+<pre><code class="language-bash">if [ -t 1 ]; then RED=$'\033[0;31m'; NC=$'\033[0m'; else RED=''; NC=''; fi
+</code></pre>
+<p><code>[ -t 1 ]</code> истинно, только когда стандартный вывод — терминал.</p>
+</div></details></div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Конфигурационные файлы</h2><div class="prose"><p><em>Аналогия:</em> анкета с частично заполненными полями: если человек что-то не указал, используется значение, напечатанное в бланке заранее.</p>
+<p>Пороги и список служб для <code>healthcheck.sh</code> удобно вынести в отдельный файл: на разных серверах они разные, а скрипт один.</p>
+<pre><code class="language-conf"># /etc/healthcheck.conf
+DISK_WARN=80
+MEM_WARN=90
+SERVICES=&quot;nginx ssh&quot;
+</code></pre>
+<pre><code class="language-bash">CONFIG=&quot;${CONFIG:-/etc/healthcheck.conf}&quot;
+[ -r &quot;$CONFIG&quot; ] &amp;&amp; source &quot;$CONFIG&quot;
+
+# если переменная не задана в конфиге — подставляем значение по умолчанию:
+DISK_WARN=${DISK_WARN:-85}
+MEM_WARN=${MEM_WARN:-90}
+SERVICES=${SERVICES:-&quot;ssh&quot;}
+</code></pre>
+<p><code>healthcheck.conf</code> — обычный текстовый файл, где на каждой строке <code>имя=значение</code>, то есть ровно так же, как объявляются переменные в самом скрипте. Поэтому <code>source</code> (сокращённо <code>.</code>) работает просто: читает файл и выполняет каждую строку так, будто она написана здесь.</p>
+<p><code>${VAR:-default}</code> — защита от незаданной переменной: «взять значение VAR, но если пусто или не задано — использовать default». Синтаксис <code>:-</code> встречается в реальных скриптах постоянно, его стоит запомнить. Рядом полезен <code>${VAR:?сообщение}</code> — «упасть с этим сообщением, если переменная не задана», удобно для обязательных настроек.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>source выполняет всё, что найдёт</summary><div class="callout-body"><p><code>source</code> не «читает настройки» — он <strong>выполняет файл как код</strong>. Строка <code>rm -rf /</code> в конфиге будет выполнена. Поэтому подгружать так можно только файлы, которым доверяешь, и никогда — присланные пользователем. Для внешних данных берут форматы, которые парсятся, а не исполняются.</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Поиск и анализ файловой системы</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do3-find-du.webp" alt="" /><br />
+<em>Аналогия:</em> <code>find</code> — детектив: обходит папки и докладывает про каждый файл, подходящий под критерии. <code>du</code> — весовщик: взвешивает, сколько места занимает каждая папка.</p>
+<p>Когда <code>healthcheck.sh</code> сообщил, что диск заполнен, следующий вопрос — чем. Вот набор команд для расследования.</p>
+<pre><code class="language-bash">du -xsh /var/* 2&gt;/dev/null | sort -rh | head           # какие папки в /var самые тяжёлые
+find /var/log -type f -size +100M                       # файлы больше 100 МБ
+find /var/log -type f -name &quot;*.gz&quot; -mtime +30            # архивы логов старше 30 дней
+find /tmp -type f -mtime +7 -delete                       # удалить файлы старше недели
+find /etc -type f -mmin -60                                # конфиги, изменённые за последний час
+find /var/log -type f -printf '%s %p\n' | sort -rn | head  # самые большие файлы
+
+sha256sum /etc/nginx/nginx.conf                            # отпечаток файла
+</code></pre>
+<p>У <code>find</code> первым аргументом идёт путь, откуда начинать, дальше — фильтры. <code>-type d</code> ищет только директории, <code>-type f</code> — обычные файлы. <code>-name &quot;*.gz&quot;</code> фильтрует по имени, где <code>*</code> — «любое количество любых символов». <code>-size +100M</code> — больше 100 мегабайт, <code>-mtime +30</code> — изменённые больше 30 дней назад, <code>-mmin -60</code> — меньше 60 минут назад. <code>-delete</code> удаляет найденное — запускай его только после того, как проверил тот же <code>find</code> без <code>-delete</code>.</p>
+<p>Считать найденное удобно через <code>| wc -l</code>: <code>find</code> печатает каждый файл на отдельной строке, а <code>wc -l</code> считает строки.</p>
+<p><strong>Хеш</strong> (<code>sha256sum</code>) нужен, чтобы понять, менялся ли файл: сохранил отпечаток конфига, через неделю сравнил — если отпечатки разные, кто-то его правил. Старый <code>md5sum</code> для такой проверки тоже работает, но для безопасности не годится: под MD5 умеют подделывать файлы.</p>
+<p><code>du -xsh</code>: <code>-x</code> не выходит за пределы текущего раздела диска, <code>-s</code> (summarize) показывает итог по каждой папке, а не расписывает по файлам; <code>-h</code> (human-readable) переводит в удобные единицы. <code>2&gt;/dev/null</code> перенаправляет <strong>поток ошибок</strong> (цифра <code>2</code>) в «устройство-пустоту» — так скрываются ожидаемые ошибки вроде «нет доступа к папке», не засоряя полезный вывод.</p>
+<p><code>sort -rh</code> сортирует по убыванию (<code>-r</code>), понимая размеры вроде «2.3G» как числа (<code>-h</code>). Без <code>-h</code> строки сравнивались бы посимвольно, и «450M» оказалось бы больше «2.3G».</p>
+<p>Вариант с <code>-printf '%s %p\n'</code> вместо <code>-exec du</code> заметно быстрее: <code>find</code> печатает размер и путь сам, не запуская отдельный процесс на каждый файл. На каталоге с десятками тысяч файлов разница измеряется минутами.</p>
+<p>Время выполнения скрипта удобно мерить встроенной переменной <code>$SECONDS</code>:</p>
+<pre><code class="language-bash">start=$SECONDS
+# ... основная работа ...
+echo &quot;Время выполнения: $((SECONDS - start)) сек&quot;
+</code></pre>
+<p><code>$(( ... ))</code> — <strong>арифметическое расширение</strong>, для вычислений с числами (в отличие от <code>$( ... )</code>, который выполняет команду).</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Именованные флаги: getopts</h2><div class="prose"><p><em>Аналогия:</em> разница между «дай мне то, то и вот это строго по порядку» и «дай мне -s большой -m овсяное»: во втором случае порядок не важен, потому что у каждого значения своя метка.</p>
+<pre><code class="language-bash">while getopts &quot;s:m:v&quot; opt; do
+  case $opt in
+    s) size=&quot;$OPTARG&quot; ;;
+    m) milk=&quot;$OPTARG&quot; ;;
+    v) verbose=1 ;;
+    *) echo &quot;Использование: $0 [-s размер] [-m молоко] [-v]&quot; &gt;&amp;2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))    # убрать разобранные флаги, оставить остальные аргументы
+</code></pre>
+<p>Строка <code>&quot;s:m:v&quot;</code> описывает допустимые флаги: двоеточие после буквы означает «у этого флага обязательно есть значение», без двоеточия — флаг-переключатель. Значение забирается через <code>$OPTARG</code>. Благодаря этому <code>./script.sh -s large -m oat</code> и <code>./script.sh -m oat -s large</code> работают одинаково.</p>
+<p><code>shift $((OPTIND - 1))</code> в конце сдвигает позиционные параметры так, чтобы после разбора флагов в <code>$1</code>, <code>$2</code> остались обычные аргументы — без этой строки они будут смещены.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Уборка за собой: trap и mktemp</h2><div class="prose"><p><strong><code>trap</code></strong> заранее говорит скрипту: «если тебя прервут — Ctrl+C, <code>kill</code>, или ты сам упадёшь — сначала сделай вот это».</p>
+<pre><code class="language-bash">tmpfile=$(mktemp)
+trap 'rm -f &quot;$tmpfile&quot;' EXIT   # удалится, даже если скрипт упадёт или его прервут
+
+echo &quot;работаю...&quot; &gt; &quot;$tmpfile&quot;
+</code></pre>
+<p><code>mktemp</code> создаёт временный файл с гарантированно уникальным именем — чтобы два одновременно запущенных экземпляра не подрались за один файл — и возвращает путь. <code>trap 'команда' EXIT</code> регистрирует команду как «выполнить перед выходом при любой причине выхода».</p>
+<p>Кроме <code>EXIT</code> полезен <code>ERR</code> — сработает при падении команды в строгом режиме:</p>
+<pre><code class="language-bash">trap 'echo &quot;Упал на строке $LINENO&quot; &gt;&amp;2' ERR
+</code></pre>
+<p>Это же — механизм для более серьёзных вещей: снять блокировку, откатить незавершённый деплой, отправить уведомление о падении. На собеседовании вопрос «как гарантированно убрать за собой временные файлы» ожидает в ответ именно <code>trap ... EXIT</code>.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Отладка и shellcheck</h2><div class="prose"><p><em>Аналогия:</em> <code>shellcheck</code> — как проверка орфографии, только для скриптов: он читает код и указывает на конструкции, которые сломаются на непредвиденных данных.</p>
+<pre><code class="language-bash">sudo apt install -y shellcheck
+shellcheck myscript.sh
+</code></pre>
+<p>Это самый быстрый способ повысить качество своих скриптов, и почти в любой команде он стоит в пайплайне как обязательная проверка. Он ловит ровно то, о чём были разделы 2 и 3: неэкранированные переменные, <code>read</code> без <code>-r</code>, парсинг <code>ls</code>, забытые кавычки, бесполезное использование <code>cat</code>.</p>
+<p>Отладка самого выполнения:</p>
+<pre><code class="language-bash">bash -x myscript.sh          # печатать каждую команду перед выполнением
+set -x                        # то же самое, но включить с определённого места
+set +x                         # и выключить
+</code></pre>
+<p>Вывод <code>-x</code> можно сделать полезнее, добавив в него номер строки:</p>
+<pre><code class="language-bash">export PS4='+ ${BASH_SOURCE}:${LINENO}: '
+</code></pre>
+<p>Тогда каждая строка трассировки будет подписана файлом и номером строки — незаменимо, когда скрипт длинный и падает непонятно где.</p>
+<p>Проверка синтаксиса без запуска — отдельный полезный приём:</p>
+<pre><code class="language-bash">bash -n myscript.sh    # разобрать, но не выполнять
+</code></pre>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Логирование и идемпотентность</h2><div class="prose"><p>Два свойства, которые превращают скрипт из «работает у меня» в «можно поставить в автоматику».</p>
+<p><strong>Логирование.</strong> Скрипт, запущенный из cron или systemd-таймера, никто не видит — единственное, что от него остаётся, это вывод. Поэтому полезные сообщения пишут с отметкой времени и в поток ошибок, чтобы они не смешивались с результатом:</p>
+<pre><code class="language-bash">log() { echo &quot;[$(date +'%F %T')] $*&quot; &gt;&amp;2; }
+
+log &quot;Начинаю бэкап&quot;
+log &quot;Готово, файлов: $count&quot;
+</code></pre>
+<p>Если скрипт оформлен systemd-юнитом (<a href="../lessons/1-1.html#s-7">1.1 Linux</a>, §7), этот вывод автоматически попадёт в journald, и его можно будет читать через <code>journalctl -u</code>.</p>
+<p><strong>Идемпотентность</strong> — свойство давать один и тот же результат, сколько раз ни запусти. Скрипт, который при повторном запуске падает или создаёт дубликаты, нельзя безопасно поставить по расписанию и нельзя перезапустить после сбоя.</p>
+<pre><code class="language-bash">mkdir -p /opt/myapp              # ✔ не ругается, если папка уже есть
+useradd appuser 2&gt;/dev/null || true    # ✔ переживает повторный запуск
+
+grep -q &quot;^export PATH&quot; ~/.bashrc || echo &quot;export PATH=...&quot; &gt;&gt; ~/.bashrc
+# ✔ добавит строку, только если её ещё нет — иначе при каждом запуске плодились бы копии
+</code></pre>
+<p>Это же понятие центральное в Ansible (<a href="../lessons/4-3.html">4.3 Ansible</a>), где идемпотентность обеспечивается самим инструментом. В bash её приходится обеспечивать руками — и умение объяснить, зачем она нужна, ценится на собеседовании выше, чем знание десятка флагов <code>find</code>.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Когда bash пора менять на Python</h2><div class="prose"><p>Bash отлично склеивает готовые утилиты и плохо делает всё остальное. Признаки, что пора переходить:</p>
+<ul>
+<li>нужны <strong>структуры данных</strong> сложнее плоского списка — словари, вложенность, объекты;</li>
+<li>скрипт <strong>разбирает JSON или YAML</strong> — да, есть <code>jq</code>, но за пределами простых выборок это быстро становится нечитаемым;</li>
+<li>нужна <strong>арифметика с дробями</strong> — в bash её попросту нет, приходится звать <code>bc</code> или <code>awk</code>;</li>
+<li>нужно <strong>обрабатывать ошибки по-разному</strong> в зависимости от типа сбоя;</li>
+<li>скрипт <strong>перевалил за 200–300 строк</strong> и продолжает расти;</li>
+<li><strong>нужны тесты</strong> — писать их для bash можно, но заметно больнее.</li>
+</ul>
+<p>Порог не формальный, но полезный ориентир: если ты второй раз ловишь себя на мысли «сейчас бы сюда словарь», задача уже переросла bash. Python для этого и изучается в следующей фазе — <a href="../lessons/2-1.html">2.1 Python</a>.</p>
+<p>Обратное тоже верно: тащить Python туда, где надо запустить три команды подряд и проверить код возврата, — избыточно. Хороший DevOps-инженер владеет обоими и понимает границу.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li><code>set -euo pipefail</code> в начале каждого рабочего скрипта: без него bash молча продолжает после ошибки и отчитывается успехом.</li>
+<li>Любая подстановка переменной — в двойных кавычках. <code>&quot;$@&quot;</code> для всех аргументов, не <code>&quot;$*&quot;</code>. Не парсить вывод <code>ls</code>.</li>
+<li>Код завершения: <code>0</code> — успех, остальное — ошибка; именно его читают пайплайны. Ошибки писать в <code>&gt;&amp;2</code>.</li>
+<li>Функции с <code>local</code>, точка входа <code>main &quot;$@&quot;</code> — так скрипт остаётся читаемым после сотни строк.</li>
+<li><code>awk</code> находит столбцы и считает; <code>printf &quot;%.2f&quot;</code> форматирует; <code>$( )</code> подставляет результат команды, <code>$(( ))</code> — арифметики.</li>
+<li>ANSI-коды красят терминал; сбрасывай цвет и не крась вывод, уходящий в файл (<code>[ -t 1 ]</code>).</li>
+<li><code>${VAR:-default}</code> — значение по умолчанию; <code>source</code> <strong>выполняет</strong> файл, а не читает — доверяй только своим конфигам.</li>
+<li><code>getopts</code> — именованные флаги вместо позиционных; <code>trap ... EXIT</code> — гарантированная уборка.</li>
+<li><code>shellcheck</code> перед каждым коммитом; <code>bash -x</code> и <code>PS4</code> с номером строки — для отладки.</li>
+<li>Идемпотентность: скрипт должен переживать повторный запуск. Логи — с отметкой времени и в stderr.</li>
+<li>Словари, JSON, дробная арифметика или 300 строк — пора в Python.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 1 (<code>healthcheck.sh</code>) — простая проверка доступности из раздела «Эксплуатация» в <a href="../projects/p1.html">P1</a>.</li>
+<li>Строгий режим, <code>getopts</code> и shellcheck в CI из заданий 2–5 — основа мини-проекта <a href="../projects/m1.html">M1</a>.</li>
+</ul>
+</div></details><article class="task" data-task="ee9ff4e755"><h3>Задание 1 — healthcheck.sh</h3><p>Напиши скрипт, который проверяет заполнение диска, памяти и работу служб из списка и печатает по строке на проверку с метками <code>[ OK ]</code>, <code>[WARN]</code>, <code>[FAIL]</code>. Код выхода: 0 — всё хорошо, 1 — есть предупреждения, 2 — есть сбои. Строгий режим, функции, <code>main &quot;$@&quot;</code>.<br />
+<strong>Проверка:</strong> <code>shellcheck healthcheck.sh</code> без предупреждений; останови nginx — скрипт выводит <code>[FAIL]</code> и возвращает 2.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ee9ff4e755"> Сделала руками и проверила</label></article><article class="task" data-task="9ece640073"><h3>Задание 2 — параметры и проверки</h3><p>Добавь флаги через <code>getopts</code>: <code>-o файл</code> для записи результата, <code>-q</code> для тихого режима, <code>-h</code> для справки. Неверный флаг — понятная ошибка и код выхода 1.<br />
+<strong>Проверка:</strong> <code>./healthcheck.sh -x; echo $?</code> печатает ошибку и код ошибки; <code>./healthcheck.sh -o /tmp/r.txt</code> создаёт файл без цветовых кодов внутри.</p>
+<label class="task-done"><input type="checkbox" data-task-check="9ece640073"> Сделала руками и проверила</label></article><article class="task" data-task="9209459b2c"><h3>Задание 3 — конфиг и расследование диска</h3><p>Вынеси пороги и список служб в <code>/etc/healthcheck.conf</code> со значениями по умолчанию в скрипте. Добавь флаг <code>-d</code>: при превышении порога диска скрипт дополнительно печатает пять самых тяжёлых папок и файлы больше 100 МБ на этом разделе.<br />
+<strong>Проверка:</strong> без конфига скрипт работает на значениях по умолчанию; создай файл через <code>fallocate -l 200M /var/tmp/big</code> — <code>-d</code> его находит; имена с пробелами обрабатываются корректно.</p>
+<label class="task-done"><input type="checkbox" data-task-check="9209459b2c"> Сделала руками и проверила</label></article><article class="task" data-task="c5aad10315"><h3>Задание 4 — уборка за собой</h3><p>Добавь <code>trap</code> и <code>mktemp</code>: временный файл удаляется и при нормальном завершении, и при <code>Ctrl+C</code>.<br />
+<strong>Проверка:</strong> прерви скрипт <code>Ctrl+C</code> в середине работы — в <code>/tmp</code> не осталось его файлов.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c5aad10315"> Сделала руками и проверила</label></article><article class="task" data-task="5f092d4111"><h3>Задание 5 — скрипт как сервис</h3><p>Оформи скрипт systemd-таймером (раз в 10 минут), вывод — в journald.<br />
+<strong>Проверка:</strong> <code>systemctl list-timers</code> показывает следующий запуск, <code>journalctl -u healthcheck</code> — результаты последних запусков.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5f092d4111"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-1.html">1.1 Linux</a> — окружение, systemd, cron</li>
+<li><a href="../lessons/1-4.html">1.4 Метрики и логи</a> — на чём эти скрипты применяются</li>
+<li><a href="../lessons/2-1.html">2.1 Python</a> — куда переходить, когда bash перестал справляться</li>
+</ul>
+<h3>Источники</h3><ul>
+<li><code>man bash</code>, раздел SHELL BUILTIN COMMANDS</li>
+<li>ShellCheck: https://www.shellcheck.net/</li>
+<li>Google Shell Style Guide: https://google.github.io/styleguide/shellguide.html</li>
+<li>Обзоры требований к DevOps-инженерам 2026 года (Hexlet, Хабр Карьера)</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="1-2.html">← 1.2 Сети: от TCP/IP до nginx</a><a class="lesson-jump" href="1-4.html">1.4 Метрики, логи и алерты →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "1-3", "number": "1.3", "title": "Bash-скрипты для администрирования", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["ee9ff4e755", "9ece640073", "9209459b2c", "c5aad10315", "5f092d4111"], "quiz": [{"id": "e088422bcf", "q": "Что делает <code>set -euo pipefail<\/code>?", "options": ["Включает подробный вывод каждой команды", "Останавливает скрипт при ошибке, на необъявленной переменной и при падении любой команды конвейера", "Запускает скрипт от root", "Отключает вывод ошибок"], "answer": [1], "why": "<p>без строгого режима bash продолжает работу после ошибки и в конце сообщает «всё хорошо» кодом 0.<\/p>\n"}, {"id": "656f82a5ad", "q": "Переменная <code>file=&quot;отчёт за март.txt&quot;<\/code>. Какая команда удалит именно этот файл?", "options": ["<code>rm $file<\/code>", "<code>rm &quot;$file&quot;<\/code>", "<code>rm '$file'<\/code>", "<code>rm ${file}<\/code>"], "answer": [1], "why": "<p>без двойных кавычек значение разобьётся на три слова. В одинарных кавычках переменная не подставится вовсе.<\/p>\n"}, {"id": "54e5d4187a", "q": "Как надёжно удалить временный файл, даже если скрипт прервали через Ctrl+C?", "options": ["Удалить его в последней строке скрипта", "<code>trap 'rm -f &quot;$tmp&quot;' EXIT<\/code> сразу после создания файла", "Создать его в домашней папке", "Использовать <code>nohup<\/code>"], "answer": [1], "why": "<p><code>trap ... EXIT<\/code> выполнится при любом завершении скрипта: штатном, по ошибке или по сигналу.<\/p>\n"}, {"id": "9db50e5d4e", "q": "Что выведет <code>echo ${PORT:-8080}<\/code>, если переменная PORT не задана?", "options": ["Пустую строку", "Ошибку", "<code>8080<\/code>", "<code>PORT<\/code>"], "answer": [2], "why": "<p><code>${VAR:-default}<\/code> подставляет значение по умолчанию, если переменная пустая или не задана.<\/p>\n"}, {"id": "243499ae46", "q": "Почему <code>source config.conf<\/code> опасен для файлов, которые прислал кто-то другой?", "options": ["Он слишком медленный", "Он выполняет файл как код: любая команда внутри будет запущена", "Он не понимает комментарии", "Он работает только от root"], "answer": [1], "why": "<p><code>source<\/code> не «читает настройки», а исполняет строки файла. Подгружать так можно только свои доверенные конфиги.<\/p>\n"}, {"id": "f5b95c7836", "q": "Какой инструмент находит в bash-скриптах незакавыченные переменные и другие типовые ошибки?", "options": ["<code>bash -n<\/code>", "<code>shellcheck<\/code>", "<code>grep<\/code>", "<code>set -x<\/code>"], "answer": [1], "why": "<p><code>bash -n<\/code> проверяет только синтаксис, <code>set -x<\/code> показывает выполнение, а <code>shellcheck<\/code> — линтер, который ловит именно опасные конструкции.<\/p>\n"}, {"id": "475217643a", "q": "Какие признаки говорят, что скрипт пора переписать на Python? Выбери все.", "options": ["Нужно разбирать JSON сложнее простых выборок", "Нужны словари и вложенные структуры данных", "Нужно запустить три команды подряд", "Скрипт перевалил за пару сотен строк и продолжает расти"], "answer": [0, 1, 3], "why": "<p>bash хорош для склейки утилит. Структуры данных, сложная обработка ошибок и тесты — территория Python.<\/p>\n"}], "cards": [{"id": "82f7084dab", "q": "Что делает <code>set -euo pipefail<\/code>?", "a": "<p><code>-e<\/code> — завершить скрипт при ошибке любой команды; <code>-u<\/code> — ошибка при использовании необъявленной переменной; <code>-o pipefail<\/code> — конвейер считается упавшим, если упала любая команда в нём, а не только последняя.<\/p>\n"}, {"id": "9d212dc5cf", "q": "Почему переменные в bash берут в кавычки?", "a": "<p>Без кавычек значение разбивается по пробелам и раскрываются шаблоны <code>*<\/code>. Путь <code>My Documents<\/code> превратится в два аргумента, а <code>rm -rf $DIR/*<\/code> с пустой переменной станет <code>rm -rf /*<\/code>.<\/p>\n"}, {"id": "c86e4d4eca", "q": "Чем <code>$@<\/code> отличается от <code>$*<\/code>?", "a": "<p>В кавычках <code>&quot;$@&quot;<\/code> передаёт каждый аргумент отдельно с сохранением пробелов внутри, <code>&quot;$*&quot;<\/code> склеивает все в одну строку. Почти всегда нужен <code>&quot;$@&quot;<\/code>.<\/p>\n"}, {"id": "a31ef3e67e", "q": "Что такое код возврата и как его проверить?", "a": "<p>Число от 0 до 255, которое команда возвращает при завершении: 0 — успех, остальное — ошибка. Последний код — в <code>$?<\/code>, проверяют через <code>if command; then<\/code> или <code>command || handle_error<\/code>.<\/p>\n"}, {"id": "ce98105371", "q": "Как сделать скрипт идемпотентным?", "a": "<p>Проверять состояние перед действием: <code>mkdir -p<\/code>, <code>grep -q<\/code> перед добавлением строки в конфиг, проверка существования пользователя перед созданием. Повторный запуск не должен ломать систему или дублировать изменения.<\/p>\n"}, {"id": "58f2f7fd37", "q": "Когда пора переписать bash-скрипт на Python?", "a": "<p>Когда появляются сложные структуры данных, разбор JSON, работа с API, обработка ошибок с ветвлением, тесты, или скрипт перевалил за сотню-другую строк.<\/p>\n"}, {"id": "e6e4965cff", "q": "Что делает <code>trap<\/code>?", "a": "<p>Назначает команду на сигнал или событие: <code>trap cleanup EXIT<\/code> выполнит функцию при любом завершении скрипта, <code>trap '' INT<\/code> проигнорирует Ctrl+C.<\/p>\n"}, {"id": "4443d1b7f6", "q": "Чем <code>[ ]<\/code> отличается от <code>[[ ]]<\/code>?", "a": "<p><code>[ ]<\/code> — POSIX-команда <code>test<\/code>, требует аккуратных кавычек. <code>[[ ]]<\/code> — встроенная конструкция bash: безопаснее с пустыми переменными, поддерживает <code>&amp;&amp;<\/code>, <code>||<\/code>, шаблоны и регулярные выражения (<code>=~<\/code>).<\/p>\n"}], "next": "1-4"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

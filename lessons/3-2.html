@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3.2 CI/CD в GitLab — DevOps-маршрут</title>
+<meta name="description" content="Урок 3.2: CI/CD в GitLab">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c3)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-3">← 3. Docker и CI/CD</a>
+    <div class="sidebar-art"><svg class="art art-build" viewBox="0 0 240 140" role="img" aria-label="Контейнеры на конвейере" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<text class="lbl stage s1" x="22" y="24">build</text>
+<text class="lbl stage s2" x="102" y="24">test</text>
+<text class="lbl stage s3" x="176" y="24">deploy</text>
+<path class="dim" d="M20 32 H220" stroke-dasharray="2 6"/>
+<g class="belt">
+  <g class="box"><rect x="-70" y="58" width="44" height="32" rx="3"/><path class="dim" d="M-59 62 V86 M-48 62 V86 M-37 62 V86"/></g>
+  <g class="box"><rect x="10" y="58" width="44" height="32" rx="3"/><path class="dim" d="M21 62 V86 M32 62 V86 M43 62 V86"/></g>
+  <g class="box"><rect x="90" y="58" width="44" height="32" rx="3"/><path class="dim" d="M101 62 V86 M112 62 V86 M123 62 V86"/></g>
+  <g class="box"><rect x="170" y="58" width="44" height="32" rx="3"/><path class="dim" d="M181 62 V86 M192 62 V86 M203 62 V86"/></g>
+</g>
+<path d="M12 96 H228"/>
+<circle class="dim wheel" cx="30" cy="106" r="7"/><circle class="dim wheel" cx="120" cy="106" r="7"/><circle class="dim wheel" cx="210" cy="106" r="7"/>
+<text class="lbl" x="20" y="134">docker build · push</text>
+</svg></div>
+    <div class="lesson-number">lesson 3.2 · build</div>
+    <h1 class="lesson-title">CI/CD в GitLab</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Зачем нужен CI/CD</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">CI: сборка и тестирование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">CD: доставка изменений</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">GitLab Runner: кто реально выполняет шаги</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Структура `.gitlab-ci.yml`</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Артефакты: передаём файлы между этапами</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Тест кодстайла как отдельный этап</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Интеграционные тесты и условный запуск</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Этап деплоя: доставка на реальный сервер</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Уведомления о результате pipeline</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Секреты в пайплайне</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Кеш и артефакты — это разные вещи</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Правила запуска: rules</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Сборка образа в пайплайне</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Стратегии выката и откат</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Если что-то делается вручную каждый раз перед релизом — рано или поздно об этом забудут, сделают не в том порядке или просто устанут это делать. CI/CD — не про «модную технологию», а про то, чтобы сборка, тесты и доставка кода происходили одинаково надёжно каждый раз, без участия человека там, где он не нужен.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>CI (Continuous Integration)</strong> — практика частой автоматической интеграции и проверки кода: собрать и протестировать при каждом изменении.</li>
+<li><strong>CD (Continuous Delivery)</strong> — продолжение CI: автоматическая доставка проверенных изменений в тестовую и/или боевую среду.</li>
+<li><strong>Pipeline</strong> — последовательность автоматических шагов (сборка → тесты → деплой), запускаемая при изменении кода в репозитории.</li>
+<li><strong>Runner</strong> — отдельный процесс (часто на отдельной машине), который реально выполняет шаги pipeline по заданию от GitLab.</li>
+<li><strong>Артефакт (в контексте CI)</strong> — файл, полученный на одном этапе pipeline (например, скомпилированная программа), который нужно передать в следующие этапы или сохранить.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Зачем нужен CI/CD</h2><div class="prose"><p><em>Аналогия:</em> CI/CD — как конвейер на заводе вместо ручной сборки на коленке: каждая деталь проходит одни и те же проверки в одном и том же порядке, независимо от того, кто и когда её туда положил.</p>
+<p>Причины внедрять CI/CD:</p>
+<ul>
+<li>командная разработка — несколько человек одновременно меняют один и тот же код;</li>
+<li>длинный жизненный цикл ПО — проект живёт годами, а не неделю;</li>
+<li>желание сокращать релизный цикл — выпускать изменения чаще и мельче, а не редко и большими партиями;</li>
+<li>сложность развёртывания и тестирования крупных систем вручную;</li>
+<li>человеческий фактор — ручные шаги рано или поздно выполняются неправильно или забываются.</li>
+</ul>
+<p><code>Pipeline</code> — это последовательность действий (описанных скриптом), которая запускается автоматически при изменении кода в репозитории — то есть ровно то же самое, что человек делал бы руками при релизе, но без человека и без права на «забыл».</p>
+<p><img loading="lazy" src="../assets/diagrams/do6-pipeline.webp" alt="" /></p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>CI: сборка и тестирование</h2><div class="prose"><p><em>Аналогия:</em> CI — это ОТК (отдел технического контроля) на заводе, который проверяет каждую деталь сразу после изготовления, а не ждёт, пока готовое изделие соберут целиком и выяснится, что одна деталь была бракованной с самого начала.</p>
+<p>CI обычно решает две задачи:</p>
+<ul>
+<li><strong>BUILD</strong> — проверить, что код вообще собирается, и подготовить артефакты (например, скомпилированный бинарник) для следующих этапов;</li>
+<li><strong>TEST</strong> — прогнать тесты кодстайла, модульные и интеграционные тесты, сформировать отчёт о том, что прошло, а что нет.</li>
+</ul>
+<p>Если любой из этих шагов проваливается — pipeline должен «упасть» (зафейлиться) целиком, чтобы сломанный код физически не мог продвинуться дальше по цепочке.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>CD: доставка изменений</h2><div class="prose"><p><em>Аналогия:</em> если CI — это ОТК на заводе, то CD — это логистика, которая после проверки везёт готовую партию сначала на склад (staging), а потом, по отдельному решению, в магазины (production).</p>
+<p>CD может включать:</p>
+<ul>
+<li><strong>PUBLISH</strong> — собрать образ контейнера и отправить его в реестр (например, Docker registry), откуда его потом возьмут для развёртывания;</li>
+<li><strong>UPDATE CONFIGS</strong> — обновить конфигурацию на целевых машинах;</li>
+<li><strong>DEPLOY STAGING</strong> — развернуть тестовую среду для ручных проверок QA; может запускаться и автоматически, и вручную;</li>
+<li><strong>DEPLOY PRODUCTION</strong> — развернуть новую версию на «боевом» окружении; этот шаг обычно запускают вручную, а не автоматически, и часто ограничивают конкретной веткой (<code>master</code>, <code>release</code>).</li>
+</ul>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>GitLab Runner: кто реально выполняет шаги</h2><div class="prose"><p><em>Аналогия:</em> GitLab — это диспетчер, который говорит «нужно сделать вот это», а runner — конкретный рабочий на конкретной машине, который реально берёт инструмент и делает работу.</p>
+<pre><code class="language-bash"># на отдельной машине (или VM):
+curl -L &quot;https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh&quot; | sudo bash
+sudo apt-get install gitlab-runner
+
+gitlab-runner register
+# понадобятся: URL проекта и токен регистрации со страницы настроек CI/CD в GitLab
+</code></pre>
+<p>После регистрации runner подключается к конкретному проекту (или группе проектов) и начинает опрашивать GitLab: «есть для меня задачи?» — как только в репозитории происходит изменение, GitLab передаёт runner'у шаги pipeline на выполнение.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Структура `.gitlab-ci.yml`</h2><div class="prose"><p><em>Аналогия:</em> <code>.gitlab-ci.yml</code> — это письменная инструкция для конвейера: какие станции (stages) есть, что делает каждая станция, и в каком порядке деталь проходит через них.</p>
+<pre><code class="language-yaml">stages:
+  - build
+  - test
+  - deploy
+
+build_job:
+  stage: build
+  image: python:3.13-slim
+  script:
+    - pip install build
+    - python -m build          # собрать пакет приложения в dist/
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 30 days
+</code></pre>
+<p><code>stages</code> задаёт порядок этапов верхнего уровня. Каждая «работа» (<code>job</code>, здесь <code>build_job</code>) привязана к конкретному этапу через <code>stage:</code> и содержит список команд в <code>script:</code>. Работы одного этапа выполняются параллельно, а этапы между собой — строго последовательно: следующий этап не начнётся, пока не завершится (успешно) предыдущий.</p>
+<p><img loading="lazy" src="../assets/diagrams/do6-stages.webp" alt="" /></p>
+
+<figure class="explain" data-anim="ci-pipeline"><figcaption><span class="explain-tag">▶ схема</span>Запусти pipeline и сломай в нём тест</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Артефакты: передаём файлы между этапами</h2><div class="prose"><p><em>Аналогия:</em> артефакт — это деталь, прошедшая одну станцию конвейера и переданная дальше на следующую, а не выброшенная сразу после использования.</p>
+<pre><code class="language-yaml">artifacts:
+  paths:
+    - dist/
+  expire_in: 30 days
+</code></pre>
+<p>Файлы, собранные на этапе <code>build</code> (например, пакет приложения в <code>dist/</code> или скомпилированный бинарник), автоматически становятся доступны на последующих этапах (<code>test</code>, <code>deploy</code>) того же pipeline благодаря <code>artifacts</code>. <code>expire_in</code> задаёт, сколько времени GitLab будет их хранить, прежде чем удалить автоматически.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Тест кодстайла как отдельный этап</h2><div class="prose"><p><em>Аналогия:</em> проверка кодстайла — как проверка орфографии перед отправкой важного письма: сама по себе не гарантирует, что содержание письма верно, но отлавливает целый класс мелких, но раздражающих ошибок автоматически.</p>
+<pre><code class="language-yaml">codestyle_job:
+  stage: test
+  image: python:3.13-slim
+  script:
+    - pip install ruff
+    - ruff check .
+    - ruff format --check .
+</code></pre>
+<p><code>ruff format --check</code> в этом режиме не переписывает файлы, а завершается с ошибкой, если находит несоответствие стилю, и именно эта ошибка «роняет» весь job (а значит, и pipeline), не давая проекту с плохим кодстайлом продвинуться к следующим этапам. <code>ruff check</code> ловит не стиль, а подозрительный код: неиспользуемые импорты, необъявленные переменные (<a href="../lessons/2-4.html#s-11">2.4 Архитектура и тесты</a>, §11). Для других языков то же самое делают свои инструменты: <code>shellcheck</code> для bash, <code>hadolint</code> для Dockerfile, <code>clang-format</code> для C, <code>gofmt</code> для Go — меняется только команда, смысл этапа тот же.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Интеграционные тесты и условный запуск</h2><div class="prose"><p><em>Аналогия:</em> интеграционные тесты запускаются только если сборка и кодстайл уже прошли — нет смысла тестировать поведение программы, которая даже не собралась.</p>
+<p>Модульные тесты проверяют логику без базы (<a href="../lessons/2-4.html#s-8">2.4 Архитектура и тесты</a>, §8). Интеграционные — что приложение действительно работает с настоящим PostgreSQL. Базу для них GitLab поднимает сам, рядом с job:</p>
+<pre><code class="language-yaml">integration_tests_job:
+  stage: test
+  image: python:3.13-slim
+  needs: [&quot;build_job&quot;, &quot;codestyle_job&quot;]
+  services:
+    - name: postgres:17
+      alias: db
+  variables:
+    POSTGRES_DB: shop
+    POSTGRES_USER: shop
+    POSTGRES_PASSWORD: test
+    DATABASE_URL: postgresql://shop:test@db:5432/shop
+  script:
+    - pip install -r requirements.txt pytest
+    - pytest tests/integration --junitxml=report.xml
+  artifacts:
+    reports:
+      junit: report.xml
+</code></pre>
+<p><code>services</code> запускает дополнительный контейнер на время job — здесь PostgreSQL, доступный по имени <code>db</code>. Пароль <code>test</code> живёт только внутри временной базы и исчезает вместе с ней, поэтому его можно держать в файле. <code>artifacts:reports:junit</code> отдаёт GitLab отчёт о тестах, и в merge request видно, какие именно тесты упали.<br />
+<code>needs</code> явно указывает, какие job должны успешно завершиться, прежде чем стартует текущая — это позволяет выстроить зависимость между конкретными job, а не просто между этапами целиком. Если хотя бы одна из зависимостей провалилась, зависящий job вообще не запустится.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Этап деплоя: доставка на реальный сервер</h2><div class="prose"><p><em>Аналогия:</em> деплой — это финальная доставка курьером: взять готовый (уже проверенный) пакет и физически отвезти его по адресу получателя.</p>
+<pre><code class="language-bash">#!/bin/bash
+set -euo pipefail
+ssh -i ~/.ssh/deploy_key deploy@production-server \
+  &quot;cd /opt/shop &amp;&amp; docker compose pull &amp;&amp; docker compose up -d&quot;
+</code></pre>
+<pre><code class="language-yaml">deploy_job:
+  stage: deploy
+  when: manual
+  script:
+    - ./deploy.sh
+</code></pre>
+<p><code>ssh</code> выполняет команду на удалённом сервере: скачать новую версию образа и пересоздать контейнеры, у которых изменился образ. Аутентификация — по SSH-ключу, без пароля. Для программ, которые поставляются не образом, а файлом, вместо этого копируют сам файл через <code>scp</code> и перезапускают systemd-сервис — механизм тот же. <code>when: manual</code> — деплой на боевое окружение обычно требует явного нажатия кнопки человеком в интерфейсе GitLab, а не срабатывает автоматически.</p>
+<p><img loading="lazy" src="../assets/diagrams/do6-deploy.webp" alt="" /></p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Уведомления о результате pipeline</h2><div class="prose"><p><em>Аналогия:</em> уведомление — это как автоматический звонок из химчистки «ваш заказ готов», вместо того чтобы самому периодически туда звонить и спрашивать.</p>
+<pre><code class="language-bash">curl -s -X POST &quot;https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage&quot; \
+     -d chat_id=&quot;&lt;CHAT_ID&gt;&quot; \
+     -d text=&quot;Pipeline завершён: CI — успешно, CD — успешно&quot;
+</code></pre>
+<pre><code class="language-yaml">notify_job:
+  stage: .post
+  script:
+    - ./notify.sh &quot;$CI_JOB_STATUS&quot;
+  when: always
+</code></pre>
+<p><code>when: always</code> — job уведомления должен запускаться независимо от того, упали предыдущие этапы или нет, иначе о провале pipeline никто не узнает автоматически. Telegram Bot API принимает обычный HTTP POST-запрос — не нужен никакой специальный SDK, чтобы отправить сообщение от имени бота.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Секреты в пайплайне</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do6-secrets.svg" alt="" /><br />
+<em>Аналогия:</em> пайплайн — это связка ключей от всей инфраструктуры, которая лежит в общедоступном месте и автоматически срабатывает при каждом коммите. Обращаться с ней нужно соответственно.</p>
+<p>В §9 SSH-ключ берётся из <code>~/.ssh/deploy_key</code> на самом раннере. Это работает, но небезопасно: ключ доступен <strong>любому</strong> job, который на этом раннере выполняется, включая job из чужого merge request.</p>
+<p>Правильный способ — <strong>переменные CI/CD</strong> в настройках проекта, а не в репозитории:</p>
+<pre><code class="language-yaml">deploy_job:
+  stage: deploy
+  script:
+    - install -m 600 -D /dev/stdin ~/.ssh/id_ed25519 &lt;&lt;&lt; &quot;$SSH_PRIVATE_KEY&quot;
+    - ssh-keyscan &quot;$DEPLOY_HOST&quot; &gt;&gt; ~/.ssh/known_hosts
+    - ssh &quot;$DEPLOY_USER@$DEPLOY_HOST&quot; &quot;cd /opt/shop &amp;&amp; docker compose pull &amp;&amp; docker compose up -d&quot;
+</code></pre>
+<p>Две настройки у каждой переменной решают почти всё:</p>
+<ul>
+<li><strong>Masked</strong> — GitLab затирает значение в логах. Без этого случайный <code>echo</code> или подробный вывод команды публикует секрет всем, у кого есть доступ к пайплайну.</li>
+<li><strong>Protected</strong> — переменная доступна только защищённым веткам и тегам. Без этого любой может открыть merge request из форка с одной строкой <code>echo $DEPLOY_KEY</code> и получить ключ от прода.</li>
+</ul>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Четыре способа потерять секрет</summary><div class="callout-body"><ol>
+<li>Записать пароль прямо в <code>.gitlab-ci.yml</code> — он навсегда останется в истории git (<a href="../lessons/0-1.html#s-5">0.1 Git</a>, §5).</li>
+<li>Оставить ключ на раннере — доступен всем job, включая чужие.</li>
+<li>Напечатать переменную при отладке — попадёт в лог, который видят все участники проекта.</li>
+<li>Не поставить флаг Protected — секрет утечёт через merge request из форка.</li>
+</ol>
+<p>И общее правило: секрет, попавший в лог или в историю, считается <strong>скомпрометированным</strong>. Его меняют, а не удаляют запись.</p>
+</div></details>
+<p><strong>Принцип наименьших прав.</strong> Ключ деплоя должен уметь ровно одно: положить файл и перезапустить один сервис. Не быть root, не иметь доступа к другим машинам, не открывать интерактивную оболочку. Ограничить можно прямо в <code>authorized_keys</code> на целевой машине через <code>command=</code> — тогда даже украденный ключ позволит выполнить только заранее заданную команду.</p>
+<p>Для серьёзных систем секреты держат во внешнем хранилище — <strong>HashiCorp Vault</strong> или облачном аналоге, где они выдаются на время и с журналом обращений (<a href="../lessons/6-2.html">6.2 DevSecOps</a>).</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Кеш и артефакты — это разные вещи</h2><div class="prose"><p><em>Аналогия:</em> артефакт — готовая деталь, которую передают на следующую станцию конвейера. Кеш — ящик с инструментами, который стоит у станка и переиспользуется в следующей смене.</p>
+<p>Их постоянно путают, а назначение у них разное.</p>
+<pre><code class="language-yaml">build_job:
+  stage: build
+  cache:                      # ускоряет, но не влияет на результат
+    key:
+      files:
+        - requirements.txt     # ключ меняется только при смене зависимостей
+    paths:
+      - .venv/
+  artifacts:                   # результат работы, нужен следующим этапам
+    paths:
+      - dist/
+    expire_in: 1 week
+</code></pre>
+<p><strong>Артефакты</strong> — результат работы job, который обязан попасть в следующие этапы: собранный бинарник, отчёт о тестах, файл покрытия. Они гарантированно передаются дальше и хранятся заданное время.</p>
+<p><strong>Кеш</strong> — оптимизация: скачанные зависимости, каталог <code>node_modules</code>, <code>.venv</code>. Пайплайн обязан корректно отработать и с пустым кешем, просто медленнее. Опираться на кеш как на источник данных нельзя — он может быть очищен в любой момент.</p>
+<p>Ключ кеша стоит привязывать к файлу зависимостей: тогда он переиспользуется, пока список библиотек не изменился, и автоматически обновляется при изменении.</p>
+<p>Отдельно — <strong>отчёты</strong>: GitLab умеет разбирать результаты тестов и показывать их прямо в merge request, если указать формат:</p>
+<pre><code class="language-yaml">  artifacts:
+    reports:
+      junit: report.xml
+</code></pre>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Правила запуска: rules</h2><div class="prose"><p><em>Аналогия:</em> не каждая деталь проходит все станции конвейера. Пробный образец не отправляют в магазин, а серийную партию не разбирают на части для анализа.</p>
+<p>Запускать все job на каждый коммит расточительно и часто неверно: деплой в прод не должен срабатывать от коммита в ветку разработчика.</p>
+<pre><code class="language-yaml">deploy_prod:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: manual                      # только по тегу вида v1.2.3, и то вручную
+    - when: never                        # во всех остальных случаях не запускать
+
+deploy_staging:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success                   # автоматически при слиянии в main
+
+test_job:
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == &quot;merge_request_event&quot;'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+</code></pre>
+<p>Здесь видно, как события Git из <a href="../lessons/0-1.html#s-17">0.1 Git</a>, §17 превращаются в конкретные правила: push в ветку, открытый merge request, слияние в main, поставленный тег — каждое запускает своё.</p>
+<p>Ключевые переменные, которые GitLab передаёт в каждый job: <code>CI_COMMIT_SHA</code> (полный хеш), <code>CI_COMMIT_SHORT_SHA</code>, <code>CI_COMMIT_BRANCH</code>, <code>CI_COMMIT_TAG</code>, <code>CI_PIPELINE_SOURCE</code>, <code>CI_PROJECT_NAME</code>. Из них собирают теги образов и сообщения уведомлений.</p>
+<p>Конструкции <code>only</code>/<code>except</code> делают примерно то же, но считаются устаревшими — в новом коде пишут <code>rules</code>.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Сборка образа в пайплайне</h2><div class="prose"><p><em>Аналогия:</em> конвейер должен уметь не только проверить деталь, но и упаковать её в коробку, на которой написано, что именно внутри.</p>
+<p>Здесь сходятся 3.1 и 3.2: пайплайн собирает тот самый образ и кладёт его в реестр, откуда его потом возьмут для развёртывания.</p>
+<pre><code class="language-yaml">build_image:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind                     # Docker внутри Docker
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  script:
+    - docker login -u &quot;$CI_REGISTRY_USER&quot; -p &quot;$CI_REGISTRY_PASSWORD&quot; &quot;$CI_REGISTRY&quot;
+    - docker build -t &quot;$IMAGE&quot; -t &quot;$CI_REGISTRY_IMAGE:latest&quot; .
+    - docker push &quot;$IMAGE&quot;
+    - docker push &quot;$CI_REGISTRY_IMAGE:latest&quot;
+
+scan_image:
+  stage: test
+  image: aquasec/trivy:latest
+  script:
+    - trivy image --severity HIGH,CRITICAL --exit-code 1 &quot;$IMAGE&quot;
+</code></pre>
+<p><strong>Тег образа — это хеш коммита</strong>, а не <code>latest</code>. Так по любому работающему контейнеру можно точно сказать, из какого коммита он собран, и откатиться на предыдущий образ одной командой. Тег <code>latest</code> дополнительно ставят для удобства, но полагаться на него при развёртывании нельзя (<a href="../lessons/3-1.html#s-15">3.1 Docker</a>, §15).</p>
+<p><code>docker:dind</code> — способ дать job доступ к Docker. Он требует привилегированного режима у раннера, что само по себе снижает изоляцию; альтернативы без этого недостатка — <strong>BuildKit в rootless-режиме</strong> и <strong>buildah</strong>, они собирают образы без демона Docker (подробно — в <a href="../lessons/6-1.html#s-7">6.1 CI-CD в Kubernetes</a>, §7). В старых пайплайнах ещё встретится kaniko, но в 2025 году его заархивировали.</p>
+<p>Сканирование образа встроено в тот же пайплайн: <code>--exit-code 1</code> роняет job при критичных уязвимостях, и сломанный образ физически не доедет до развёртывания.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Стратегии выката и откат</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do6-deploy-strategies.svg" alt="" /><br />
+<em>Аналогия:</em> заменить все лампочки в здании разом, по одной, или сначала в одном кабинете и посмотреть, не мигают ли.</p>
+<p>Скрипт из §9 останавливает сервис и запускает новую версию — это стратегия <strong>Recreate</strong>, и она означает простой на время выката. Есть варианты получше.</p>
+<p><strong>Rolling</strong> — экземпляры заменяются по одному, простоя нет. Обязательное условие: старая и новая версии какое-то время работают одновременно, значит, должны быть совместимы между собой и с текущей схемой базы — ровно то, о чём шла речь в <a href="../lessons/2-11.html#s-14">2.11 Продвинутый SQL</a>, §14.</p>
+<p><strong>Blue-green</strong> — новая версия поднимается рядом со старой, трафик переключается одним движением балансировщика. Главное достоинство — мгновенный откат: вернуть трафик обратно. Цена — двойные ресурсы на время выката.</p>
+<p><strong>Canary</strong> — новая версия получает малую долю трафика (скажем, 5%), метрики сравниваются со старой, и только потом доля растёт. Поломку видит небольшая часть пользователей. Требует работающего мониторинга из <a href="../lessons/1-4.html">1.4 Метрики и логи</a> — без метрик сравнивать нечего.</p>
+<p><strong>Откат — обязательная часть пайплайна, а не импровизация.</strong> Если образы тегированы хешем коммита, откат сводится к развёртыванию предыдущего тега, и это должно быть отдельной кнопкой, а не набором команд по памяти в три часа ночи. Здесь же вспоминается <a href="../lessons/0-1.html#s-11">0.1 Git</a>, §11: на общей ветке откат делают через <code>revert</code>, а не переписыванием истории.</p>
+<p>Отдельно про <strong>миграции базы</strong>: они почти никогда не откатываются автоматически. Поэтому их пишут совместимыми с обеими версиями кода, а откат приложения не должен требовать отката схемы.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>GitLab CI или GitHub Actions</summary><div class="callout-body"><p>В российских вакансиях чаще упоминается GitLab CI, в международных — GitHub Actions. Идеи одинаковы, отличается словарь: <code>stages</code> и <code>jobs</code> там называются <code>jobs</code> и <code>steps</code>, <code>.gitlab-ci.yml</code> — файлом в <code>.github/workflows/</code>, runner — <code>runs-on</code>, переменные CI/CD — Secrets. Освоив одно, второе осваивается за вечер, поэтому выбор системы на собеседовании обычно не критичен — важнее понимать, что именно пайплайн делает и почему.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Pipeline — автоматическая последовательность шагов (build → test → deploy), запускаемая при изменении кода.</li>
+<li>CI отвечает за сборку и тестирование, CD — за доставку изменений в тестовую/боевую среду.</li>
+<li>Runner — процесс на отдельной машине, реально выполняющий шаги по заданию от GitLab.</li>
+<li>artifacts передают файлы между этапами одного pipeline; needs выстраивает зависимости между конкретными job.</li>
+<li>Деплой на продакшн обычно запускают вручную (when: manual), а не автоматически.</li>
+<li>Уведомления должны срабатывать всегда (when: always), включая случай провала pipeline.</li>
+<li><strong>Секреты — только в переменных CI/CD</strong> с флагами Masked и Protected, никогда в репозитории и не на раннере. Попавший в лог секрет считается скомпрометированным и подлежит замене.</li>
+<li>Ключ деплоя ограничивают по правам до одного действия — тогда его утечка не означает потерю всей инфраструктуры.</li>
+<li><strong>Артефакты</strong> — результат работы, обязаны попасть в следующие этапы. <strong>Кеш</strong> — только ускорение: пайплайн должен работать и с пустым кешем.</li>
+<li><code>rules</code> определяют, что и когда запускается: тест на merge request, staging на слияние в main, прод по тегу и вручную.</li>
+<li>Образ тегируют <strong>хешем коммита</strong>, а не <code>latest</code> — так видно, что развёрнуто, и откат сводится к предыдущему тегу.</li>
+<li>Сканер уязвимостей с <code>--exit-code 1</code> встраивают в пайплайн: сломанный образ не должен доехать до развёртывания.</li>
+<li>Стратегии выката: Recreate (простой), Rolling (без простоя, но версии сосуществуют), Blue-green (мгновенный откат, двойные ресурсы), Canary (поломку видит малая доля).</li>
+<li>Откат — заранее подготовленная кнопка, а не импровизация. Миграции базы автоматически не откатываются, поэтому пишутся совместимыми с обеими версиями кода.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–5 — раздел «CI/CD» в <a href="../projects/p1.html">P1</a>: стадии lint → test → build → deploy, секреты в защищённых переменных, уведомления, откат.</li>
+<li>Те же стадии в GitHub Actions — в <a href="../projects/m1.html">M1</a> и <a href="../projects/m2.html">M2</a>.</li>
+</ul>
+</div></details><article class="task" data-task="db06297e9a"><h3>Задание 1 — свой раннер</h3><p>Поставь GitLab Runner на виртуалку и зарегистрируй его с Docker executor для своего проекта.<br />
+<strong>Проверка:</strong> в настройках проекта раннер зелёный, задачи выполняются на нём (видно в логе задачи).</p>
+<label class="task-done"><input type="checkbox" data-task-check="db06297e9a"> Сделала руками и проверила</label></article><article class="task" data-task="15dd8cb91a"><h3>Задание 2 — четыре стадии</h3><p>Пайплайн для Python-проекта: lint (ruff), test (pytest с отчётом JUnit), build (Docker-образ в реестр GitLab с тегом коммита), deploy (на виртуалку по SSH, вручную).<br />
+<strong>Проверка:</strong> в MR видны результаты тестов; сломанный тест останавливает пайплайн до сборки.</p>
+<label class="task-done"><input type="checkbox" data-task-check="15dd8cb91a"> Сделала руками и проверила</label></article><article class="task" data-task="856664900e"><h3>Задание 3 — кэш и артефакты</h3><p>Добавь кэш pip между запусками и артефакт с отчётом покрытия.<br />
+<strong>Проверка:</strong> второй запуск ставит зависимости заметно быстрее; отчёт скачивается со страницы задачи.</p>
+<label class="task-done"><input type="checkbox" data-task-check="856664900e"> Сделала руками и проверила</label></article><article class="task" data-task="b16feb5883"><h3>Задание 4 — секреты</h3><p>SSH-ключ для деплоя и токен Telegram — в переменных проекта с флагами Masked и Protected.<br />
+<strong>Проверка:</strong> <code>echo $DEPLOY_KEY</code> в задаче печатает <code>[MASKED]</code>; задача из незащищённой ветки переменную не получает.</p>
+<label class="task-done"><input type="checkbox" data-task-check="b16feb5883"> Сделала руками и проверила</label></article><article class="task" data-task="98e08b991e"><h3>Задание 5 — уведомления и откат</h3><p>Отправляй в Telegram сообщение об успехе или провале пайплайна. Сделай задачу ручного отката на предыдущий тег образа.<br />
+<strong>Проверка:</strong> при неудачном деплое откат возвращает рабочую версию одной кнопкой.</p>
+<label class="task-done"><input type="checkbox" data-task-check="98e08b991e"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/0-1.html">0.1 Git</a> — события Git, запускающие пайплайн</li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a> — образ, который здесь собирается и сканируется</li>
+<li><a href="../lessons/2-11.html">2.11 Продвинутый SQL</a> — миграции, совместимые с обеими версиями кода</li>
+<li><a href="../lessons/4-1.html">4.1 Compose и Swarm</a> — куда выкатывается результат</li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a> — продвинутые сценарии</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация GitLab CI/CD: https://docs.gitlab.com/ci/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="3-1.html">← 3.1 Docker</a><a class="lesson-jump" href="4-1.html">4.1 Docker Compose и Swarm →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "3-2", "number": "3.2", "title": "CI/CD в GitLab", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["db06297e9a", "15dd8cb91a", "856664900e", "b16feb5883", "98e08b991e"], "quiz": [{"id": "717548576f", "q": "Чем Continuous Delivery отличается от Continuous Deployment?", "options": ["Delivery — изменение готово к выкатке, но в прод уходит по решению человека; Deployment — уходит автоматически", "Это одно и то же", "Delivery — только сборка, Deployment — только тесты", "Deployment бывает только в Kubernetes"], "answer": [0], "why": "<p>разница — в последнем шаге: кнопка или автоматика.<\/p>\n"}, {"id": "e24347194e", "q": "Чем кэш отличается от артефактов в GitLab CI?", "options": ["Ничем", "Кэш только ускоряет и может пропасть, артефакты гарантированно передаются следующим задачам", "Артефакты хранятся вечно, кэш — неделю", "Кэш нельзя использовать с Docker"], "answer": [1], "why": "<p>пайплайн обязан проходить и с пустым кэшем, а без артефакта следующая стадия просто не найдёт файлов.<\/p>\n"}, {"id": "d29ce950e9", "q": "Какие флаги должны быть у переменной с ключом для деплоя в продакшен? Выбери все.", "options": ["Masked — не показывать в логах", "Protected — доступна только защищённым веткам и тегам", "Expanded", "Public"], "answer": [0, 1], "why": "<p>без Protected ключ можно вытащить через merge request из форка, без Masked — случайным <code>echo<\/code>.<\/p>\n"}, {"id": "c5c45390a8", "q": "Что делает <code>when: manual<\/code> у задания деплоя?", "options": ["Запускает задание после всех остальных", "Задание ждёт, пока человек нажмёт кнопку в интерфейсе GitLab", "Запускает задание по расписанию", "Отключает задание"], "answer": [1], "why": "<p>так выкатка в продакшен становится осознанным действием, а не побочным эффектом коммита.<\/p>\n"}, {"id": "34d9410c49", "q": "Зачем <code>needs<\/code> в описании задания?", "options": ["Чтобы задание запускалось вручную", "Чтобы задание стартовало сразу после нужных зависимостей, не дожидаясь всей предыдущей стадии", "Чтобы указать образ", "Чтобы передать секреты"], "answer": [1], "why": "<p>пайплайн превращается в граф и проходит быстрее.<\/p>\n"}, {"id": "5168d00cdb", "q": "Зачем задаче интеграционных тестов <code>services: postgres:17<\/code>?", "options": ["Чтобы собрать образ PostgreSQL", "Чтобы на время задачи рядом поднялась настоящая база, с которой тесты будут работать", "Чтобы задеплоить базу в продакшен", "Чтобы ускорить pip"], "answer": [1], "why": "<p>интеграционные тесты проверяют работу с реальной базой, и CI сам её поднимает и убирает.<\/p>\n"}, {"id": "efbd0d803c", "q": "Деплой новой версии сломал продакшен. Как правильно откатиться?", "options": ["Пересобрать старый код из истории git", "Выкатить предыдущий проверенный образ по его тегу", "Удалить контейнер и подождать", "Перезагрузить сервер"], "answer": [1], "why": "<p>старый образ уже собран и проверен. Пересборка может дать другой результат и займёт время.<\/p>\n"}], "cards": [{"id": "078e5f8571", "q": "Чем Continuous Delivery отличается от Continuous Deployment?", "a": "<p>Delivery — каждое изменение готово к выкатке, но в продакшен оно уходит по решению человека. Deployment — каждое прошедшее проверки изменение выкатывается автоматически.<\/p>\n"}, {"id": "23f3b7aeb7", "q": "Чем кэш отличается от артефактов в GitLab CI?", "a": "<p>Кэш ускоряет повторные запуски (зависимости), не гарантирован и не для передачи результатов. Артефакты — результаты задачи, гарантированно передаются следующим стадиям и доступны для скачивания.<\/p>\n"}, {"id": "b14c9ead4d", "q": "Как хранить секреты в пайплайне?", "a": "<p>В переменных CI с флагами masked и protected или во внешнем хранилище (Vault через OIDC). Не в <code>.gitlab-ci.yml<\/code> и не в репозитории.<\/p>\n"}, {"id": "7b1a858667", "q": "Что такое executor у GitLab Runner?", "a": "<p>Способ выполнения задач: shell (прямо на машине раннера), docker (каждая задача в чистом контейнере), kubernetes (под на задачу). Docker и Kubernetes дают изоляцию и воспроизводимость.<\/p>\n"}, {"id": "fa46b88eb0", "q": "Как ускорить медленный пайплайн?", "a": "<p>Параллельные задачи, кэш зависимостей, кэш слоёв Docker, запуск только нужных задач через <code>rules: changes<\/code>, <code>needs<\/code> вместо ожидания всей стадии, быстрые тесты раньше медленных.<\/p>\n"}, {"id": "04e2d0f526", "q": "Как откатить неудачный деплой?", "a": "<p>Выкатить предыдущую версию артефакта (тег образа), а не пересобирать старый код. Стратегии вроде blue-green и canary позволяют откатиться переключением трафика.<\/p>\n"}], "next": "4-1"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

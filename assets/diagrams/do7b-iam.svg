@@ -1,0 +1,56 @@
+<svg viewBox="0 0 1000 450" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <pattern id="im1" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1c2733" stroke-width="1"/>
+    </pattern>
+    <marker id="ima" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#6bbdb6"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="450" fill="#0e1620"/>
+  <rect width="1000" height="450" fill="url(#im1)" opacity="0.5"/>
+
+  <text x="40" y="46" font-size="26" font-weight="700" fill="#dce6ec">Доступы: ключи против ролей</text>
+  <text x="40" y="72" font-size="15" fill="#8a9aa8">Утёкший ключ от облака — самая дорогая ошибка новичка. Счёт приходит за майнинг, оплаченный с твоей карты.</text>
+
+  <text x="40" y="112" font-size="15" font-weight="650" fill="#e0574f">Статический ключ в коде</text>
+  <rect x="40" y="126" width="450" height="140" rx="9" fill="#16202b" stroke="#e0574f" stroke-width="2"/>
+  <text x="62" y="152" font-size="12.5" fill="#cfe0e8" font-family="ui-monospace, Consolas, monospace">AWS_SECRET_KEY = "wJalr..."</text>
+  <text x="62" y="180" font-size="13" fill="#dce6ec">· Не истекает сам по себе</text>
+  <text x="62" y="202" font-size="13" fill="#dce6ec">· Попадает в git и остаётся в истории</text>
+  <text x="62" y="224" font-size="13" fill="#dce6ec">· Боты сканируют публичные репозитории</text>
+  <text x="62" y="248" font-size="13" fill="#e0574f">· Находят за минуты, не за дни</text>
+
+  <text x="540" y="112" font-size="15" font-weight="650" fill="#6bbdb6">Роль, привязанная к ресурсу</text>
+  <rect x="540" y="126" width="420" height="140" rx="9" fill="#16202b" stroke="#6bbdb6" stroke-width="2"/>
+  <rect x="562" y="146" width="150" height="40" rx="6" fill="#101d2a" stroke="#2a3742"/>
+  <text x="637" y="171" font-size="12.5" fill="#dce6ec" text-anchor="middle">виртуальная машина</text>
+  <line x1="716" y1="166" x2="756" y2="166" stroke="#6bbdb6" stroke-width="2" marker-end="url(#ima)"/>
+  <rect x="762" y="146" width="176" height="40" rx="6" fill="#152b2a" stroke="#6bbdb6"/>
+  <text x="850" y="171" font-size="12.5" fill="#6bbdb6" text-anchor="middle">роль с правами</text>
+  <text x="562" y="212" font-size="13" fill="#dce6ec">· Ключей вообще нет — облако выдаёт</text>
+  <text x="562" y="232" font-size="13" fill="#dce6ec">  временные учётные данные само</text>
+  <text x="562" y="254" font-size="13" fill="#6bbdb6">· Нечему утечь: красть нечего</text>
+
+  <line x1="40" y1="292" x2="960" y2="292" stroke="#2a3742" stroke-width="1.5"/>
+
+  <text x="40" y="322" font-size="16" font-weight="650" fill="#dce6ec">Принцип наименьших привилегий</text>
+
+  <rect x="40" y="338" width="298" height="96" rx="8" fill="#16202b" stroke="#e0574f" stroke-width="1.5"/>
+  <text x="60" y="364" font-size="14" font-weight="650" fill="#e0574f">Так делают в спешке</text>
+  <text x="60" y="388" font-size="12.5" fill="#cfe0e8" font-family="ui-monospace, Consolas, monospace">Action: "*"</text>
+  <text x="60" y="408" font-size="12.5" fill="#cfe0e8" font-family="ui-monospace, Consolas, monospace">Resource: "*"</text>
+  <text x="60" y="428" font-size="12" fill="#8a9aa8">«потом сузим» — не сужают никогда</text>
+
+  <rect x="351" y="338" width="298" height="96" rx="8" fill="#16202b" stroke="#6bbdb6" stroke-width="1.5"/>
+  <text x="371" y="364" font-size="14" font-weight="650" fill="#6bbdb6">Так надо</text>
+  <text x="371" y="388" font-size="12.5" fill="#cfe0e8" font-family="ui-monospace, Consolas, monospace">Action: "s3:GetObject"</text>
+  <text x="371" y="408" font-size="12.5" fill="#cfe0e8" font-family="ui-monospace, Consolas, monospace">Resource: "arn:...:my-bucket/*"</text>
+  <text x="371" y="428" font-size="12" fill="#8a9aa8">ровно то, что нужно, и не больше</text>
+
+  <rect x="662" y="338" width="298" height="96" rx="8" fill="#101d2a" stroke="#e08a4f" stroke-width="1.5"/>
+  <text x="682" y="364" font-size="14" font-weight="650" fill="#e08a4f">Обязательно с первого дня</text>
+  <text x="682" y="388" font-size="12.5" fill="#dce6ec">Двухфакторная аутентификация</text>
+  <text x="682" y="408" font-size="12.5" fill="#dce6ec">на корневой аккаунт, и им</text>
+  <text x="682" y="428" font-size="12.5" fill="#dce6ec">не пользоваться в повседневной работе.</text>
+</svg>

@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5.1 Kubernetes с нуля — DevOps-маршрут</title>
+<meta name="description" content="Урок 5.1: Kubernetes с нуля">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c5)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-5">← 5. Kubernetes и GitOps</a>
+    <div class="sidebar-art"><svg class="art art-k8s" viewBox="0 0 240 140" role="img" aria-label="Кластер Kubernetes" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g class="spin"><polygon points="120.0,26.0 151.3,41.1 159.0,74.9 137.4,102.0 102.6,102.0 81.0,74.9 88.7,41.1"/><path class="dim" d="M120 66 L120.0,32.0 M120 66 L146.6,44.8 M120 66 L153.1,73.6 M120 66 L134.8,96.6 M120 66 L105.2,96.6 M120 66 L86.9,73.6 M120 66 L93.4,44.8"/></g>
+<circle cx="120" cy="66" r="9"/>
+<rect class="pod d0" x="149.3" y="11.5" width="12" height="12" rx="3"/><rect class="pod d1" x="171.1" y="78.5" width="12" height="12" rx="3"/><rect class="pod d2" x="114.0" y="120.0" width="12" height="12" rx="3"/><rect class="pod d3" x="56.9" y="78.5" width="12" height="12" rx="3"/><rect class="pod d4" x="78.7" y="11.5" width="12" height="12" rx="3"/>
+<text class="lbl" x="18" y="134">kubectl get pods</text>
+</svg></div>
+    <div class="lesson-number">lesson 5.1 · k8s</div>
+    <h1 class="lesson-title">Kubernetes с нуля</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Kubernetes vs Docker Swarm</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">minikube: Kubernetes на одной машине для обучения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Манифест: декларативное описание желаемого состояния</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Pod — минимальная единица развёртывания</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Service — стабильный адрес для подов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">ConfigMap: конфигурация отдельно от кода</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Secret: чувствительные данные</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">kubectl: основные команды</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Доступ и визуализация: minikube service, minikube dashboard</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Стратегии обновления: recreate и rolling</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Пробы: liveness, readiness, startup</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Requests и limits</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Как трафик попадает внутрь: типы Service и Ingress</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Namespace и организация кластера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Под не работает: порядок разбора</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Docker Swarm (урок 4.1) — простой оркестратор «из коробки». Kubernetes — куда более сложный и мощный инструмент, ставший фактическим стандартом индустрии для крупных приложений с множеством сервисов. Освоить его базовые понятия — pod, service, деплой через манифесты — необходимо почти для любой DevOps-вакансии.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Манифест</strong> — YAML-файл, декларативно описывающий, каким должно быть состояние объекта в кластере (не «что сделать», а «как должно быть»).</li>
+<li><strong>Pod</strong> — минимальная единица развёртывания в Kubernetes: один или несколько тесно связанных контейнеров, работающих вместе как единое целое.</li>
+<li><strong>Service</strong> — стабильная точка доступа к набору подов, которые сами по себе могут пересоздаваться и менять IP.</li>
+<li><strong>ConfigMap</strong> — объект для хранения несекретной конфигурации отдельно от кода приложения.</li>
+<li><strong>Secret</strong> — объект для хранения чувствительных данных (пароли, ключи), закодированных в base64.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Kubernetes vs Docker Swarm</h2><div class="prose"><p><em>Аналогия:</em> если Docker Swarm — небольшая семейная мастерская, где прораб лично знает каждого работника, то Kubernetes — огромный завод с отдельными цехами, конвейерами и системой учёта для тысяч единиц оборудования.</p>
+<p>Docker Swarm проще в освоении и достаточен для несложных случаев. Kubernetes сложнее, но предназначен для куда более серьёзных нагрузок: большого количества сервисов, сложного взаимодействия между ними, тонкой настройки распределения ресурсов. Kubernetes также включает больше встроенных инструментов «из коробки» — например, собственную систему мониторинга состояния кластера.</p>
+<p><img loading="lazy" src="../assets/diagrams/do10-swarmvsk8s.webp" alt="" /></p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>minikube: Kubernetes на одной машине для обучения</h2><div class="prose"><p><em>Аналогия:</em> minikube — как тренажёр-симулятор настоящего самолёта: полноценная кабина со всеми приборами, но помещается в одну комнату, а не требует настоящего аэродрома.</p>
+<pre><code class="language-bash">minikube start --memory=4096
+minikube status
+</code></pre>
+<p>minikube разворачивает полноценный (хотя и однонодовый) кластер Kubernetes прямо на локальной машине — этого достаточно, чтобы изучить все базовые понятия и команды, не имея доступа к настоящему многоузловому production-кластеру.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Манифест: декларативное описание желаемого состояния</h2><div class="prose"><p><em>Аналогия:</em> манифест — не пошаговая инструкция «сначала сделай это, потом то», а техническое задание архитектору: «хочу дом с тремя комнатами и окнами на юг» — как именно это будет построено, решает уже сам Kubernetes.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shop-api
+  template:
+    metadata:
+      labels:
+        app: shop-api
+    spec:
+      containers:
+        - name: shop-api
+          image: username/shop-api:1.0
+          ports:
+            - containerPort: 8080
+</code></pre>
+<pre><code class="language-bash">kubectl apply -f shop-api-deployment.yaml
+</code></pre>
+<p><code>kubectl apply</code> не «выполняет команду однократно», а сообщает Kubernetes желаемое состояние — Kubernetes сам сравнивает его с текущим состоянием кластера и делает всё необходимое, чтобы привести одно к другому (создать под, если его ещё нет; ничего не делать, если уже всё так).</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Pod — минимальная единица развёртывания</h2><div class="prose"><p><em>Аналогия:</em> pod — не то же самое, что контейнер: это, скорее, «стручок гороха» — небольшая капсула, внутри которой может быть один основной контейнер (чаще всего) или несколько тесно связанных, живущих и умирающих вместе.</p>
+<pre><code class="language-bash">kubectl get pods
+kubectl describe pod shop-api-7d4b8f9c-x2n4k
+kubectl logs shop-api-7d4b8f9c-x2n4k
+</code></pre>
+<p>В большинстве простых случаев pod содержит ровно один контейнер, и в быту про них часто говорят как о синонимах — но технически именно pod, а не контейнер, является минимальной управляемой единицей в Kubernetes: у него общий сетевой адрес и общее хранилище для всех контейнеров внутри.</p>
+<p><img loading="lazy" src="../assets/diagrams/do10-pod.webp" alt="" /></p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Service — стабильный адрес для подов</h2><div class="prose"><p><em>Аналогия:</em> поды — как временные сотрудники, которых может уволить и нанять заново система (с новым внутренним ID каждый раз), а Service — это постоянный номер горячей линии компании, который не меняется, даже если сотрудник, отвечающий на звонки, сменился.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: shop-api
+spec:
+  selector:
+    app: shop-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+</code></pre>
+<p>Поды могут пересоздаваться (при сбое, обновлении, масштабировании) и каждый раз получать новый внутренний IP — обращаться напрямую к поду ненадёжно. <code>Service</code> находит подходящие поды по <code>selector</code> (совпадению меток) и предоставляет для них общий стабильный адрес, который не меняется.</p>
+<p><img loading="lazy" src="../assets/diagrams/do10-service.webp" alt="" /></p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>ConfigMap: конфигурация отдельно от кода</h2><div class="prose"><p><em>Аналогия:</em> ConfigMap — как отдельная записка с адресом на холодильнике, а не адрес, вытатуированный прямо на теле курьера — поменять адрес намного проще, чем переделывать самого курьера.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  DB_HOST: &quot;postgres-service&quot;
+  DB_PORT: &quot;5432&quot;
+</code></pre>
+<pre><code class="language-yaml">containers:
+  - name: shop-api
+    envFrom:
+      - configMapRef:
+          name: app-config
+</code></pre>
+<p>ConfigMap хранит несекретные значения конфигурации (хосты, порты, флаги) отдельно от самого образа приложения — поменять адрес базы данных можно, обновив только ConfigMap, без пересборки образа. <code>envFrom</code> в манифесте контейнера говорит «забери все пары ключ-значение из указанного источника и сделай их переменными окружения внутри контейнера»; <code>configMapRef: name: app-config</code> указывает, из какого именно ConfigMap их брать — в результате внутри контейнера появятся переменные <code>DB_HOST</code> и <code>DB_PORT</code>, как если бы их прописали вручную при запуске.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Secret: чувствительные данные</h2><div class="prose"><p><em>Аналогия:</em> Secret — это конверт с надписью «конфиденциально», но не запертый сейф: сам по себе base64 — это не шифрование, а просто другой способ записи тех же символов, который любой может «открыть» одной командой.</p>
+<pre><code class="language-bash">kubectl create secret generic db-secret \
+  --from-literal=password=supersecret
+
+kubectl get secret db-secret -o jsonpath='{.data.password}' | base64 --decode
+</code></pre>
+<p>Значения внутри <code>Secret</code> кодируются в base64 — это защищает не от намеренного взлома, а скорее от случайного отображения пароля в логах или интерфейсе «как есть». Настоящая защита секретов в реальных кластерах обеспечивается правами доступа (RBAC) и шифрованием на уровне etcd, а не самим base64.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>kubectl: основные команды</h2><div class="prose"><p><em>Аналогия:</em> kubectl — пульт управления с несколькими режимами: «применить план», «посмотреть список», «спросить подробности», «почитать журнал происшествий».</p>
+<pre><code class="language-bash">kubectl apply -f manifest.yaml       # применить манифест
+kubectl get pods                      # список объектов (можно get service, get deployment...)
+kubectl describe pod &lt;имя&gt;            # подробная информация об объекте
+kubectl logs &lt;имя_пода&gt;               # логи контейнера внутри пода
+</code></pre>
+<p><code>get</code> даёт краткую сводку, <code>describe</code> — подробности вплоть до истории событий (почему под не запустился, если что-то пошло не так), <code>logs</code> — прямой доступ к выводу самого приложения внутри пода.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Доступ и визуализация: minikube service, minikube dashboard</h2><div class="prose"><p><em>Аналогия:</em> если кластер — это закрытое здание завода, <code>minikube service</code> — временный туннель прямо к конкретному цеху, а <code>minikube dashboard</code> — застеклённая смотровая галерея, откуда видно вообще всё производство сразу.</p>
+<pre><code class="language-bash">minikube service shop-api --url
+minikube dashboard
+</code></pre>
+<p><code>minikube service</code> создаёт временный туннель с локальной машины до конкретного <code>Service</code> внутри кластера — без этого сервисы Kubernetes по умолчанию недоступны снаружи. <code>minikube dashboard</code> открывает встроенный веб-интерфейс с визуализацией всех объектов кластера — подов, деплойментов, логов, конфигураций — без запоминания команд <code>kubectl</code> для каждого действия.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Стратегии обновления: recreate и rolling</h2><div class="prose"><p><em>Аналогия:</em> <code>recreate</code> — как полностью закрыть магазин на ремонт, а потом открыть заново — быстро по шагам, но с полным простоем; <code>rolling</code> — как ремонтировать по одному прилавку за раз, не закрывая весь магазин целиком, но сам процесс растягивается дольше.</p>
+<pre><code class="language-yaml">spec:
+  strategy:
+    type: Recreate   # или RollingUpdate
+</code></pre>
+<p>При <code>Recreate</code> Kubernetes сначала полностью останавливает все старые поды и только потом запускает новые — приложение на время обновления недоступно, зато переход происходит быстро и предсказуемо. При <code>RollingUpdate</code> (по умолчанию) старые поды заменяются новыми постепенно, по одному — приложение остаётся доступным всё время обновления, но само обновление занимает больше времени, так как одновременно должны существовать и старая, и новая версия.</p>
+<p><img loading="lazy" src="../assets/diagrams/do10-strategy.webp" alt="" /></p>
+<p>Отдельно стоит знать про иерархию: <code>Deployment</code> управляет <code>ReplicaSet</code>, а тот — подами. При обновлении создаётся новый ReplicaSet, старый остаётся с нулём реплик — именно поэтому возможен мгновенный откат:</p>
+<pre><code class="language-bash">kubectl rollout status deployment/shop-api    # следить за ходом обновления
+kubectl rollout history deployment/shop-api    # список версий
+kubectl rollout undo deployment/shop-api        # откатиться на предыдущую
+</code></pre>
+<p>Это та самая «кнопка отката» из <a href="../lessons/3-2.html#s-15">3.2 CI-CD</a>, §15, только встроенная в оркестратор.</p>
+
+<figure class="explain" data-anim="k8s-deployment"><figcaption><span class="explain-tag">▶ схема</span>Deployment в действии: самовосстановление, масштаб, rolling update</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Пробы: liveness, readiness, startup</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do10-probes.svg" alt="" /><br />
+<em>Аналогия:</em> врач задаёт три разных вопроса — «жив ли пациент», «может ли он работать» и «закончился ли наркоз». Ответы на них означают разные действия, и путать их нельзя.</p>
+<p>Без проб Kubernetes считает под здоровым, пока процесс внутри не умер. Приложение может зависнуть, потерять связь с базой, отвечать ошибками на всё подряд — трафик всё равно будет идти. Пробы дают кластеру возможность это понять.</p>
+<pre><code class="language-yaml">containers:
+  - name: app
+    livenessProbe:
+      httpGet: { path: /healthz, port: 8000 }
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 3
+
+    readinessProbe:
+      httpGet: { path: /readyz, port: 8000 }
+      periodSeconds: 5
+
+    startupProbe:
+      httpGet: { path: /healthz, port: 8000 }
+      failureThreshold: 30
+      periodSeconds: 5        # даёт до 150 секунд на запуск
+</code></pre>
+<p>Вот те самые эндпоинты из <a href="../lessons/2-5.html#s-11">2.5 Бэкенд-сервис</a>, §11 — теперь видно, кто их читает.</p>
+<p><strong><code>liveness</code></strong> отвечает на вопрос «процесс не завис». Не прошла — <strong>под перезапускают</strong>. Поэтому проверять в ней что-либо внешнее нельзя: если база ушла на обслуживание, перезапуск приложения ничем не поможет.</p>
+<p><strong><code>readiness</code></strong> отвечает «можно ли слать трафик». Не прошла — под <strong>убирают из Service</strong>, но не трогают. Вот здесь и проверяют зависимости: база, очередь, кеш. Как только всё вернётся, под сам вернётся в ротацию.</p>
+<p><strong><code>startup</code></strong> нужна для медленно стартующих приложений. Пока она не прошла, остальные пробы не выполняются вовсе. Без неё <code>liveness</code> с коротким интервалом убьёт под, который просто не успел запуститься за отведённое время, и приложение уйдёт в бесконечный цикл перезапусков.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Проверка базы в liveness — типовая авария</summary><div class="callout-body"><p>База ушла на десять минут обслуживания. Kubernetes видит, что liveness не проходит, убивает под, поднимает новый — тот тоже не может достучаться до базы, и цикл повторяется, пока база не вернётся. При этом настоящей проблемы с приложением не было ни секунды.</p>
+<p>Правило: <strong>liveness проверяет только себя и почти всегда отвечает успешно; readiness проверяет зависимости и может честно сказать «сейчас не готов»</strong>. Это ровно то различие, что разбиралось в <a href="../lessons/2-5.html#s-11">2.5 Бэкенд-сервис</a>, §11, — и в Kubernetes цена ошибки становится наглядной.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Requests и limits</h2><div class="prose"><p><em>Аналогия:</em> <code>requests</code> — бронь столика, <code>limits</code> — потолок счёта. По брони планировщик решает, поместишься ли ты в ресторан вообще.</p>
+<pre><code class="language-yaml">    resources:
+      requests:
+        memory: &quot;256Mi&quot;
+        cpu: &quot;250m&quot;
+      limits:
+        memory: &quot;512Mi&quot;
+        cpu: &quot;1000m&quot;
+</code></pre>
+<p><strong><code>requests</code></strong> — гарантированный минимум, по которому планировщик выбирает узел. Если на всех узлах свободно меньше, чем запрошено, под останется в состоянии <code>Pending</code> и не запустится нигде.</p>
+<p><strong><code>limits</code></strong> — потолок. Превышение по памяти означает убийство контейнера с состоянием <strong><code>OOMKilled</code></strong>; превышение по процессору — просто замедление, ничего не падает. Асимметрия та же, что разбиралась в <a href="../lessons/4-1.html#s-11">4.1 Compose и Swarm</a>, §11.</p>
+<p>Единицы стоит запомнить: <code>250m</code> — это 0.25 ядра («milliCPU»), <code>256Mi</code> — мебибайты (не мегабайты, разница около 5%).</p>
+<p>Из соотношения requests и limits выводится <strong>класс обслуживания</strong> (QoS), по которому Kubernetes решает, кого убивать первым при нехватке памяти на узле:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Класс</th>
+<th>Когда</th>
+<th>Кого убьют</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Guaranteed</code></td>
+<td>requests равны limits</td>
+<td>последним</td>
+</tr>
+<tr>
+<td><code>Burstable</code></td>
+<td>requests меньше limits</td>
+<td>вторым</td>
+</tr>
+<tr>
+<td><code>BestEffort</code></td>
+<td>ничего не указано</td>
+<td><strong>первым</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Отсюда практический вывод: под без указанных ресурсов не просто рискует съесть всё — он ещё и первый кандидат на вытеснение. Для важных сервисов requests и limits ставят равными.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Как подбирать значения</summary><div class="callout-body"><p>Не угадыванием: посмотреть фактическое потребление под нагрузкой через метрики из <a href="../lessons/4-5.html">4.5 Наблюдаемость</a> и взять пиковое значение с запасом. Слишком низкий лимит памяти даёт регулярные <code>OOMKilled</code> под нагрузкой; слишком высокие requests не дают поду разместиться на узле. И то и другое видно в метриках, а не в интуиции.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Как трафик попадает внутрь: типы Service и Ingress</h2><div class="prose"><p><em>Аналогия:</em> <code>ClusterIP</code> — внутренний добавочный номер, <code>NodePort</code> — прямой городской номер конкретного здания, <code>LoadBalancer</code> — единый номер call-центра, <code>Ingress</code> — секретарь, который по названию отдела соединяет с нужным добавочным.</p>
+<p>В §5 разобран <code>Service</code> в варианте по умолчанию. Их четыре типа:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Что даёт</th>
+<th>Где применяется</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ClusterIP</code></td>
+<td>адрес только внутри кластера</td>
+<td>по умолчанию, для связи сервисов между собой</td>
+</tr>
+<tr>
+<td><code>NodePort</code></td>
+<td>порт на каждом узле кластера</td>
+<td>отладка, простые случаи</td>
+</tr>
+<tr>
+<td><code>LoadBalancer</code></td>
+<td>внешний балансировщик от облака</td>
+<td>боевой доступ снаружи, по одному на сервис</td>
+</tr>
+<tr>
+<td><code>ExternalName</code></td>
+<td>псевдоним для внешнего адреса</td>
+<td>обращение к сервису вне кластера</td>
+</tr>
+</tbody>
+</table></div>
+<p>Проблема с <code>LoadBalancer</code> в том, что облако создаёт (и тарифицирует) отдельный балансировщик на каждый такой сервис. Для десятка сервисов это десяток балансировщиков и десяток внешних адресов.</p>
+<p><strong>Ingress</strong> решает это: один вход снаружи, маршрутизация внутрь по имени домена и пути.</p>
+<pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main
+spec:
+  rules:
+    - host: shop.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port: { number: 8080 }
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port: { number: 80 }
+  tls:
+    - hosts: [shop.example.com]
+      secretName: shop-tls
+</code></pre>
+<p>По сути это тот же nginx как reverse proxy из <a href="../lessons/1-2.html#s-11">1.2 Сети</a>, §11, только описанный манифестом. Сам Ingress — лишь правила; выполняет их <strong>Ingress-контроллер</strong> (Traefik, HAProxy, NGINX Gateway Fabric и другие; долго самым популярным был ingress-nginx, но с марта 2026 года он больше не поддерживается), который надо установить в кластер отдельно. Забыть про это — типовая причина того, что манифест применился, а ничего не работает.</p>
+<p>Ingress же обычно завершает TLS, а в связке с cert-manager сертификаты выпускаются и продлеваются автоматически — окончательный ответ на вопрос из <a href="../lessons/1-2.html#s-3">1.2 Сети</a>, §3.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Namespace и организация кластера</h2><div class="prose"><p><em>Аналогия:</em> папки в одном файловом хранилище. Ничего не мешает свалить всё в корень, пока файлов десять.</p>
+<pre><code class="language-bash">kubectl create namespace staging
+kubectl apply -f app.yaml -n staging
+kubectl get pods -n staging
+kubectl config set-context --current --namespace=staging   # чтобы не писать -n каждый раз
+</code></pre>
+<p>Пространства имён разделяют объекты внутри кластера: тестовое и предпродакшн окружение, команды, инфраструктурные компоненты. Имена объектов уникальны внутри пространства, а не во всём кластере, — можно иметь <code>app</code> в каждом из них.</p>
+<p>К пространствам привязываются квоты ресурсов (<code>ResourceQuota</code>), сетевые политики и права доступа (<code>RBAC</code>), поэтому разделение по ним — не косметика, а основа управления.</p>
+<p>Обращение к сервису в другом пространстве идёт по полному имени:</p>
+<pre><code>имя-сервиса.пространство.svc.cluster.local
+</code></pre>
+<p>Внутри одного пространства достаточно короткого имени — то же самое, что имена сервисов в Compose из <a href="../lessons/3-1.html#s-11">3.1 Docker</a>, §11.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>Под не работает: порядок разбора</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do10-pod-troubleshooting.svg" alt="" /><br />
+<em>Аналогия:</em> статус в списке подов — как код ошибки на панели прибора: он почти всегда сразу называет причину, если знать расшифровку.</p>
+<p>Это то, что просят продемонстрировать на собеседовании чаще всего остального по Kubernetes.</p>
+<p><strong>Шаг 1</strong> — посмотреть статус:</p>
+<pre><code class="language-bash">kubectl get pods
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Статус</th>
+<th>Причина</th>
+<th>Куда смотреть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CrashLoopBackOff</code></td>
+<td>контейнер стартует и падает по кругу</td>
+<td><code>logs --previous</code></td>
+</tr>
+<tr>
+<td><code>ImagePullBackOff</code></td>
+<td>образ не скачивается</td>
+<td>тег, доступ к реестру</td>
+</tr>
+<tr>
+<td><code>Pending</code></td>
+<td>планировщик не нашёл узел</td>
+<td>requests, ограничения размещения</td>
+</tr>
+<tr>
+<td><code>OOMKilled</code></td>
+<td>превышен лимит памяти</td>
+<td>утечка или заниженный лимит</td>
+</tr>
+<tr>
+<td><code>Running</code>, но <code>0/1 READY</code></td>
+<td>readiness не проходит</td>
+<td>зависимости приложения</td>
+</tr>
+<tr>
+<td><code>Terminating</code> надолго</td>
+<td>не завершается по SIGTERM</td>
+<td>обработка сигнала, <code>terminationGracePeriodSeconds</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Шаг 2</strong> — журнал событий, где почти всегда лежит точная причина:</p>
+<pre><code class="language-bash">kubectl describe pod &lt;имя&gt;          # события в самом низу вывода
+kubectl get events --sort-by=.lastTimestamp
+</code></pre>
+<p><strong>Шаг 3</strong> — логи, в том числе от предыдущего упавшего запуска:</p>
+<pre><code class="language-bash">kubectl logs &lt;под&gt;                   # текущий контейнер
+kubectl logs &lt;под&gt; --previous         # предыдущая упавшая попытка — ключевое при CrashLoop
+kubectl logs -l app=shop-api --tail=50  # по метке, со всех подов сразу
+</code></pre>
+<p><strong>Шаг 4</strong> — зайти внутрь и проверить руками:</p>
+<pre><code class="language-bash">kubectl exec -it &lt;под&gt; -- sh
+kubectl port-forward &lt;под&gt; 8080:8000       # пробросить порт к себе, минуя Service
+</code></pre>
+<p><code>port-forward</code> полезен для важной проверки: если через него приложение отвечает, а через Service нет — проблема в <code>selector</code> сервиса или в readiness, а не в самом приложении.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Частая причина «манифест применился, ничего не работает»</summary><div class="callout-body"><p>Метки в <code>selector</code> сервиса не совпадают с метками подов. Kubernetes при этом не выдаёт ошибки — Service просто не находит ни одного пода и никуда не направляет трафик. Проверяется мгновенно:</p>
+<pre><code class="language-bash">kubectl get endpoints shop-api     # пусто — значит selector не совпал
+</code></pre>
+<p>Пустой список конечных точек — первое, что стоит смотреть, когда сервис не отвечает.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Манифест — декларативное «как должно быть», а не пошаговая инструкция; kubectl apply сводит текущее состояние к желаемому.</li>
+<li>Pod — минимальная управляемая единица, не то же самое, что контейнер (хотя чаще всего один под = один контейнер).</li>
+<li>Service даёт стабильный адрес для подов, которые сами могут пересоздаваться и менять IP.</li>
+<li>ConfigMap — для несекретной конфигурации, Secret — для чувствительных данных (base64 — не шифрование, а кодирование).</li>
+<li>kubectl get/describe/logs — три основных способа посмотреть, что происходит в кластере.</li>
+<li>minikube service пробрасывает временный туннель к сервису, minikube dashboard визуализирует весь кластер.</li>
+<li>Recreate — быстрое обновление с простоем, RollingUpdate — постепенное обновление без простоя, но дольше. Откат — <code>kubectl rollout undo</code>.</li>
+<li><strong>Три пробы, три действия</strong>: <code>liveness</code> не прошла — под перезапускают, <code>readiness</code> — убирают из Service, <code>startup</code> — даёт время на медленный запуск. <strong>Проверять базу в liveness — значит устроить цикл перезапусков.</strong></li>
+<li><code>requests</code> определяют, куда планировщик поставит под; <code>limits</code> — потолок. Превышение памяти = <code>OOMKilled</code>, превышение CPU = замедление. Под без ресурсов убивают первым.</li>
+<li>Типы Service: <code>ClusterIP</code> внутри, <code>NodePort</code> для отладки, <code>LoadBalancer</code> по одному балансировщику на сервис. <strong>Ingress</strong> — один вход и маршрутизация по домену и пути; требует отдельно установленного контроллера.</li>
+<li>Пространства имён разделяют объекты и служат точкой привязки квот, прав и сетевых политик.</li>
+<li>Разбор упавшего пода: статус в <code>get pods</code> → события в <code>describe</code> → <code>logs --previous</code> → <code>exec</code> и <code>port-forward</code>. Пустой <code>get endpoints</code> означает, что <code>selector</code> не совпал с метками подов.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–3 — основа приложения в кластере для <a href="../projects/p3.html">P3</a>: Deployment с пробами и ресурсами, Service, выкатка и откат.</li>
+<li>Те же манифесты, превращённые в шаблоны, — начало <a href="../projects/m4.html">M4</a>.</li>
+</ul>
+</div></details><article class="task" data-task="e6ccd91ad0"><h3>Задание 1 — первый Deployment</h3><p>В minikube или kind разверни приложение Deployment'ом на 3 реплики с Service типа ClusterIP, ConfigMap и Secret.<br />
+<strong>Проверка:</strong> <code>kubectl get pods -o wide</code> — 3 пода в Running; удаление одного пода (<code>kubectl delete pod</code>) через секунды восстанавливает число реплик.</p>
+<label class="task-done"><input type="checkbox" data-task-check="e6ccd91ad0"> Сделала руками и проверила</label></article><article class="task" data-task="f6900b24f3"><h3>Задание 2 — пробы и ресурсы</h3><p>Добавь readiness и liveness-пробы на <code>/readyz</code> и <code>/healthz</code>, requests и limits.<br />
+<strong>Проверка:</strong> при сломанной базе поды выходят из Endpoints Service (<code>kubectl get endpoints</code>), но не перезапускаются.</p>
+<label class="task-done"><input type="checkbox" data-task-check="f6900b24f3"> Сделала руками и проверила</label></article><article class="task" data-task="943683ea68"><h3>Задание 3 — rolling update и откат</h3><p>Обнови образ через <code>kubectl set image</code>, затем выкати заведомо битый тег и откати через <code>kubectl rollout undo</code>.<br />
+<strong>Проверка:</strong> во время обновления цикл <code>curl</code> не получает ошибок; битый релиз не убил старые поды, откат восстанавливает работу.</p>
+<label class="task-done"><input type="checkbox" data-task-check="943683ea68"> Сделала руками и проверила</label></article><article class="task" data-task="80a1231e3e"><h3>Задание 4 — Ingress</h3><p>Включи Ingress-контроллер и открой приложение по имени хоста.<br />
+<strong>Проверка:</strong> <code>curl -H &quot;Host: shop.local&quot; http://&lt;ip-ingress&gt;</code> возвращает ответ приложения.</p>
+<label class="task-done"><input type="checkbox" data-task-check="80a1231e3e"> Сделала руками и проверила</label></article><article class="task" data-task="786d8d0e0d"><h3>Задание 5 — разбор неработающего пода</h3><p>Сломай под тремя способами: несуществующий образ, неверная команда, слишком маленький лимит памяти.<br />
+<strong>Проверка:</strong> для каждого случая находишь причину через <code>kubectl describe pod</code>, <code>kubectl logs --previous</code> и <code>kubectl get events</code>, называешь статус (ImagePullBackOff, CrashLoopBackOff, OOMKilled).</p>
+<label class="task-done"><input type="checkbox" data-task-check="786d8d0e0d"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — <code>/healthz</code> и <code>/readyz</code>, которые здесь читают пробы</li>
+<li><a href="../lessons/4-1.html">4.1 Compose и Swarm</a> — те же понятия в простом оркестраторе</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — метрики, по которым подбирают requests и limits</li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a> — хранилище, права доступа и продвинутые объекты</li>
+<li><a href="../lessons/5-3.html">5.3 Helm и Kustomize</a> — шаблонизация всех этих манифестов</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Kubernetes: https://kubernetes.io/docs/concepts/</li>
+<li>Справочник kubectl: https://kubernetes.io/docs/reference/kubectl/</li>
+<li>minikube: https://minikube.sigs.k8s.io/docs/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="4-5.html">← 4.5 Наблюдаемость в продакшене</a><a class="lesson-jump" href="5-2.html">5.2 Kubernetes в работе: кластер, HTTPS, хранилище →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "5-1", "number": "5.1", "title": "Kubernetes с нуля", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["e6ccd91ad0", "f6900b24f3", "943683ea68", "80a1231e3e", "786d8d0e0d"], "quiz": [{"id": "3b92550791", "q": "Что такое Pod?", "options": ["Узел кластера", "Минимальная единица развёртывания: один или несколько контейнеров с общей сетью и томами", "Образ контейнера", "Группа сервисов"], "answer": [1], "why": "<p>контейнеры одного пода видят друг друга по localhost и делят тома.<\/p>\n"}, {"id": "ac61b0fd08", "q": "Чем readinessProbe отличается от livenessProbe?", "options": ["При провале readiness под убирают из балансировки, при провале liveness — перезапускают", "Это одно и то же", "readiness перезапускает под", "liveness проверяется только при старте"], "answer": [0], "why": "<p>если база ненадолго недоступна, перезапуски не помогут — достаточно не слать трафик.<\/p>\n"}, {"id": "3234e91b47", "q": "Под в статусе <code>CrashLoopBackOff<\/code>. Что посмотреть в первую очередь? Выбери все.", "options": ["<code>kubectl describe pod<\/code> — события и код выхода", "<code>kubectl logs --previous<\/code> — лог упавшего контейнера", "<code>kubectl delete namespace<\/code>", "<code>kubectl get nodes<\/code>"], "answer": [0, 1], "why": "<p>describe покажет причину (OOMKilled, ошибку команды), логи прошлого запуска — что приложение успело написать перед падением.<\/p>\n"}, {"id": "67dade5075", "q": "Что произойдёт, если контейнер превысит limits по памяти?", "options": ["Он замедлится", "Его убьют, статус будет OOMKilled", "Kubernetes выделит ему больше памяти", "Ничего"], "answer": [1], "why": "<p>превышение лимита CPU приводит к замедлению (throttling), а памяти — к уничтожению контейнера.<\/p>\n"}, {"id": "053056b88a", "q": "Зачем нужен Service, если у подов уже есть IP-адреса?", "options": ["Поды не имеют адресов", "IP подов меняются при пересоздании, а Service даёт постоянный адрес и балансирует между подами", "Service шифрует трафик", "Чтобы поды видели интернет"], "answer": [1], "why": "<p>Service находит поды по меткам (selector) и сам следит, какие из них сейчас готовы.<\/p>\n"}, {"id": "79b1374c36", "q": "Secret в Kubernetes зашифрован по умолчанию?", "options": ["Да, AES-256", "Нет, значения в base64, который декодируется одной командой", "Да, если namespace называется secret", "Secret нельзя прочитать вообще"], "answer": [1], "why": "<p>защиту обеспечивают RBAC, шифрование etcd и внешние хранилища секретов, а не сам формат.<\/p>\n"}, {"id": "612da71c36", "q": "Чем requests отличаются от limits?", "options": ["requests — гарантированный объём, по нему планировщик выбирает узел; limits — потолок", "Это одно и то же", "requests — максимум, limits — минимум", "limits нужны только для CPU"], "answer": [0], "why": "<p>без requests планировщик не знает, сколько места нужно поду, и может переполнить узел.<\/p>\n"}], "cards": [{"id": "c50ce41a02", "q": "Что такое Pod и почему в нём может быть несколько контейнеров?", "a": "<p>Минимальная единица развёртывания: один или несколько контейнеров с общей сетью (localhost) и томами. Несколько контейнеров — для тесно связанных задач: sidecar для логов или прокси, init-контейнер для подготовки.<\/p>\n"}, {"id": "208c635b0b", "q": "Чем Deployment отличается от ReplicaSet и Pod?", "a": "<p>Pod — запущенные контейнеры. ReplicaSet поддерживает нужное число подов. Deployment управляет ReplicaSet'ами и обеспечивает обновления и откаты.<\/p>\n"}, {"id": "4822dbec28", "q": "Какие типы Service знаешь?", "a": "<p>ClusterIP — внутренний адрес в кластере; NodePort — порт на каждом узле; LoadBalancer — внешний балансировщик облака; ExternalName — DNS-псевдоним. HTTP-трафик снаружи обычно идёт через Ingress.<\/p>\n"}, {"id": "d9106ce706", "q": "Чем liveness отличается от readiness и startup?", "a": "<p>Liveness при провале перезапускает контейнер. Readiness убирает под из балансировки. Startup отключает остальные пробы, пока медленное приложение запускается.<\/p>\n"}, {"id": "3540ec8b7a", "q": "Чем requests отличаются от limits?", "a": "<p>Requests — гарантированный объём, по нему планировщик выбирает узел. Limits — потолок: превышение памяти убивает контейнер (OOMKilled), CPU — ограничивается (throttling).<\/p>\n"}, {"id": "d5bfb1d2fe", "q": "Под в CrashLoopBackOff. Что делать?", "a": "<p><code>kubectl describe pod<\/code> (события, exit code), <code>kubectl logs --previous<\/code> (лог упавшего контейнера), проверить команду, конфиг, секреты, доступность зависимостей, лимиты памяти.<\/p>\n"}, {"id": "8f3fb0e649", "q": "Secret в Kubernetes зашифрован?", "a": "<p>По умолчанию нет — значения в base64. Защита — RBAC, шифрование etcd на уровне кластера и внешние хранилища секретов.<\/p>\n"}], "next": "5-2"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

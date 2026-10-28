@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6.1 CI/CD в Kubernetes — DevOps-маршрут</title>
+<meta name="description" content="Урок 6.1: CI/CD в Kubernetes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c6)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-6">← 6. Продвинутый CI/CD</a>
+    <div class="sidebar-art"><svg class="art art-ship" viewBox="0 0 240 140" role="img" aria-label="Безопасная поставка" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path class="flow" d="M14 70 H78"/>
+<path class="flow" d="M162 70 H226"/>
+<rect class="dim" x="14" y="58" width="14" height="24" rx="3"/>
+<rect class="dim" x="212" y="58" width="14" height="24" rx="3"/>
+<path class="shield" d="M120 18 L158 32 V66 C158 94 140 110 120 120 C100 110 82 94 82 66 V32 Z"/>
+<path class="check" d="M103 68 L116 81 L139 56"/>
+<rect class="dim" x="186" y="28" width="22" height="16" rx="3"/><path class="dim" d="M191 28 V22 A6 6 0 0 1 203 22 V28"/>
+<text class="lbl" x="18" y="134">trivy · sign · argocd sync</text>
+</svg></div>
+    <div class="lesson-number">lesson 6.1 · ship</div>
+    <h1 class="lesson-title">CI/CD в Kubernetes</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">GitLab Runner внутри Kubernetes: чем это лучше отдельной VM</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Отдельный namespace для раннера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Установка раннера через Helm-чарт</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Secret для токена раннера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">config.toml: настройка Kubernetes executor</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Регистрация раннера с этим конфигом</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Стадия build: образ без Docker-демона</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Стадия test: модульные тесты и смоук после выкатки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Окружения: staging автоматически, prod — вручную по тегу</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Секреты: при запуске, а не в образе</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">cache и artifacts: разные вещи с похожим поведением</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Скорость конвейера: за что платят временем</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Переиспользование: конвейер не пишут дважды</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">GitLab CI и GitHub Actions: одно и то же другими словами</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Стратегии выкладки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Безопасность самого конвейера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">Как измеряют работу конвейера: DORA-метрики</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В уроке <a href="../lessons/3-2.html">3.2 CI-CD</a> GitLab Runner ставился на отдельную VM — рабочий вариант, но статичный: одна VM обрабатывает задания, даже если сейчас ни одного пайплайна не запущено, или наоборот — не справляется, если запущено сразу несколько. В этом уроке раннер переезжает внутрь Kubernetes-кластера (того же самого, что и в уроках <a href="../lessons/5-2.html">5.2 Kubernetes в работе</a> и <a href="../lessons/5-3.html">5.3 Helm и Kustomize</a>): каждое задание пайплайна получает собственный под, который создаётся под задачу и удаляется по её завершении. Дополнительно пайплайн усложняется: образ собирается внутри кластера, staging обновляется автоматически, продакшен — вручную по тегу релиза, а секреты передаются приложению при запуске, а не вшиваются в образ.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>GitLab Runner</strong> — программа-исполнитель, которая забирает задания у GitLab и выполняет их.</li>
+<li><strong>Kubernetes executor</strong> — режим работы раннера, в котором каждое задание выполняется в отдельном поде кластера, а не на самом раннере напрямую.</li>
+<li><strong>config.toml</strong> — конфигурационный файл раннера: лимиты ресурсов, образ по умолчанию, параметры подключения к кластеру.</li>
+<li><strong>Правило (rule)</strong> в <code>.gitlab-ci.yml</code> — условие, определяющее, когда именно должен запускаться конкретный этап пайплайна.</li>
+<li><strong>CI/CD-переменная (variable)</strong> — значение, переданное в пайплайн извне, часто используется для секретов вроде паролей и ключей.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>GitLab Runner внутри Kubernetes: чем это лучше отдельной VM</h2><div class="prose"><p><em>Аналогия:</em> раннер на выделенной VM — как содержать одного штатного грузчика, который либо простаивает без работы, либо не успевает, если заказов резко стало много. Раннер с Kubernetes executor — как вызывать грузчика по требованию, ровно на время конкретной задачи, и сразу отпускать после неё.</p>
+<p>С Kubernetes executor раннер сам не выполняет задания напрямую — вместо этого при поступлении задания он создаёт в кластере отдельный под именно под это задание, а после завершения под удаляется. Это даёт эластичность: при нескольких одновременных пайплайнах кластер создаёт несколько подов параллельно, а в отсутствие заданий не расходует ресурсы на простаивающий раннер.</p>
+<p><img loading="lazy" src="../assets/diagrams/do13-elastic.webp" alt="" /></p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Отдельный namespace для раннера</h2><div class="prose"><p><em>Аналогия:</em> поселить раннер в собственный подъезд, а не в одну квартиру с самим приложением — так проще ограничить его права и не перепутать его ресурсы с ресурсами продакшн-сервисов.</p>
+<pre><code class="language-bash">kubectl create namespace gitlab-runner
+</code></pre>
+<p>Отдельный namespace изолирует под и служебные объекты раннера (Secret, ServiceAccount, RBAC-права) от подов самого приложения — это не только вопрос порядка, но и безопасности: правам раннера легче ограничиться его собственным namespace, а не всем кластером.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Установка раннера через Helm-чарт</h2><div class="prose"><p><em>Аналогия:</em> вместо ручной сборки раннера по чертежам — готовый набор для сборки с инструкцией, официально подготовленный производителем (GitLab).</p>
+<pre><code class="language-bash">helm repo add gitlab https://charts.gitlab.io
+helm repo update
+
+helm install gitlab-runner gitlab/gitlab-runner \
+  --namespace gitlab-runner \
+  --set gitlabUrl=https://gitlab.example.com/ \
+  --set runnerToken=glrt-&lt;токен_раннера&gt;
+</code></pre>
+<p>Токен <code>glrt-…</code> берут в GitLab: <strong>Settings → CI/CD → Runners → New project runner</strong>. Раннер сначала создаётся в интерфейсе GitLab (там же задаются теги и описание), а сам процесс получает только его токен аутентификации.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Старый способ: registration token</summary><div class="callout-body"><p>Во многих статьях и старых чартах встречается <code>runnerRegistrationToken</code> и <code>gitlab-runner register --registration-token</code>. Этот способ объявлен устаревшим ещё в GitLab 15.6, в новых инстансах он выключен, а удаление запланировано на GitLab 20.0. Для новых раннеров используй токены аутентификации <code>glrt-</code>.</p>
+</div></details>
+<p>Официальный Helm-чарт GitLab Runner сам создаёт Deployment для раннера, необходимые ServiceAccount и RBAC-права для того, чтобы раннер мог создавать поды заданий в кластере — вручную писать все эти манифесты с нуля не требуется.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Secret для токена раннера</h2><div class="prose"><p><em>Аналогия:</em> токен раннера — как ключ-карта для входа в конкретное здание (GitLab-проект); хранить его открытым текстом в конфиге так же неразумно, как приклеить ключ-карту прямо на дверь снаружи.</p>
+<pre><code class="language-bash">kubectl create secret generic gitlab-runner-token \
+  --namespace gitlab-runner \
+  --from-literal=runner-token=glrt-&lt;токен_раннера&gt; \
+  --from-literal=runner-registration-token=&quot;&quot;
+# в values.yaml чарта: runners.secret: gitlab-runner-token
+</code></pre>
+<p>Токен подтверждает право раннера брать задания именно нужного GitLab-проекта или группы. Пустой ключ <code>runner-registration-token</code> чарт всё ещё ожидает в Secret по историческим причинам. Хранение его в Secret, а не в открытом виде в values.yaml или config.toml, снижает риск случайной утечки токена, например, при коммите конфигурации в репозиторий.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>config.toml: настройка Kubernetes executor</h2><div class="prose"><p><em>Аналогия:</em> config.toml — должностная инструкция для раннера: каким образом создавать поды под задания, сколько ресурсов им разрешено занимать и какой образ использовать, если задание само не указало другой.</p>
+<pre><code class="language-toml">[[runners]]
+  name = &quot;k8s-runner&quot;
+  executor = &quot;kubernetes&quot;
+
+  [runners.kubernetes]
+    namespace = &quot;gitlab-runner&quot;
+    image = &quot;alpine:3.22&quot;
+    cpu_limit = &quot;500m&quot;
+    memory_limit = &quot;512Mi&quot;
+    cpu_request = &quot;250m&quot;
+    memory_request = &quot;256Mi&quot;
+</code></pre>
+<p><code>executor = &quot;kubernetes&quot;</code> включает режим, при котором каждое задание выполняется в отдельном поде. <code>cpu_limit</code>/<code>memory_limit</code> защищают кластер от ситуации, когда одно задание с ошибкой (например, бесконечный цикл сборки) займёт все доступные ресурсы узла и помешает остальным подам. <code>image = &quot;alpine:3.22&quot;</code> — образ по умолчанию для подов заданий, если конкретное задание не переопределит его своим. Версию фиксируют явно: плавающие теги вроде <code>docker:stable</code> давно не обновляются и однажды тихо сломают сборку.</p>
+<p><img loading="lazy" src="../assets/diagrams/do13-configtoml.webp" alt="" /></p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Регистрация раннера с этим конфигом</h2><div class="prose"><p><em>Аналогия:</em> должностную инструкцию мало написать — нужно ещё официально утвердить её и приложить к личному делу конкретного сотрудника.</p>
+<pre><code class="language-bash">gitlab-runner register \
+  --non-interactive \
+  --url https://gitlab.example.com/ \
+  --token glrt-&lt;токен_раннера&gt; \
+  --executor kubernetes \
+  --config /etc/gitlab-runner/config.toml
+</code></pre>
+<p>При установке Helm-чартом регистрация происходит сама; команда нужна, когда раннер ставят вручную. Теги, «только защищённые ветки» и описание теперь задаются при создании раннера в интерфейсе GitLab, а не флагами <code>register</code>. Регистрация — момент, когда раннер сообщает GitLab о своём существовании и получает связанные с этим GitLab-проектом настройки. После регистрации именно этот раннер начинает подхватывать задания из пайплайнов проекта, используя параметры, описанные в <code>config.toml</code>.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Стадия build: образ без Docker-демона</h2><div class="prose"><p><em>Аналогия:</em> цех сборки, который открывается под каждую партию и закрывается после неё: никакого постоянного оборудования, но и делить станок с соседним заказом не приходится.</p>
+<p>С Kubernetes executor каждое задание — отдельный под, и Docker-демона в нём нет. Запускать Docker внутри пода (Docker-in-Docker) можно только в привилегированном режиме, а это фактически права root на узле кластера. Поэтому образы в кластере собирают инструментами, которым демон не нужен. Сейчас GitLab рекомендует <strong>BuildKit в rootless-режиме</strong>:</p>
+<pre><code class="language-yaml">build:
+  stage: build
+  image:
+    name: moby/buildkit:rootless
+    entrypoint: [&quot;&quot;]
+  variables:
+    BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+  before_script:
+    - mkdir -p ~/.docker
+    - echo &quot;{\&quot;auths\&quot;:{\&quot;$CI_REGISTRY\&quot;:{\&quot;auth\&quot;:\&quot;$(printf '%s:%s' &quot;$CI_REGISTRY_USER&quot; &quot;$CI_REGISTRY_PASSWORD&quot; | base64 | tr -d '\n')\&quot;}}}&quot; &gt; ~/.docker/config.json
+  script:
+    - buildctl-daemonless.sh build
+        --frontend dockerfile.v0
+        --local context=. --local dockerfile=.
+        --output type=image,name=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA,push=true
+        --export-cache type=registry,ref=$CI_REGISTRY_IMAGE:buildcache
+        --import-cache type=registry,ref=$CI_REGISTRY_IMAGE:buildcache
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == &quot;merge_request_event&quot;'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+</code></pre>
+<p><code>buildctl-daemonless.sh</code> поднимает BuildKit прямо внутри задания без root-прав, собирает образ по Dockerfile и сразу пушит его в реестр GitLab. Авторизацию в реестре приходится писать руками в <code>~/.docker/config.json</code> — это и делает <code>before_script</code>. Тег — короткий хеш коммита: по нему всегда видно, из какого кода собран образ (<a href="../lessons/3-2.html#s-14">3.2 CI-CD</a>, §14). <code>--export-cache</code>/<code>--import-cache</code> хранят слои в реестре, чтобы следующая сборка их переиспользовала.</p>
+
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>А как же Kaniko?</summary><div class="callout-body"><p>Ещё недавно стандартом для этой задачи был <strong>Kaniko</strong> от Google, и он до сих пор встречается в статьях и в чужих пайплайнах. В июне 2025 года Google заархивировал проект: обновлений и исправлений уязвимостей больше нет (живёт только форк от Chainguard). Для новых пайплайнов бери BuildKit rootless или Buildah. Учти: в некоторых кластерах rootless-сборке нужно ослабить seccomp/AppArmor для пода задания — проверь настройки раннера.</p>
+</div></details>
+<p>Правила <code>rules</code> перечисляют, когда задание нужно: в merge request (проверить изменения до слияния), в основной ветке и на тегах релизов. Остальные пуши в произвольные ветки сборку не запускают — экономия ресурсов кластера.</p>
+
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Как следующая стадия получает результат сборки</summary><div class="callout-body"><p>С Kubernetes executor каждое задание пайплайна выполняется в своём собственном, отдельном поде — под стадии <code>build</code> и под стадии <code>test</code> физически разные, и файловая система одного не видна другому. Образ передаётся через реестр, а мелкие результаты — через <code>artifacts</code>:</p>
+<pre><code class="language-yaml">build:
+  # ...
+  after_script:
+    - echo &quot;IMAGE=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA&quot; &gt; build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+</code></pre>
+<p>Ключ <code>artifacts</code> указывает GitLab сохранить перечисленные файлы во внутреннем хранилище сразу после завершения задания. Отчёт <code>dotenv</code> особенный: каждая строка <code>ИМЯ=значение</code> из файла становится переменной окружения во всех следующих заданиях пайплайна. Так стадия деплоя узнаёт точное имя образа, который собрала стадия <code>build</code>, хотя они выполняются в разных подах.</p>
+</div></details></div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Стадия test: модульные тесты и смоук после выкатки</h2><div class="prose"><p><em>Аналогия:</em> после сборки изделие проверяют дважды: на стенде в цеху (модульные тесты) и в реальных условиях, куда его привезли (смоук-тест после выкатки).</p>
+<pre><code class="language-yaml">test:unit:
+  stage: test
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA     # тестируем ровно тот образ, что собрали
+  script:
+    - pytest tests/unit --junitxml=report.xml
+  artifacts:
+    reports:
+      junit: report.xml
+
+smoke:staging:
+  stage: verify
+  needs: [&quot;deploy:staging&quot;]
+  image: curlimages/curl:8.10.1
+  script:
+    - ./scripts/smoke.sh &quot;$STAGING_URL&quot;
+</code></pre>
+<p>Модульные тесты запускаются <strong>внутри собранного образа</strong>: так проверяется не только код, но и то, что в образ попали все зависимости. Смоук-тест — тот самый скрипт из <a href="../lessons/5-2.html#s-9">5.2 Kubernetes в работе</a>, §9 — запускается после выкатки на staging и проверяет весь путь от домена до базы. Если смоук упал, пайплайн красный, и до продакшена изменения не дойдут.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Окружения: staging автоматически, prod — вручную по тегу</h2><div class="prose"><p><em>Аналогия:</em> опытную партию отправляют на тестовый склад сразу после контроля качества, а в магазины — только после подписи начальника и с официальной маркировкой (тегом).</p>
+<pre><code class="language-yaml">deploy:staging:
+  stage: deploy
+  script:
+    - helm upgrade --install shop ./charts/shop --namespace staging
+        --set image.tag=$CI_COMMIT_SHORT_SHA --atomic --wait
+  environment:
+    name: staging
+    url: https://staging.shop.example.com
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+deploy:prod:
+  stage: deploy
+  script:
+    - helm upgrade --install shop ./charts/shop --namespace prod
+        --set image.tag=$CI_COMMIT_SHORT_SHA --atomic --wait
+  environment:
+    name: production
+    url: https://shop.example.com
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: manual
+</code></pre>
+<p>Каждый коммит в основную ветку сам уезжает на staging — команда всегда видит там свежую версию. Продакшен выкатывается только для тегов вида <code>v1.4.0</code> (семантическое версионирование, <a href="../lessons/0-1.html#s-13">0.1 Git</a>, §13) и только по нажатию кнопки: <code>when: manual</code> требует, чтобы человек явно запустил задание в интерфейсе GitLab. <code>environment</code> регистрирует окружение в GitLab: на странице Environments видно, какая версия где сейчас работает, и туда же добавляется кнопка повторной выкатки предыдущей версии для отката. Флаги <code>--atomic --wait</code> разобраны в <a href="../lessons/5-3.html#s-15">5.3 Helm и Kustomize</a>, §15.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Секреты: при запуске, а не в образе</h2><div class="prose"><p><em>Аналогия:</em> ключ от сейфа не вклеивают в инструкцию к сейфу. Инструкцию печатают тиражом, а ключ выдают лично тому, кто будет открывать.</p>
+<p>Частая ошибка — подставить пароль в конфиг во время сборки:</p>
+<pre><code class="language-yaml"># ✘ пароль навсегда остаётся внутри образа
+build:
+  script:
+    - echo &quot;DB_PASSWORD=${DB_PASSWORD}&quot; &gt;&gt; config.env
+    - docker build -t shop .
+</code></pre>
+<p>Такой образ содержит пароль в одном из слоёв. Его увидит любой, кто может скачать образ из реестра, — а скачивают его все узлы кластера, все раннеры и все разработчики. Удалить пароль из старых слоёв нельзя, только пересобрать образ и сменить пароль.</p>
+<p>Правильно — образ без секретов, а пароль передаётся приложению при запуске, через Kubernetes Secret:</p>
+<pre><code class="language-yaml">deploy:prod:
+  script:
+    - kubectl -n prod create secret generic shop-db
+        --from-literal=password=&quot;$PROD_DB_PASSWORD&quot;
+        --dry-run=client -o yaml | kubectl apply -f -
+    - helm upgrade --install shop ./charts/shop --namespace prod --set image.tag=$CI_COMMIT_SHORT_SHA
+</code></pre>
+<p><code>--dry-run=client -o yaml | kubectl apply -f -</code> — приём «создать или обновить»: <code>create</code> сам по себе падает, если секрет уже есть, а связка с <code>apply</code> работает и в первый раз, и в сотый. Значение <code>PROD_DB_PASSWORD</code> хранится в настройках проекта GitLab (Settings → CI/CD → Variables) с флагами masked и protected: оно не попадает в репозиторий и в логи, и доступно только заданиям на защищённых ветках и тегах. В чарте под получает пароль из Secret как переменную окружения (<a href="../lessons/5-1.html#s-7">5.1 Kubernetes</a>, §7). Ещё лучше — вообще не передавать пароль через CI, а брать его из хранилища секретов (<a href="../lessons/6-2.html#s-3">6.2 DevSecOps</a>, §3).</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>cache и artifacts: разные вещи с похожим поведением</h2><div class="prose"><p><em>Аналогия:</em> кеш — заготовки на складе, которые всегда можно завезти заново, если склад сгорит. Артефакт — единственный экземпляр готового изделия, который передаётся дальше по цеху: потеряли — переделывать всё сначала.</p>
+<p><img loading="lazy" src="../assets/diagrams/do13-cache-vs-artifacts.svg" alt="" /></p>
+<p>В §7 мы уже использовали <code>artifacts</code>, чтобы передать имя образа из одного пода в другой. Рядом с ним есть <code>cache</code>, и разница между ними — вопрос на собеседовании.</p>
+<pre><code class="language-yaml">test:unit:
+  stage: test
+  variables:
+    PIP_CACHE_DIR: &quot;$CI_PROJECT_DIR/.cache/pip&quot;
+  cache:                          # ускорение: скачанные пакеты
+    key:
+      files:
+        - requirements.txt        # ключ меняется при изменении зависимостей
+    paths:
+      - .cache/pip
+  artifacts:                      # результат: то, что создало задание
+    reports:
+      junit: report.xml
+    expire_in: 1 week
+  script:
+    - pip install -r requirements.txt pytest
+    - pytest --junitxml=report.xml
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>cache</code></th>
+<th><code>artifacts</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Назначение</td>
+<td>Ускорить работу</td>
+<td>Передать результат</td>
+</tr>
+<tr>
+<td>Что кладут</td>
+<td>Зависимости, которые можно скачать заново</td>
+<td>Собранные файлы, отчёты тестов</td>
+</tr>
+<tr>
+<td>Гарантия</td>
+<td>Никакой — может отсутствовать</td>
+<td>Есть — следующая стадия получит</td>
+</tr>
+<tr>
+<td>Область</td>
+<td>Между запусками конвейера</td>
+<td>Внутри одного запуска и для скачивания</td>
+</tr>
+</tbody>
+</table></div>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Проверка, которую стоит провести один раз</summary><div class="callout-body"><p>Удалите весь кеш и запустите конвейер заново. Он <strong>обязан</strong> пройти — просто медленнее. Если падает, значит в кеш положили то, что должно быть артефактом, и однажды это выстрелит на ровном месте: кеш теряется молча и без объяснений.</p>
+</div></details>
+<p>Ключ кеша задают по содержимому файла зависимостей (<code>requirements.txt</code>, <code>package-lock.json</code>, <code>go.sum</code>). Тогда кеш переиспользуется, пока список зависимостей не изменился, и обновляется автоматически, когда изменился.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Скорость конвейера: за что платят временем</h2><div class="prose"><p><em>Аналогия:</em> конвейер, идущий сорок минут, разработчики перестают ждать — они переключаются на другую задачу и возвращаются через час. Обратная связь, приходящая через час, почти бесполезна.</p>
+<p>Практическая цель — уложить основную проверку в 10 минут. Приёмы по убыванию отдачи:</p>
+<p><strong>Быстрое падение.</strong> Самые быстрые проверки — первыми. Линтер, находящий ошибку за 20 секунд, не должен стоять после десятиминутной сборки.</p>
+<p><strong>Параллельность.</strong> Задания одной стадии выполняются одновременно, и с Kubernetes executor это буквально разные поды:</p>
+<pre><code class="language-yaml">test:unit:
+  stage: test
+  script: [pytest tests/unit]
+
+test:integration:            # выполняется параллельно с test:unit
+  stage: test
+  services: [postgres:17]
+  script: [pytest tests/integration]
+</code></pre>
+<p><strong>Матрица</strong> — одно описание, много вариантов запуска:</p>
+<pre><code class="language-yaml">test:
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON: [&quot;3.12&quot;, &quot;3.13&quot;]
+        DB: [&quot;postgres:16&quot;, &quot;postgres:17&quot;]
+  image: python:$PYTHON-slim
+  script:
+    - ./run-tests.sh          # четыре комбинации, все параллельно
+</code></pre>
+<p><strong>Кеш слоёв образа.</strong> То, что мы разбирали в уроке 3.1: порядок инструкций в Dockerfile определяет, сколько слоёв придётся пересобирать. В конвейере это ещё заметнее, потому что сборка идёт с чистого листа каждый раз.</p>
+<p><strong>Не делать лишнего.</strong> Правила <code>rules</code> с <code>changes</code> позволяют не запускать сборку фронтенда, если изменился только бэкенд:</p>
+<pre><code class="language-yaml">build:frontend:
+  rules:
+    - changes: [&quot;frontend/**/*&quot;]
+</code></pre>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>С чего начинать оптимизацию</summary><div class="callout-body"><p>Не с догадок, а с измерения: в интерфейсе видно длительность каждого задания. Обычно 80% времени съедают одна-две стадии, и почти всегда это скачивание зависимостей и сборка образа. Настроенный кеш и правильный порядок слоёв дают больше, чем любые тонкие настройки.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Переиспользование: конвейер не пишут дважды</h2><div class="prose"><p><em>Аналогия:</em> десять проектов с одинаковым конвейером, скопированным вручную, — это десять мест, где надо поправить одно и то же изменение. И девять мест, где о нём забудут.</p>
+<p>Три механизма в GitLab CI:</p>
+<pre><code class="language-yaml"># 1. include — подключить готовый файл из другого репозитория
+include:
+  - project: 'platform/ci-templates'
+    ref: v2.1.0                 # обязательно версия, а не main
+    file: '/templates/python-service.yml'
+
+# 2. extends — унаследовать блок
+.base-test:                     # точка в начале = шаблон, сам не запускается
+  stage: test
+  cache:
+    paths: [.cache/pip]
+  before_script:
+    - pip install -r requirements.txt pytest
+
+test:unit:
+  extends: .base-test
+  script: [pytest tests/unit]
+
+# 3. якоря YAML для мелких повторов
+.defaults: &amp;defaults
+  image: python:3.13-slim
+  tags: [k8s]
+</code></pre>
+<p>В GitHub Actions ту же задачу решают переиспользуемые workflow (<code>workflow_call</code>) и составные действия (composite actions).</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Всегда указывайте версию подключаемого шаблона</summary><div class="callout-body"><p><code>ref: main</code> означает, что чужое изменение в шаблоне попадёт в ваш конвейер без вашего участия — и сломает его в самый неподходящий момент. Это тот же принцип, что с тегом <code>latest</code> у образов из урока 3.1: без фиксации версии сборка перестаёт быть воспроизводимой.</p>
+</div></details></div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>GitLab CI и GitHub Actions: одно и то же другими словами</h2><div class="prose"><p>В вакансиях встречаются обе системы, а нередко и обе сразу. Понятия соответствуют почти один в один, и знание одной системы переносится на другую за пару дней.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>GitLab CI</th>
+<th>GitHub Actions</th>
+<th>Что это</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.gitlab-ci.yml</code></td>
+<td><code>.github/workflows/*.yml</code></td>
+<td>Описание конвейера</td>
+</tr>
+<tr>
+<td><code>stages</code> / <code>job</code></td>
+<td><code>jobs</code> / <code>steps</code></td>
+<td>Этапы и задания</td>
+</tr>
+<tr>
+<td><code>rules: if:</code></td>
+<td><code>if:</code> / <code>on:</code></td>
+<td>Условия запуска</td>
+</tr>
+<tr>
+<td><code>artifacts</code></td>
+<td><code>actions/upload-artifact</code></td>
+<td>Передача результатов</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td><code>actions/cache</code></td>
+<td>Кеш зависимостей</td>
+</tr>
+<tr>
+<td><code>include</code> / <code>extends</code></td>
+<td>reusable workflows / composite actions</td>
+<td>Переиспользование</td>
+</tr>
+<tr>
+<td>CI/CD Variables</td>
+<td>Secrets и Variables</td>
+<td>Секреты и параметры</td>
+</tr>
+<tr>
+<td>Runner</td>
+<td>Runner</td>
+<td>Исполнитель заданий</td>
+</tr>
+<tr>
+<td><code>environment</code></td>
+<td><code>environment</code></td>
+<td>Окружение с правилами доступа</td>
+</tr>
+<tr>
+<td><code>when: manual</code></td>
+<td><code>environment</code> с обязательным одобрением</td>
+<td>Ручное подтверждение</td>
+</tr>
+</tbody>
+</table></div>
+<p>Заметная разница одна: в GitHub Actions существует огромный каталог готовых действий (<code>actions/checkout</code>, <code>docker/build-push-action</code>), и типовой конвейер собирается из них. В GitLab CI чаще пишут команды напрямую.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Чужие действия — это чужой код в вашем конвейере</summary><div class="callout-body"><p>Строка <code>uses: some-org/some-action@v1</code> означает выполнение чужого кода с доступом ко всем секретам задания. Тег <code>v1</code> может быть перемещён автором на другой коммит в любой момент. Поэтому сторонние действия закрепляют по полному хешу коммита:</p>
+<pre><code class="language-yaml">uses: some-org/some-action@a1b2c3d4e5f6...   # неизменяемая ссылка
+</code></pre>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Стратегии выкладки</h2><div class="prose"><p><em>Аналогия:</em> вопрос не в том, как доставить новую версию, а в том, сколько людей увидят поломку раньше, чем вы о ней узнаете.</p>
+<p><img loading="lazy" src="../assets/diagrams/do13-deploy-strategies.svg" alt="" /></p>
+<p><strong>Rolling</strong> — то, что Kubernetes делает по умолчанию: поды заменяются по одному. Дополнительных ресурсов не требует, но обе версии некоторое время работают одновременно, а значит должны быть совместимы между собой и с одной и той же схемой базы.</p>
+<p><strong>Blue-Green</strong> — рядом с работающей версией поднимается полная копия новой, её проверяют, затем трафик переключают целиком. В Kubernetes это делается изменением метки в селекторе Service:</p>
+<pre><code class="language-yaml">spec:
+  selector:
+    app: myapp
+    version: green      # было blue — переключение одним изменением
+</code></pre>
+<p>Откат мгновенный: вернуть метку обратно. Цена — двойные ресурсы на время выкладки.</p>
+<p><strong>Canary</strong> — новая версия получает небольшую долю трафика, метрики ошибок сравниваются со старой версией, доля постепенно растёт. Требует маршрутизатора трафика (Ingress с весами или service mesh) и настроенного мониторинга из урока 4.5 — без метрик решение об откате принимать не по чему.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Ни одна стратегия не решает проблему миграций</summary><div class="callout-body"><p>При rolling обе версии кода работают с одной базой. При blue-green переключение мгновенное, а база всё равно общая. При canary — тем более. Совместимость схемы данных остаётся отдельной задачей, и решается она так же, как обсуждалось в уроке 5.3: миграция разбивается на шаги, каждый из которых совместим и со старым, и с новым кодом.</p>
+</div></details>
+<figure class="explain" data-anim="deploy-strategies"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: Rolling, Blue-Green и Canary с багом и без</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Безопасность самого конвейера</h2><div class="prose"><p>Проверка кода на уязвимости — тема следующего урока. Здесь речь о другом: конвейер сам по себе является лакомой мишенью, потому что у него есть доступ ко всему.</p>
+<p><strong>Долгоживущие ключи — главная проблема.</strong> Ключ от облака в переменных проекта живёт годами, попадает в резервные копии, случайно печатается в логах. Современная замена — федерация через OIDC: конвейер предъявляет облаку подписанный токен своего запуска, облако проверяет его и выдаёт временные права на несколько минут. Постоянного секрета не существует вовсе.</p>
+<p><strong>Чужой код в конвейере.</strong> Задание, запущенное для внешнего предложения изменений, выполняет код автора этого предложения. Если такому заданию доступны секреты, автор просто печатает их. Отсюда правила: конвейеры для внешних веток выполняются без секретов, а доступ к боевым переменным даётся только защищённым веткам и тегам.</p>
+<p><strong>Права раннера.</strong> Раннер в кластере из §3 создаёт поды, а значит имеет заметные права. Ограничение его отдельным пространством имён и минимальной ролью — то, о чём шла речь в RBAC-разделе 5.2.</p>
+<p><strong>Логи.</strong> Маскирование переменных скрывает точное совпадение значения, но не спасает от вывода в изменённом виде (в base64, по частям, внутри JSON). Правило простое: секреты в конвейере не печатают вовсе, а <code>set -x</code> в скриптах с секретами не используют.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Что проверить в своём конвейере прямо сейчас</summary><div class="callout-body"><ul>
+<li>Есть ли долгоживущие ключи от облака или кластера в переменных? Можно ли заменить их на OIDC?</li>
+<li>Доступны ли секреты заданиям из внешних веток?</li>
+<li>Не выполняет ли конвейер <code>docker</code> от привилегированного пользователя с монтированием сокета хоста? Это равносильно правам root на узле.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Как измеряют работу конвейера: DORA-метрики</h2><div class="prose"><p>Четыре метрики из исследования DORA — общепринятый язык, на котором говорят о зрелости процессов доставки. Их регулярно спрашивают, и не для того, чтобы услышать определения, а чтобы понять, измеряли ли вы что-нибудь вообще.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Что измеряет</th>
+<th>Ориентир хорошего уровня</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Частота выкладок</strong></td>
+<td>Как часто изменения попадают к пользователям</td>
+<td>От раза в день до по требованию</td>
+</tr>
+<tr>
+<td><strong>Время от коммита до продакшена</strong></td>
+<td>Сколько идёт путь от коммита до работающей версии</td>
+<td>Меньше дня</td>
+</tr>
+<tr>
+<td><strong>Доля неудачных выкладок</strong></td>
+<td>Какая часть выкладок вызвала сбой</td>
+<td>Ниже 15%</td>
+</tr>
+<tr>
+<td><strong>Время восстановления</strong></td>
+<td>Сколько занимает возврат к работоспособности</td>
+<td>Меньше часа</td>
+</tr>
+</tbody>
+</table></div>
+<p>Главная мысль исследования контринтуитивна: первые две и вторые две метрики <strong>не противоречат друг другу</strong>. Команды, которые выкладываются часто, ломают продакшн реже — потому что мелкое изменение проще проверить и откатить, чем накопленный за квартал релиз.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Сильный ответ на вопрос про конвейер</summary><div class="callout-body"><p>Не «у нас GitLab CI с тремя стадиями», а: <em>«От коммита до staging — семь минут, до продакшена — с ручным подтверждением. Откат — revert коммита, около двух минут. Выкладываемся несколько раз в день, за последний квартал два отката»</em>. Числа показывают, что процесс существует и измеряется, а не просто настроен когда-то.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>19</b>/23 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Kubernetes executor создаёт отдельный под под каждое задание пайплайна и удаляет его после завершения — в отличие от статичной VM-раннера из урока 3.2.</li>
+<li>Отдельный namespace изолирует раннер от подов приложения по правам и ресурсам.</li>
+<li>Helm-чарт GitLab Runner сам создаёт Deployment, ServiceAccount и RBAC-права для раннера.</li>
+<li>Раннер создают в интерфейсе GitLab и подключают токеном <code>glrt-…</code>; старые registration tokens устарели. Токен хранится в Secret, а не в открытом виде.</li>
+<li>config.toml задаёт лимиты ресурсов и образ по умолчанию для подов заданий.</li>
+<li>Правила (rules) в .gitlab-ci.yml определяют, когда именно запускается стадия — для merge request, для основной ветки, по тегу, вручную.</li>
+<li>В кластере образ собирают без Docker-демона (BuildKit rootless; Kaniko заархивирован в 2025 году). Staging обновляется каждым коммитом в main, prod — только по тегу <code>vX.Y.Z</code> и по кнопке.</li>
+<li>Образ передаётся между стадиями через реестр, мелкие результаты — через artifacts (<code>dotenv</code>, отчёты тестов), потому что каждая стадия выполняется в своём поде.</li>
+<li><strong>Секреты не вшивают в образ</strong>: CI/CD-переменная превращается в Kubernetes Secret при деплое, приложение читает её при запуске.</li>
+<li><strong><code>cache</code> — ускорение, <code>artifacts</code> — результат.</strong> Кеш может пропасть в любой момент; конвейер обязан проходить и без него, только медленнее. Артефакт гарантированно попадает в следующую стадию.</li>
+<li>Цель по скорости — 10 минут на основную проверку. Приёмы: быстрые проверки первыми, параллельные задания, матрица, кеш слоёв образа, <code>rules: changes</code>.</li>
+<li>Переиспользование: <code>include</code> из общего репозитория шаблонов, <code>extends</code> для наследования блоков. <strong>Подключаемый шаблон всегда фиксируют версией, а не <code>main</code>.</strong></li>
+<li>GitLab CI и GitHub Actions соответствуют почти один в один. Сторонние действия закрепляют по хешу коммита — тег автор может передвинуть.</li>
+<li>Три стратегии выкладки: <strong>rolling</strong> (по умолчанию, обе версии живут вместе), <strong>blue-green</strong> (мгновенный откат, двойные ресурсы), <strong>canary</strong> (доля трафика + метрики). Ни одна не решает проблему несовместимой миграции базы.</li>
+<li>Долгоживущие ключи в переменных заменяют <strong>федерацией через OIDC</strong>: конвейер получает временные права на минуты вместо постоянного секрета.</li>
+<li>Задание из внешней ветки выполняет чужой код — секреты ему давать нельзя. Боевые переменные доступны только защищённым веткам и тегам.</li>
+<li><strong>Четыре DORA-метрики:</strong> частота выкладок, время от коммита до продакшена, доля неудачных выкладок, время восстановления. Частые выкладки не увеличивают число сбоев, а уменьшают.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>20</b>/23 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–4 — раздел «Пайплайн» в <a href="../projects/p3.html">P3</a>: раннер в кластере, сборка BuildKit без демона, окружения, переиспользуемые шаблоны.</li>
+<li>Задание 5 (DORA-метрики) — готовые числа для README <a href="../projects/p3.html">P3</a>.</li>
+</ul>
+</div></details><article class="task" data-task="6a85879fb0"><h3>Задание 1 — раннер в кластере</h3><p>Поставь GitLab Runner в Kubernetes через Helm с Kubernetes executor в отдельном namespace.<br />
+<strong>Проверка:</strong> каждая задача пайплайна запускается отдельным подом (<code>kubectl get pods -n gitlab-runner -w</code> во время пайплайна).</p>
+<label class="task-done"><input type="checkbox" data-task-check="6a85879fb0"> Сделала руками и проверила</label></article><article class="task" data-task="0cf38e9e25"><h3>Задание 2 — сборка без Docker-демона</h3><p>Собирай образ в кластере через BuildKit rootless или Buildah без привилегированного режима, с кэшем слоёв в реестре.<br />
+<strong>Проверка:</strong> под сборки не privileged; повторная сборка без изменений зависимостей использует кэш.</p>
+<label class="task-done"><input type="checkbox" data-task-check="0cf38e9e25"> Сделала руками и проверила</label></article><article class="task" data-task="33c2fda3ba"><h3>Задание 3 — окружения</h3><p>Пайплайн с окружениями review (на каждый MR, удаляется после слияния), staging (автоматически из main) и production (вручную по тегу).<br />
+<strong>Проверка:</strong> в GitLab → Environments видны все окружения с текущими версиями; MR создаёт и удаляет своё окружение.</p>
+<label class="task-done"><input type="checkbox" data-task-check="33c2fda3ba"> Сделала руками и проверила</label></article><article class="task" data-task="ed6eb1cf2e"><h3>Задание 4 — переиспользование</h3><p>Вынеси общие шаблоны задач в отдельный репозиторий и подключай через <code>include: project</code> с фиксированной версией (<code>ref: v1.0.0</code>).<br />
+<strong>Проверка:</strong> два разных проекта используют одни шаблоны; обновление шаблонов не влияет на проект, пока он не сменит версию.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ed6eb1cf2e"> Сделала руками и проверила</label></article><article class="task" data-task="f05ff11a39"><h3>Задание 5 — DORA</h3><p>Посчитай для своего проекта частоту деплоев и время от коммита до продакшена за последний месяц (по истории пайплайнов).<br />
+<strong>Проверка:</strong> цифры собраны и записаны; понятно, какая стадия занимает больше всего времени.</p>
+<label class="task-done"><input type="checkbox" data-task-check="f05ff11a39"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>21</b>/23 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>22</b>/23 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>23</b>/23 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a></li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a></li>
+<li><a href="../lessons/5-3.html">5.3 Helm и Kustomize</a></li>
+<li><a href="../lessons/5-4.html">5.4 GitOps и Argo CD</a></li>
+<li><a href="../lessons/6-2.html">6.2 DevSecOps</a></li>
+<li><a href="../lessons/6-3.html">6.3 Итоговый проект</a></li>
+</ul>
+<h3>Источники</h3><ul>
+<li>GitLab CI/CD: https://docs.gitlab.com/ci/</li>
+<li>GitLab Environments: https://docs.gitlab.com/ci/environments/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="5-4.html">← 5.4 GitOps и Argo CD</a><a class="lesson-jump" href="6-2.html">6.2 DevSecOps: безопасность в конвейере →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "6-1", "number": "6.1", "title": "CI/CD в Kubernetes", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["6a85879fb0", "0cf38e9e25", "33c2fda3ba", "ed6eb1cf2e", "f05ff11a39"], "quiz": [{"id": "acde6eda6f", "q": "Почему в кластере образы собирают BuildKit rootless, а не через Docker-in-Docker?", "options": ["BuildKit быстрее", "Docker-in-Docker требует привилегированного пода — это фактически root на узле кластера", "Docker не умеет собирать образы", "BuildKit бесплатный"], "answer": [1], "why": "<p>BuildKit в rootless-режиме собирает образ без демона в обычном непривилегированном контейнере. Раньше для этого брали Kaniko, но в 2025 году его заархивировали.<\/p>\n"}, {"id": "cabbf66d22", "q": "Как стадия деплоя узнаёт имя образа, который собрала стадия build в другом поде?", "options": ["Через общую файловую систему подов", "Через артефакт <code>dotenv<\/code> или через тег образа, вычисляемый из хеша коммита", "Через переменную окружения узла", "Никак"], "answer": [1], "why": "<p>каждое задание — отдельный под, и передавать результат приходится через реестр и артефакты.<\/p>\n"}, {"id": "c34da5ae09", "q": "Почему пароль базы нельзя подставлять в конфиг во время сборки образа?", "options": ["Сборка станет медленнее", "Пароль навсегда останется в слое образа, который скачивают все узлы и разработчики", "Образ не запустится", "BuildKit это запрещает"], "answer": [1], "why": "<p>секрет передают при запуске — через Kubernetes Secret или хранилище секретов.<\/p>\n"}, {"id": "3bfb583a06", "q": "Какая схема окружений описана в уроке?", "options": ["И staging, и prod — вручную по тегу", "staging — автоматически из основной ветки, prod — вручную по тегу релиза", "prod — автоматически на каждый коммит", "Только одно окружение"], "answer": [1], "why": "<p>staging всегда показывает свежую версию, а в продакшен выкатывается только осознанно выпущенный релиз.<\/p>\n"}, {"id": "ad070d7c29", "q": "Какие стратегии выкладки позволяют проверить новую версию на части трафика или переключиться мгновенно? Выбери все.", "options": ["Canary", "Blue-green", "Recreate", "Ручное копирование файлов"], "answer": [0, 1], "why": "<p>canary даёт малую долю трафика с наблюдением за метриками, blue-green — мгновенное переключение и откат. Recreate идёт с простоем.<\/p>\n"}, {"id": "9f5b6eb6cd", "q": "Что из перечисленного входит в DORA-метрики? Выбери все.", "options": ["Частота выкладок", "Время от коммита до продакшена", "Доля неудачных выкладок", "Число строк кода"], "answer": [0, 1, 2], "why": "<p>четвёртая метрика — время восстановления после сбоя. Вместе они показывают скорость и стабильность доставки.<\/p>\n"}, {"id": "29e40caaa3", "q": "Зачем фиксировать версию подключаемого шаблона в <code>include: ... ref:<\/code>?", "options": ["Иначе include не сработает", "Чтобы чужое изменение шаблона не попало в твой пайплайн без твоего ведома", "Чтобы пайплайн шёл быстрее", "Чтобы не платить за GitLab"], "answer": [1], "why": "<p>без фиксации версии сборка перестаёт быть воспроизводимой — как с тегом <code>latest<\/code> у образов.<\/p>\n"}], "cards": [{"id": "b4e98117ca", "q": "Чем Kubernetes executor лучше раннера на отдельной VM?", "a": "<p>Каждая задача в чистом поде, автоматическое масштабирование под нагрузку, ресурсы кластера используются эффективнее, нет накопленного мусора между запусками.<\/p>\n"}, {"id": "046a84e12b", "q": "Какие стратегии выкладки знаешь?", "a": "<p>Recreate (остановить старое, запустить новое — с простоем), rolling update (постепенная замена), blue-green (два окружения, переключение трафика), canary (новая версия на часть трафика с наблюдением за метриками).<\/p>\n"}, {"id": "e01b4942b4", "q": "Что такое DORA-метрики?", "a": "<p>Deployment Frequency, Lead Time for Changes, Change Failure Rate, Time to Restore Service. Показывают скорость и стабильность доставки.<\/p>\n"}, {"id": "85d75c9f9e", "q": "Как собрать Docker-образ внутри Kubernetes?", "a": "<p>Без доступа к Docker-демону: BuildKit в rootless-режиме, Buildah (Kaniko — заархивирован в 2025 году, в старых проектах ещё встречается). Docker-in-Docker требует privileged, что небезопасно.<\/p>\n"}, {"id": "0f50071e84", "q": "Зачем <code>needs<\/code> в GitLab CI?", "a": "<p>Позволяет задаче стартовать сразу после нужных зависимостей, не дожидаясь завершения всей предыдущей стадии — пайплайн превращается в граф и выполняется быстрее.<\/p>\n"}, {"id": "f4b374c3f9", "q": "Как сделать, чтобы в продакшен попадал тот же образ, что тестировали?", "a": "<p>Собирать образ один раз, тегировать по коммиту и продвигать его между окружениями без пересборки (promote), а не собирать заново для каждого окружения.<\/p>\n"}], "next": "6-2"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

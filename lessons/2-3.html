@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.3 Параллельность и асинхронность в Python — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.3: Параллельность и асинхронность в Python">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.3 · code</div>
+    <h1 class="lesson-title">Параллельность и асинхронность в Python</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Парадигмы программирования — зачем их различать</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Многопроцессность</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Случайность по распределению, а не поровну</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Живое обновление вывода в консоли</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Конечный автомат состояний (state machine)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Асинхронное программирование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">GIL: почему в Python процессы, а не потоки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">concurrent.futures — практичный способ запускать параллельно</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Race condition и блокировки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Ограничение параллелизма и таймауты</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Повторные попытки: экспоненциальная задержка</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Здесь начинается настоящий DevOps-Python: не «посчитать что-то в одной функции», а «несколько процессов работают одновременно и не мешают друг другу», «скачать много файлов, не дожидаясь по очереди каждого» — ровно то, из чего состоят реальные скрипты автоматизации.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Процесс</strong> — отдельная, полностью независимая копия программы со своей памятью (в отличие от потока/thread, который делит память с остальными).</li>
+<li><strong>Асинхронность</strong> — способ не ждать медленную операцию (сеть, диск) простаивая, а заняться тем временем чем-то ещё.</li>
+<li><strong>Race condition</strong> — ситуация, когда результат зависит от того, кто из параллельных процессов «успел первым» — источник трудноуловимых багов.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Парадигмы программирования — зачем их различать</h2><div class="prose"><p><em>Аналогия:</em> ООП, процедурный и функциональный подходы — это не разные языки, а разные «стили письма» на одном языке: можно писать роман главами (процедуры), можно через диалоги персонажей (объекты), а можно как математическое доказательство без побочных эффектов (функции).</p>
+<ul>
+<li><strong>Процедурный</strong> — программа как последовательность шагов и вызовов функций.</li>
+<li><strong>ООП</strong> — данные и поведение объединены в объекты (класс <code>Server</code>, класс <code>Deployment</code>).</li>
+<li><strong>Функциональный</strong> — функции не меняют данные снаружи, а возвращают новые значения.</li>
+<li><strong>Мультипарадигмальный</strong> — Python не заставляет выбирать одно: обычно в одном проекте смешивают все три подхода там, где уместно.</li>
+</ul>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Многопроцессность</h2><div class="prose"><p><em>Аналогия:</em> если один кассир обслуживает очередь, люди ждут по одному. Если открыть несколько касс (процессов) — очередь двигается параллельно, и каждая касса вообще не знает, что происходит у соседней.</p>
+<p>Задача: за ночь накопилось 40 логов по гигабайту, их нужно сжать перед отправкой в архив. Сжатие нагружает процессор, и на 8-ядерной машине делать его по одному файлу — значит оставить семь ядер без дела.</p>
+<pre><code class="language-python">from multiprocessing import Process
+import gzip, shutil, pathlib
+
+def compress(path: pathlib.Path):
+    with open(path, &quot;rb&quot;) as src, gzip.open(f&quot;{path}.gz&quot;, &quot;wb&quot;) as dst:
+        shutil.copyfileobj(src, dst)      # читаем и пишем кусками, не весь файл в память
+    path.unlink()                         # исходник удаляем только после успешного сжатия
+
+files = sorted(pathlib.Path(&quot;/var/log/myapp&quot;).glob(&quot;*.log.1&quot;))
+processes = [Process(target=compress, args=(f,)) for f in files[:8]]
+for p in processes:
+    p.start()
+for p in processes:
+    p.join()   # дождаться завершения всех процессов
+</code></pre>
+<p>Каждый процесс — полностью независимая копия программы; они не делят переменные напрямую (в отличие от потоков), поэтому для общих данных (например, общей очереди файлов) нужны специальные потокобезопасные структуры (<code>multiprocessing.Queue</code>, <code>Manager</code>). Здесь запущено ровно 8 процессов по числу ядер — как раздать 40 файлов восьми работникам без ручного учёта, показано в §8.</p>
+<p><img loading="lazy" src="../assets/diagrams/app1-advanced-cashiers.webp" alt="" /></p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Случайность по распределению, а не поровну</h2><div class="prose"><p><em>Аналогия:</em> нечестная монета, которая падает орлом в девяти случаях из десяти. Иногда именно такая и нужна.</p>
+<p>Канареечный выкат (<a href="../lessons/6-1.html#s-15">6.1 CI-CD в Kubernetes</a>, §15): новая версия получает 10% запросов, старая — 90%. Если на 10% всё спокойно, долю увеличивают. Так же работают балансировщики с весами и нагрузочные тесты, имитирующие реальный трафик:</p>
+<pre><code class="language-python">import random
+
+backends = [&quot;v1&quot;, &quot;v2-canary&quot;]
+weights = [90, 10]                                   # веса не обязаны давать в сумме 1
+
+sample = random.choices(backends, weights=weights, k=10_000)
+print(sample.count(&quot;v2-canary&quot;))                    # около 1000
+
+# имитация трафика: главная страница чаще остальных
+paths = [&quot;/&quot;, &quot;/catalog&quot;, &quot;/cart&quot;, &quot;/checkout&quot;]
+next_path = random.choices(paths, weights=[60, 25, 10, 5])[0]
+</code></pre>
+<p><code>random.choices(..., weights=..., k=...)</code> — взвешенный случайный выбор с повторениями: варианты выпадают пропорционально весам, а <code>k</code> задаёт, сколько раз выбирать. Веса нормировать не нужно: <code>[90, 10]</code> и <code>[0.9, 0.1]</code> дают одно и то же. Для воспроизводимых тестов перед выбором вызывают <code>random.seed(42)</code> — тогда «случайная» последовательность будет одинаковой при каждом запуске.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Живое обновление вывода в консоли</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы печатать новую простыню текста при каждом изменении, экран «стирается» и перерисовывается на том же месте — как электронное табло, а не бесконечная лента чека.</p>
+<pre><code class="language-python">import os
+
+def render():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(build_table())
+
+while not all(task.done() for task in tasks):
+    render()
+    time.sleep(0.5)
+</code></pre>
+<p>Так выглядит вывод <code>docker pull</code> или <code>apt upgrade</code>: строки с прогрессом обновляются на месте. Для более серьёзного интерфейса (не просто очистка экрана) существует библиотека <code>curses</code> — про неё подробнее в <a href="../lessons/2-4.html#s-12">2.4 Архитектура и тесты</a>, §12.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Конечный автомат состояний (state machine)</h2><div class="prose"><p><em>Аналогия:</em> заказ в кофейне на табло: «в очереди» → «готовится» → «готов» / «отменён». В любой момент времени заказ находится ровно в одном из этих состояний, и переходы между ними подчиняются чётким правилам: готовый заказ нельзя снова поставить в очередь.</p>
+<p>Ровно так живёт задача в пайплайне CI/CD или под в Kubernetes. Деплой, например:</p>
+<pre><code class="language-python">from enum import Enum
+
+class Status(Enum):
+    PENDING = &quot;ожидает&quot;
+    RUNNING = &quot;выполняется&quot;
+    SUCCESS = &quot;успешно&quot;
+    FAILED = &quot;ошибка&quot;
+    ROLLED_BACK = &quot;откачен&quot;
+
+ALLOWED = {
+    Status.PENDING: {Status.RUNNING},
+    Status.RUNNING: {Status.SUCCESS, Status.FAILED},
+    Status.FAILED: {Status.ROLLED_BACK},
+}
+
+class Deployment:
+    def __init__(self, version: str):
+        self.version = version
+        self.status = Status.PENDING
+
+    def move_to(self, new: Status):
+        if new not in ALLOWED.get(self.status, set()):
+            raise ValueError(f&quot;нельзя перейти из {self.status.value} в {new.value}&quot;)
+        self.status = new
+</code></pre>
+<p><code>Enum</code> — способ перечислить весь набор допустимых состояний явно, вместо того чтобы полагаться на произвольные строки («успешно», «Успешно», «success» — три разные строки для Python, три источника багов). Словарь <code>ALLOWED</code> описывает разрешённые переходы, и метод <code>move_to</code> проверяет каждый: попытка перевести успешный деплой обратно в «выполняется» закончится понятной ошибкой, а не тихо испорченным состоянием. Из <code>SUCCESS</code> и <code>ROLLED_BACK</code> переходов нет вовсе — это конечные состояния.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Асинхронное программирование</h2><div class="prose"><p><em>Аналогия:</em> синхронный код — это как готовить ужин по одному рецепту зараз: сварил суп, потом только начал жарить котлеты. Асинхронный — как опытный повар: поставил суп вариться и, пока он варится (не отвлекая руки), уже режет овощи для другого блюда.</p>
+<pre><code class="language-python">import asyncio
+import aiohttp
+
+async def check(session, url):
+    async with session.get(url, timeout=aiohttp.ClientTimeout(total=3)) as resp:
+        return url, resp.status
+
+async def main(urls):
+    async with aiohttp.ClientSession() as session:
+        results = await asyncio.gather(*(check(session, url) for url in urls))
+    for url, status in results:
+        print(status, url)
+
+asyncio.run(main([&quot;https://example.com/healthz&quot;, &quot;https://example.org/healthz&quot;]))
+</code></pre>
+<p>Ключевые слова <code>async</code> и <code>await</code> — синтаксическая основа асинхронности в Python. <code>async def</code> объявляет не обычную, а «асинхронную» функцию — вызвать её напрямую как обычную нельзя, она возвращает специальный объект-обещание («корутину»), который нужно либо дождаться через <code>await</code>, либо явно запустить через <code>asyncio.run</code>. <code>await</code> внутри такой функции означает «здесь можно приостановиться и отдать управление кому-то другому, пока не придёт результат этой операции» — именно в этот момент, пока одна проверка <code>check</code> ждёт ответа сервера по сети, интерпретатор может переключиться и продолжить другую. <code>asyncio.gather</code> запускает сразу несколько таких асинхронных функций и ждёт, пока все они закончатся — так все проверки идут «одновременно» (пока одна ждёт ответ по сети, выполняется другая) — вместо того чтобы ждать каждую по очереди. Сто адресов с ответом по секунде проверятся примерно за секунду, а не за сто.</p>
+<p><img loading="lazy" src="../assets/diagrams/app1-advanced-async.webp" alt="" /></p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Лайфхак: не давай программе падать на одной ошибке</summary><div class="callout-body"><p>Если один адрес из ста не отвечает, скрипт проверки не должен падать — он должен проверить остальные и собрать сводку в конце. Это общий принцип реальных скриптов автоматизации: одна неудачная операция не должна валить весь батч. В <code>asyncio.gather</code> для этого есть параметр <code>return_exceptions=True</code>, а в простом цикле — <code>try/except</code> на каждую операцию:</p>
+</div></details>
+<pre><code class="language-python">results = []
+for url in urls:
+    try:
+        results.append(await check(session, url))
+    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+        results.append((url, f&quot;ошибка: {type(e).__name__}&quot;))
+</code></pre>
+
+<figure class="explain" data-anim="asyncio-timeline"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: последовательно, asyncio и CPU-задачи</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>GIL: почему в Python процессы, а не потоки</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-advanced-concurrency-choice.svg" alt="" /><br />
+<em>Аналогия:</em> GIL (Global Interpreter Lock) — как единственный ключ от кассы в маленьком магазине: сколько бы кассиров (потоков) ни стояло у одной кассы, реально пробивать чек может только тот, у кого сейчас ключ. Открыть вторую кассу (процесс) с отдельным ключом — единственный способ работать по-настоящему параллельно.</p>
+<p>В стандартном Python (CPython) только один поток одновременно может выполнять байткод — даже на процессоре с 8 ядрами. Поэтому:</p>
+<ul>
+<li><strong>Потоки (<code>threading</code>)</strong> отлично подходят, когда программа <strong>ждёт</strong> (сеть, диск, <code>time.sleep</code>) — во время ожидания GIL освобождается, и другой поток может работать.</li>
+<li><strong>Процессы (<code>multiprocessing</code>)</strong> нужны, когда программа реально <strong>считает</strong> (математика, обработка данных) — у каждого процесса свой Python-интерпретатор и свой GIL, поэтому они действительно выполняются параллельно на разных ядрах.</li>
+</ul>
+<p>Именно поэтому для сжатия логов (§2) выбраны процессы, а не потоки: сжатие — это не ожидание сети, а реальная работа процессора, и потоки упёрлись бы в GIL.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Лайфхак</summary><div class="callout-body"><p>Если код в основном ждёт (запросы к API, чтение файлов) — асинхронность (§6) или потоки эффективнее и дешевле по памяти, чем процессы. Если код в основном считает — только процессы дают настоящий параллелизм в Python. Путать эти два случая — частая причина, почему «многопоточный» скрипт не ускоряется вообще.</p>
+</div></details>
+<details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>GIL сегодня: free-threading</summary><div class="callout-body"><p>Начиная с <strong>Python 3.14</strong> (октябрь 2025) существует официально поддерживаемая сборка без GIL — она перестала считаться экспериментальной. Но три оговорки, без которых ответ на собеседовании будет неполным:</p>
+<ul>
+<li>это <strong>отдельный бинарник</strong> (<code>3.14t</code>), а не поведение по умолчанию — его надо ставить осознанно;</li>
+<li>однопоточный код в нём работает на 5–10% медленнее;</li>
+<li>если импортировать C-расширение, не объявившее себя потокобезопасным, интерпретатор <strong>тихо включает GIL обратно</strong> на весь процесс — потоки продолжат работать, но параллельности не будет.</li>
+</ul>
+<p>План сообщества — сделать отключение GIL управляемым флагом в ближайшие релизы, а поведением по умолчанию не раньше конца десятилетия. Практический вывод на 2026 год: писать код надо по-прежнему исходя из наличия GIL, но знать про free-threading стоит — вопрос всплывает.</p>
+</div></details></div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>concurrent.futures — практичный способ запускать параллельно</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы вручную нанимать каждого работника, вести учёт и по одному встречать со смены, ты нанимаешь бригаду фиксированного размера и просто отдаёшь ей список задач.</p>
+<p>Ручное создание <code>Process</code> из §2 полезно для понимания, но в рабочем коде почти всегда берут пул — он сам следит за количеством, собирает результаты и корректно закрывается.</p>
+<pre><code class="language-python">from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+
+def check_host(host: str) -&gt; tuple[str, bool]:
+    ...   # проверка по сети — код ЖДЁТ
+
+with ThreadPoolExecutor(max_workers=20) as pool:
+    futures = {pool.submit(check_host, h): h for h in hosts}
+    for fut in as_completed(futures):
+        host = futures[fut]
+        try:
+            name, alive = fut.result()
+        except Exception as e:
+            print(f&quot;{host}: проверка не удалась — {e}&quot;)
+        else:
+            print(f&quot;{name}: {'жив' if alive else 'мёртв'}&quot;)
+</code></pre>
+<p>Красота в том, что переход между режимами — это замена одного слова: <code>ThreadPoolExecutor</code> для ожидания, <code>ProcessPoolExecutor</code> для вычислений. Остальной код не меняется.</p>
+<p><code>as_completed</code> отдаёт результаты <strong>по мере готовности</strong>, а не в порядке отправки — так первые ответы видны сразу, не дожидаясь самого медленного. Исключение внутри задачи не роняет пул: оно всплывает при вызове <code>fut.result()</code>, и его можно обработать локально, продолжив остальные.</p>
+<p><code>max_workers</code> — не «чем больше, тем лучше». Для процессов разумный ориентир — число ядер (<code>os.cpu_count()</code>), для потоков зависит от того, сколько одновременных соединений выдержит та сторона.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Race condition и блокировки</h2><div class="prose"><p><em>Аналогия:</em> два человека одновременно смотрят на остаток в 100 рублей, каждый решает снять 60, и оба видят «хватает». В сумме снимают 120 — банк уходит в минус, хотя каждая проверка по отдельности была верной.</p>
+<p>Гонка возникает там, где несколько исполнителей читают и меняют одни и те же данные, а между чтением и записью успевает вклиниться другой.</p>
+<pre><code class="language-python">import threading
+
+counter = 0
+
+def worker():
+    global counter
+    for _ in range(100_000):
+        counter += 1      # ✘ не атомарно: прочитать → прибавить → записать
+
+threads = [threading.Thread(target=worker) for _ in range(4)]
+[t.start() for t in threads]
+[t.join() for t in threads]
+print(counter)      # почти наверняка меньше 400 000
+</code></pre>
+<p>Строка <code>counter += 1</code> выглядит одной операцией, но на самом деле их три, и переключение между потоками может произойти между ними. Лечится блокировкой:</p>
+<pre><code class="language-python">lock = threading.Lock()
+
+def worker():
+    global counter
+    for _ in range(100_000):
+        with lock:            # ✔ внутрь пускается только один поток за раз
+            counter += 1
+</code></pre>
+<p><code>with lock</code> гарантирует, что участок кода выполняет строго один поток. Тот же механизм для процессов — <code>multiprocessing.Lock</code>.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Блокировка — не бесплатное решение</summary><div class="callout-body"><p>Слишком широкая блокировка убивает весь смысл параллелизма: если под ней оказалась вся работа, исполнители просто стоят в очереди. Слишком много разных блокировок — риск <strong>взаимной блокировки</strong> (deadlock): поток A держит замок 1 и ждёт замок 2, поток B держит замок 2 и ждёт замок 1, оба стоят навсегда. Простое правило, снимающее большинство таких случаев: всегда захватывать блокировки в одном и том же порядке.</p>
+<p>Лучший способ избежать гонок — не разделять изменяемое состояние вовсе. Именно поэтому процессы с очередью (<code>multiprocessing.Queue</code>) из §2 часто проще и надёжнее, чем потоки с общими переменными: данные передаются сообщениями, а не правятся сообща.</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ограничение параллелизма и таймауты</h2><div class="prose"><p><em>Аналогия:</em> попросить сто человек одновременно войти в дверь шириной в одного — быстрее не станет, а дверь можно и сломать.</p>
+<p>Наивный <code>asyncio.gather</code> на большом списке запускает <strong>все</strong> задачи разом. На десяти тысячах URL это исчерпает лимит файловых дескрипторов, забьёт канал и, скорее всего, приведёт к бану на той стороне.</p>
+<pre><code class="language-python">import asyncio
+
+sem = asyncio.Semaphore(10)          # не больше 10 одновременных запросов
+
+async def fetch(session, url):
+    async with sem:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as r:
+            return await r.text()
+
+results = await asyncio.gather(*(fetch(s, u) for u in urls), return_exceptions=True)
+</code></pre>
+<p>Три обязательные детали в этом коде. <strong>Семафор</strong> ограничивает число одновременных операций — остальные ждут своей очереди. <strong>Таймаут</strong> обязателен всегда: без него зависшее соединение подвесит задачу навсегда, и скрипт в systemd-таймере будет копиться в памяти запуск за запуском. <strong><code>return_exceptions=True</code></strong> заставляет <code>gather</code> не падать на первой же ошибке, а вернуть исключения в списке результатов наравне со значениями — прямое продолжение принципа «одна неудача не валит весь батч» из §6.</p>
+<p>Аналог для пулов из §8 — это сам <code>max_workers</code>: он и есть ограничитель параллелизма.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Повторные попытки: экспоненциальная задержка</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-advanced-retry.svg" alt="" /><br />
+<em>Аналогия:</em> если сервис прилёг под нагрузкой, а ты повторяешь запрос немедленно и без остановки — ты не пытаешься его дождаться, ты добиваешь его окончательно.</p>
+<pre><code class="language-python">import random, time
+
+def with_retry(func, attempts=5, base=1.0):
+    for attempt in range(attempts):
+        try:
+            return func()
+        except (TimeoutError, ConnectionError) as e:
+            if attempt == attempts - 1:
+                raise
+            delay = base * (2 ** attempt) + random.uniform(0, 1)
+            print(f&quot;Попытка {attempt + 1} не удалась ({e}), жду {delay:.1f}с&quot;)
+            time.sleep(delay)
+</code></pre>
+<p>Пауза <strong>удваивается</strong> с каждой попыткой: 1, 2, 4, 8 секунд. Это даёт сервису шанс восстановиться вместо того, чтобы получать волну повторов.</p>
+<p>Слагаемое <code>random.uniform(0, 1)</code> — <strong>джиттер</strong>, и он не украшение. Если сто клиентов упали одновременно, то и повторят они одновременно, ровно через 1, 2 и 4 секунды — волна нагрузки повторится с прежней силой. Случайная добавка размазывает повторы во времени.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Не всё можно повторять</summary><div class="callout-body"><p>Повтор безопасен только для <strong>идемпотентных</strong> операций — тех, которые от повторного выполнения не меняют результат. <code>GET</code> и <code>PUT</code> обычно идемпотентны, <code>POST «списать деньги»</code> — нет: ответ мог потеряться уже после того, как деньги списались, и повтор спишет их дважды. Для таких случаев на стороне API используют ключ идемпотентности — уникальный идентификатор операции, по которому сервер узнаёт повтор.</p>
+<p>И отдельно: повторять имеет смысл только временные ошибки. Код <code>429</code> (слишком много запросов) и <code>503</code> — да. Код <code>400</code> или <code>404</code> — нет: запрос не станет корректнее оттого, что его отправили пять раз.</p>
+</div></details>
+<p>В рабочих проектах это редко пишут руками — берут библиотеку <code>tenacity</code>, где то же самое задаётся декоратором. Но понимать, что именно она делает, нужно.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>13</b>/17 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Процессы не делят память — для общих данных нужны специальные потокобезопасные структуры.</li>
+<li><code>Enum</code> фиксирует весь набор допустимых состояний явно — вместо произвольных строк, которые легко перепутать.</li>
+<li><code>random.choices(weights=...)</code> — случайность с разной вероятностью исходов, а не «50 на 50».</li>
+<li>Асинхронность полезна, когда программа ждёт (сеть/диск), а не когда она реально считает (для чистого CPU нужна многопроцессность).</li>
+<li>Одна упавшая операция в батче не должна валить весь скрипт — лови ошибку локально и продолжай.</li>
+<li>Выбор режима — один вопрос: код <strong>ждёт</strong> (async или потоки) или <strong>считает</strong> (процессы). Потоки для вычислений не ускоряют ничего из-за GIL.</li>
+<li><code>ThreadPoolExecutor</code> / <code>ProcessPoolExecutor</code> — рабочий способ вместо ручных <code>Process</code>; переключение между ними меняет одно слово.</li>
+<li><code>counter += 1</code> не атомарно — это гонка. Лечится <code>with lock</code>, но лучше не разделять изменяемое состояние вовсе.</li>
+<li><code>gather</code> без семафора запускает всё разом; таймаут обязателен всегда, <code>return_exceptions=True</code> не даёт упасть на первой ошибке.</li>
+<li>Повторы — только с экспоненциальной задержкой и джиттером, только для идемпотентных операций и только на временные ошибки.</li>
+<li>Free-threading официально поддерживается с Python 3.14, но отдельной сборкой и с оговорками — писать код пока следует исходя из наличия GIL.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>14</b>/17 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 2 (асинхронная проверка многих адресов с ограничением) — ядро <a href="../projects/m2.html">M2</a>.</li>
+<li>Задание 3 (повторы с экспоненциальной задержкой) — отправка сообщений в <a href="../projects/m3.html">M3</a>.</li>
+</ul>
+</div></details><article class="task" data-task="8e02c84ff9"><h3>Задание 1 — потоки против процессов</h3><p>Напиши функцию, которая считает простые числа до 2 млн (нагрузка на CPU), и функцию, которая скачивает 20 страниц (нагрузка на ввод-вывод). Запусти каждую последовательно, через <code>ThreadPoolExecutor</code> и через <code>ProcessPoolExecutor</code>.<br />
+<strong>Проверка:</strong> таблица времени показывает, что для CPU помогают процессы, а для сети — потоки. Объясняешь результат через GIL.</p>
+<label class="task-done"><input type="checkbox" data-task-check="8e02c84ff9"> Сделала руками и проверила</label></article><article class="task" data-task="47fec3a0ba"><h3>Задание 2 — асинхронный проверяльщик</h3><p>Через <code>asyncio</code> и <code>aiohttp</code> (или <code>httpx</code>) проверь доступность 50 адресов с ограничением в 10 одновременных запросов (<code>Semaphore</code>) и таймаутом 3 секунды.<br />
+<strong>Проверка:</strong> общее время — примерно максимум из таймаутов, а не их сумма; одновременно не больше 10 соединений.</p>
+<label class="task-done"><input type="checkbox" data-task-check="47fec3a0ba"> Сделала руками и проверила</label></article><article class="task" data-task="123a6680a5"><h3>Задание 3 — повторы с задержкой</h3><p>Напиши декоратор <code>retry</code> с экспоненциальной задержкой и случайным разбросом (jitter), который повторяет только сетевые ошибки и не больше N раз.<br />
+<strong>Проверка:</strong> тест с функцией, которая падает дважды и на третий раз отвечает: вызвана ровно 3 раза, паузы растут.</p>
+<label class="task-done"><input type="checkbox" data-task-check="123a6680a5"> Сделала руками и проверила</label></article><article class="task" data-task="8e435552bc"><h3>Задание 4 — гонка и блокировка</h3><p>Создай общий счётчик и увеличь его из 10 потоков по 100 000 раз без блокировки, затем с <code>threading.Lock</code>.<br />
+<strong>Проверка:</strong> без блокировки итог иногда меньше 1 000 000 (запусти несколько раз), с блокировкой всегда ровно 1 000 000.</p>
+<label class="task-done"><input type="checkbox" data-task-check="8e435552bc"> Сделала руками и проверила</label></article><article class="task" data-task="31ae058d3f"><h3>Задание 5 — конечный автомат</h3><p>Опиши состояния деплоя (<code>pending</code>, <code>building</code>, <code>testing</code>, <code>deploying</code>, <code>done</code>, <code>failed</code>) и разрешённые переходы. Недопустимый переход выбрасывает исключение.<br />
+<strong>Проверка:</strong> тесты на допустимые и недопустимые переходы.</p>
+<label class="task-done"><input type="checkbox" data-task-check="31ae058d3f"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>15</b>/17 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>16</b>/17 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>17</b>/17 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-2.html">2.2 Python для автоматизации</a> — инструменты, которые здесь распараллеливаются</li>
+<li><a href="../lessons/2-4.html">2.4 Архитектура и тесты</a> — curses и интерфейс в терминале</li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — где конкурентность становится обязательной</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>asyncio: https://docs.python.org/3/library/asyncio.html</li>
+<li>Документация по free-threading: https://docs.python.org/3/howto/free-threading-python.html</li>
+<li>What's new in Python 3.14: https://docs.python.org/3/whatsnew/3.14.html</li>
+<li>Документация <code>concurrent.futures</code>: https://docs.python.org/3/library/concurrent.futures.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-2.html">← 2.2 Python для автоматизации</a><a class="lesson-jump" href="2-4.html">2.4 Архитектура приложения и тесты →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-3", "number": "2.3", "title": "Параллельность и асинхронность в Python", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["8e02c84ff9", "47fec3a0ba", "123a6680a5", "8e435552bc", "31ae058d3f"], "quiz": [{"id": "8a4faa51f2", "q": "Скрипт сжимает сотни больших файлов и загружает процессор. Что даст реальное ускорение?", "options": ["Потоки (<code>threading<\/code>)", "Процессы (<code>multiprocessing<\/code> или <code>ProcessPoolExecutor<\/code>)", "<code>asyncio<\/code>", "<code>time.sleep<\/code> между файлами"], "answer": [1], "why": "<p>из-за GIL потоки не выполняют Python-код параллельно. У каждого процесса свой интерпретатор и свой GIL.<\/p>\n"}, {"id": "a8deb7353b", "q": "Скрипт проверяет доступность 500 сайтов. Какие подходы подходят? Выбери все.", "options": ["<code>asyncio<\/code> с <code>aiohttp<\/code>", "<code>ThreadPoolExecutor<\/code>", "Последовательный цикл с <code>requests<\/code>", "Отдельный процесс на каждый сайт"], "answer": [0, 1], "why": "<p>задача почти целиком состоит из ожидания сети — тут работают асинхронность и потоки. 500 процессов — лишняя трата памяти.<\/p>\n"}, {"id": "797666d5ac", "q": "Что такое race condition?", "options": ["Ошибка при обращении к несуществующей переменной", "Результат зависит от того, какой из параллельных потоков успел первым изменить общие данные", "Слишком быстрая программа", "Ошибка синтаксиса в асинхронном коде"], "answer": [1], "why": "<p>две операции «прочитать-изменить-записать» перемешиваются, и одно изменение теряется. Лечится блокировками.<\/p>\n"}, {"id": "ca4e3efc93", "q": "Зачем при повторах запросов добавлять случайный разброс (jitter) к задержке?", "options": ["Чтобы клиенты не повторяли запросы одновременно и не добивали перегруженный сервис", "Чтобы запросы шли быстрее", "Чтобы обойти ограничения API", "Чтобы шифровать трафик"], "answer": [0], "why": "<p>без разброса все клиенты, упавшие вместе, вместе же и повторят — и снова положат сервер.<\/p>\n"}, {"id": "10492c8603", "q": "Какой выбор весов даст новой версии примерно 10% трафика?", "options": ["<code>random.choices([&quot;v1&quot;, &quot;v2&quot;], weights=[1, 1])<\/code>", "<code>random.choices([&quot;v1&quot;, &quot;v2&quot;], weights=[90, 10])<\/code>", "<code>random.choice([&quot;v1&quot;, &quot;v2&quot;])<\/code>", "<code>random.sample([&quot;v1&quot;, &quot;v2&quot;], 1)<\/code>"], "answer": [1], "why": "<p>веса не обязаны давать в сумме единицу — важны пропорции.<\/p>\n"}, {"id": "5877d5afde", "q": "Зачем в конечном автомате словарь разрешённых переходов?", "options": ["Чтобы автомат работал быстрее", "Чтобы запретить бессмысленные переходы, например из «успешно» обратно в «выполняется»", "Чтобы сохранять состояние в базу", "Он не нужен, хватает Enum"], "answer": [1], "why": "<p>Enum перечисляет состояния, а таблица переходов задаёт правила. Без неё состояние можно тихо испортить.<\/p>\n"}, {"id": "3c2c06346b", "q": "Какие запросы можно безопасно повторять при сбое? Выбери все.", "options": ["GET", "PUT с тем же телом", "POST без ключа идемпотентности", "DELETE"], "answer": [0, 1, 3], "why": "<p>идемпотентные операции дают тот же результат при повторе. Повтор POST может создать дубликат.<\/p>\n"}], "cards": [{"id": "9a48264b15", "q": "Что такое GIL?", "a": "<p>Глобальная блокировка интерпретатора CPython: в каждый момент байткод выполняет только один поток. Поэтому потоки не ускоряют вычисления на CPU, но полезны для ввода-вывода, где поток отпускает GIL на время ожидания. Для CPU используют процессы.<\/p>\n"}, {"id": "5888f197e5", "q": "Когда использовать asyncio, когда потоки, когда процессы?", "a": "<p>Много одновременных сетевых операций — asyncio. Ввод-вывод с блокирующими библиотеками — потоки. Тяжёлые вычисления — процессы.<\/p>\n"}, {"id": "c974e4c90d", "q": "Что такое race condition?", "a": "<p>Результат зависит от порядка выполнения параллельных операций над общими данными. Лечится блокировками, атомарными операциями или отказом от общего изменяемого состояния.<\/p>\n"}, {"id": "ddee178546", "q": "Зачем экспоненциальная задержка и jitter при повторах?", "a": "<p>Чтобы не добивать перегруженный сервис частыми повторами. Jitter разносит повторы клиентов во времени, иначе все повторят одновременно и снова его положат.<\/p>\n"}, {"id": "d43fa94968", "q": "Что такое deadlock в многопоточном коде?", "a": "<p>Два потока ждут блокировки, которые держит другой. Предотвращают единым порядком захвата блокировок и таймаутами.<\/p>\n"}, {"id": "f3419268aa", "q": "Какие операции можно безопасно повторять?", "a": "<p>Идемпотентные: GET, PUT с тем же телом, DELETE. Повтор POST может создать дубликат — нужен ключ идемпотентности.<\/p>\n"}], "next": "2-4"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

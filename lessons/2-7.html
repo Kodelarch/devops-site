@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.7 SQL: соединения и множества — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.7: SQL: соединения и множества">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.7 · code</div>
+    <h1 class="lesson-title">SQL: соединения и множества</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">UNION и UNION ALL — объединение списков</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">INTERSECT — пересечение множеств</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">EXCEPT (разница множеств)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">CROSS JOIN — декартово произведение</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">INNER JOIN — соединение по условию</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">NATURAL JOIN — тот же JOIN, но по имени столбца</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">LEFT, RIGHT и FULL JOIN — сохраняем «непарные» строки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Восполняем пропуски: generate_series</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">CTE — именованные подзапросы через WITH</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">IN и EXISTS — два способа проверить принадлежность</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Соединяем несколько таблиц подряд</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Самосоединение (self-join)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">ON или WHERE — где ставить условие</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Размножение строк: почему сумма завышена</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Как база выполняет JOIN</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>До сих пор мы работали с одной таблицей за раз. Реальные данные почти всегда разбросаны по нескольким таблицам — покупки отдельно от покупателей, товары отдельно от магазинов. JOIN — это то, как SQL «сшивает» связанные таблицы обратно в один осмысленный результат, а операции над множествами (UNION/INTERSECT/EXCEPT) — как сравнивать и комбинировать целые наборы строк.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Множество (в контексте SQL)</strong> — результат запроса как набор строк, с которым можно работать через UNION/INTERSECT/EXCEPT, как с математическими множествами.</li>
+<li><strong>JOIN</strong> — операция соединения строк из двух таблиц по условию совпадения значений.</li>
+<li><strong>Декартово произведение</strong> — соединение «каждая строка одной таблицы с каждой строкой другой», без всякого условия — самый первичный, «сырой» вид JOIN.</li>
+<li><strong>CTE (Common Table Expression)</strong> — именованный временный результат запроса, объявленный через <code>WITH</code>, на который можно ссылаться дальше в основном запросе.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>UNION и UNION ALL — объединение списков</h2><div class="prose"><p><em>Аналогия:</em> объединить два списка (например, все товары и всех покупателей) в один общий список имён — как сложить два списка в один документ, один под другим.</p>
+<pre><code class="language-sql">SELECT id AS object_id, title AS object_name FROM product
+UNION
+SELECT id AS object_id, name AS object_name FROM customer;
+</code></pre>
+<p>Имена итоговых столбцов берутся из <strong>первого</strong> запроса — во втором <code>SELECT</code> названия колонок могут быть любыми, они всё равно не используются в выводе. <code>UNION</code> по умолчанию убирает дубликаты строк (как <code>DISTINCT</code>); <code>UNION ALL</code> сохраняет все строки, включая повторы.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Обязательное правило</summary><div class="callout-body"><p>Количество столбцов и их типы данных должны совпадать между всеми частями <code>UNION</code> — нельзя объединить запрос с 2 столбцами и запрос с 3 столбцами.</p>
+</div></details></div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>INTERSECT — пересечение множеств</h2><div class="prose"><p><em>Аналогия:</em> пересечение — это «и то, и другое одновременно»: покупатели, которые в один и тот же день и открывали витрину, и что-то купили (хотя это разные, не связанные напрямую таблицы).</p>
+<pre><code class="language-sql">SELECT purchase_date AS action_date, customer_id
+FROM purchase
+INTERSECT
+SELECT visit_date AS action_date, customer_id
+FROM store_visit;
+</code></pre>
+<p>Результат — только те пары <code>(дата, customer_id)</code>, которые встречаются <strong>в обоих</strong> запросах одновременно. Без <code>ALL</code> дубликаты внутри результата убираются; <code>INTERSECT ALL</code> сохраняет их (с учётом того, сколько раз пара встретилась в обеих частях).</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>EXCEPT (разница множеств)</h2><div class="prose"><p><em>Аналогия:</em> «то, что есть в первом списке, но отсутствует во втором» — как сверить список гостей, которые должны были прийти, со списком тех, кто реально расписался у входа, и найти, кто не пришёл.</p>
+<pre><code class="language-sql">SELECT customer_id FROM purchase WHERE purchase_date = '2026-03-10'
+EXCEPT ALL
+SELECT customer_id FROM store_visit WHERE visit_date = '2026-03-10'
+</code></pre>
+<p>Запрос находит покупателей, которые 10 марта что-то купили, но в этот день не открывали ни одной витрины, — например, перешли по ссылке из рассылки. <code>EXCEPT</code> (в некоторых базах называется <code>MINUS</code>) вычитает вторую таблицу из первой. Порядок частей важен: <code>A EXCEPT B</code> почти всегда не равно <code>B EXCEPT A</code>.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>CROSS JOIN — декартово произведение</h2><div class="prose"><p><em>Аналогия:</em> если сопоставить каждого покупателя с каждым магазином без всякого условия — получится «все возможные пары», как таблица результатов турнира «каждый с каждым».</p>
+<pre><code class="language-sql">SELECT c.id, c.name, s.id, s.name
+FROM customer c
+CROSS JOIN store s;
+</code></pre>
+<p>В учебной базе 12 покупателей и 8 магазинов — результат <code>CROSS JOIN</code> содержит 12 × 8 = 96 строк. Это самый «сырой» вид соединения — по сути, именно из него логически выводятся все остальные типы JOIN, если добавить условие фильтрации по совпадению столбцов.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>INNER JOIN — соединение по условию</h2><div class="prose"><p><em>Аналогия:</em> INNER JOIN — это CROSS JOIN, из которого оставили только «осмысленные» пары — те, где значения связанных столбцов действительно совпадают, как совмещение пазла только по правильным стыкам.</p>
+<pre><code class="language-sql">SELECT pu.purchase_date, c.name, c.age
+FROM purchase pu
+JOIN customer c ON pu.customer_id = c.id
+ORDER BY pu.purchase_date, c.name;
+</code></pre>
+<p><code>JOIN</code> без уточнения — то же самое, что <code>INNER JOIN</code>. <code>ON pu.customer_id = c.id</code> — условие, по которому строки двух таблиц считаются «парой». Строка <code>purchase</code>, для которой не нашлось совпадения в <code>customer</code>, в результат INNER JOIN не попадёт вообще.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>NATURAL JOIN — тот же JOIN, но по имени столбца</h2><div class="prose"><p><em>Аналогия:</em> NATURAL JOIN — ленивый вариант INNER JOIN: вместо того чтобы явно писать условие, база сама ищет столбцы с одинаковыми именами в обеих таблицах и соединяет по ним.</p>
+<pre><code class="language-sql">SELECT pu.purchase_date, c.name, c.age
+FROM purchase pu
+NATURAL JOIN customer c
+ORDER BY pu.purchase_date, c.name;
+</code></pre>
+<p>Работает только если у обеих таблиц есть столбец с одинаковым именем, по которому и должно идти соединение (здесь это не сработает «из коробки» буквально, так как <code>purchase.customer_id</code> и <code>customer.id</code> называются по-разному — NATURAL JOIN уместен только там, где имена столбцов действительно совпадают).</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Почему NATURAL JOIN редко используют в реальных проектах</summary><div class="callout-body"><p>Он неявный: если в обеих таблицах случайно совпадёт имя ещё одного столбца (не того, что задумывалось), соединение молча пойдёт не так, как ожидалось. Явный <code>JOIN ... ON</code> считается более безопасной практикой.</p>
+</div></details></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>LEFT, RIGHT и FULL JOIN — сохраняем «непарные» строки</h2><div class="prose"><p><em>Аналогия:</em> если INNER JOIN — это только пары, то LEFT JOIN — это «все из левой таблицы, даже если пары не нашлось» (для непарных строк правая часть заполняется <code>NULL</code>), как список всех сотрудников с их премиями, включая тех, кому премию в этом месяце не начислили (там будет пусто, а не пропущенная строка).</p>
+<pre><code class="language-sql">SELECT s.name AS store_name, s.rating
+FROM store s
+LEFT JOIN store_visit sv ON s.id = sv.store_id
+WHERE sv.id IS NULL;
+</code></pre>
+<p>Этот конкретный запрос находит магазины, витрину которых <strong>никто не открывал</strong>: <code>LEFT JOIN</code> подставляет <code>NULL</code> вместо данных из <code>store_visit</code> там, где совпадений нет, а <code>WHERE sv.id IS NULL</code> оставляет только такие строки. <code>RIGHT JOIN</code> — то же самое, но приоритет отдаётся правой таблице. <code>FULL JOIN</code> сохраняет непарные строки из <strong>обеих</strong> таблиц одновременно.</p>
+
+<figure class="explain" data-anim="sql-joins"><figcaption><span class="explain-tag">▶ схема</span>Переключай тип JOIN и смотри, какие строки остаются</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Восполняем пропуски: generate_series</h2><div class="prose"><p><em>Аналогия:</em> чтобы найти пропущенные дни (когда покупатель ни разу не заходил на площадку), сначала нужен полный список всех дней периода — как сплошной календарь, с которым потом сравнивают реальные отметки о посещениях.</p>
+<pre><code class="language-sql">SELECT gs::date AS missing_date
+FROM generate_series('2026-03-01'::date, '2026-03-10'::date, '1 day') AS gs
+LEFT JOIN store_visit sv ON sv.visit_date = gs::date AND sv.customer_id IN (1, 2)
+WHERE sv.id IS NULL
+ORDER BY missing_date;
+</code></pre>
+<p><code>generate_series(start, stop, step)</code> генерирует последовательность значений — здесь дат с шагом в один день. Двойное двоеточие <code>::</code> в PostgreSQL (например, <code>gs::date</code> или <code>'2026-03-01'::date</code>) — оператор явного приведения типа: он говорит базе «обращайся с этим значением именно как со значением такого-то типа», даже если само значение записано в виде обычного текста в кавычках. Запрос выводит дни с 1 по 10 марта, в которые ни Анна, ни Борис не открывали ни одной витрины. Комбинация «сгенерировать полный диапазон + LEFT JOIN + проверка на NULL» — стандартный SQL-паттерн поиска пропусков в данных: дни без продаж, часы без записей в логе, пропуски в метриках.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>CTE — именованные подзапросы через WITH</h2><div class="prose"><p><em>Аналогия:</em> CTE — как черновик, который сначала выносишь отдельным пунктом плана, а потом ссылаешься на него по названию в основном тексте, вместо того чтобы каждый раз пересказывать его целиком.</p>
+<pre><code class="language-sql">WITH generated_dates AS (
+    SELECT gs::date AS the_date
+    FROM generate_series('2026-03-01'::date, '2026-03-10'::date, '1 day') AS gs
+)
+SELECT the_date AS missing_date
+FROM generated_dates gd
+LEFT JOIN store_visit sv ON sv.visit_date = gd.the_date AND sv.customer_id IN (1, 2)
+WHERE sv.id IS NULL
+ORDER BY missing_date;
+</code></pre>
+<p>Тот же результат, что и в разделе 8, но <code>generate_series</code> вынесен в блок <code>WITH ... AS (...)</code> — именованное временное представление <code>generated_dates</code>, на которое основной запрос ссылается по имени. При росте сложности запроса CTE сильно улучшает читаемость по сравнению с подзапросом прямо внутри <code>FROM</code>.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>IN и EXISTS — два способа проверить принадлежность</h2><div class="prose"><p><em>Аналогия:</em> <code>IN</code> — «есть ли моё значение в этом готовом списке?», <code>EXISTS</code> — «а найдётся ли вообще хоть одна подходящая строка, если поискать?». Разные способы задать один и тот же по смыслу вопрос.</p>
+<pre><code class="language-sql">-- через IN
+SELECT name FROM store
+WHERE id NOT IN (SELECT store_id FROM store_visit);
+
+-- через EXISTS
+SELECT name FROM store s
+WHERE NOT EXISTS (
+    SELECT 1 FROM store_visit sv WHERE sv.store_id = s.id
+);
+</code></pre>
+<p>Оба запроса находят магазины, витрину которых никто не открывал. <code>EXISTS</code> проверяет сам факт существования хотя бы одной строки и не заботится о том, что конкретно та строка возвращает (<code>SELECT 1</code> — условная «заглушка»); <code>EXISTS</code> часто работает быстрее на больших таблицах, потому что база может прекратить поиск, как только нашла первое совпадение.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Соединяем несколько таблиц подряд</h2><div class="prose"><p><em>Аналогия:</em> если нужно узнать не просто «кто купил», а «кто что купил и в каком магазине» — приходится пройти по цепочке связей через несколько JOIN подряд, как передавать посылку по цепочке людей, каждый из которых знает только следующего.</p>
+<pre><code class="language-sql">SELECT c.name AS customer_name, pr.title, s.name AS store_name
+FROM purchase pu
+JOIN customer c ON pu.customer_id = c.id
+JOIN product pr ON pu.product_id = pr.id
+JOIN store s ON pr.store_id = s.id
+ORDER BY c.name, pr.title, s.name;
+</code></pre>
+<p>Порядок JOIN'ов в запросе почти никогда не важен для правильности результата (важна только логика условий <code>ON</code>) — база сама выбирает наиболее эффективный порядок выполнения внутри себя.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Самосоединение (self-join)</h2><div class="prose"><p><em>Аналогия:</em> self-join — это соединение таблицы саму с собой, как сравнение каждого покупателя с каждым другим покупателем из того же списка, чтобы найти пары из одного города.</p>
+<pre><code class="language-sql">SELECT c1.name AS customer_1, c2.name AS customer_2, c1.city AS common_city
+FROM customer c1
+JOIN customer c2 ON c1.city = c2.city AND c1.id &lt; c2.id
+ORDER BY c1.name, c2.name, c1.city;
+</code></pre>
+<p>Таблица <code>customer</code> подключается дважды с разными алиасами (<code>p1</code>, <code>p2</code>) — для базы данных это просто две независимые копии таблицы. Условие <code>c1.id &lt; c2.id</code> — стандартный трюк, чтобы не получить пару дважды в обоих порядках и не сравнивать покупателя самого с собой.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>ON или WHERE — где ставить условие</h2><div class="prose"><p><em>Аналогия:</em> фильтровать гостей на входе или уже внутри зала — казалось бы, разница невелика. Но если задача была «составить список всех приглашённых, отметив пришедших», то фильтр внутри зала оставит только пришедших, и весь смысл списка потеряется.</p>
+<p>Одна из самых частых ошибок с <code>LEFT JOIN</code> и почти обязательный вопрос на собеседовании. Два похожих запроса дают принципиально разный результат:</p>
+<pre><code class="language-sql">-- ✔ остаётся LEFT JOIN: все магазины, у непосещённых — NULL
+SELECT s.name, sv.visit_date
+FROM store s
+LEFT JOIN store_visit sv
+       ON sv.store_id = s.id
+      AND sv.visit_date = '2026-03-04';
+
+-- ✘ фактически стал INNER JOIN: магазины без посещений исчезли
+SELECT s.name, sv.visit_date
+FROM store s
+LEFT JOIN store_visit sv ON sv.store_id = s.id
+WHERE sv.visit_date = '2026-03-04';
+</code></pre>
+<p>Механика ровно та, что разбиралась в <a href="../lessons/2-6.html#s-11">2.6 SQL-запросы</a>, §11. <code>LEFT JOIN</code> честно подставил <code>NULL</code> во все столбцы правой таблицы для магазинов без посещений. Затем <code>WHERE sv.visit_date = '2026-03-04'</code> сравнил <code>NULL</code> с датой, получил <code>unknown</code> — и выбросил именно те строки, ради которых <code>LEFT JOIN</code> и брали.</p>
+<p><strong>Правило:</strong> условие, относящееся к <strong>правой</strong> таблице, ставится в <code>ON</code>. Условие про <strong>левую</strong> таблицу можно ставить в <code>WHERE</code> — там <code>NULL</code> не появляется. Единственное осмысленное исключение — <code>WHERE sv.id IS NULL</code>: это не фильтр, а как раз поиск «того, чего нет» (см. §7).</p>
+<p>Быстрая самопроверка при отладке: если <code>LEFT JOIN</code> вернул столько же строк, сколько <code>INNER JOIN</code>, — почти наверняка условие уехало в <code>WHERE</code>.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Размножение строк: почему сумма завышена</h2><div class="prose"><p><em>Аналогия:</em> к каждой карточке товара подшили по три накладные — и при подсчёте стоимости склада каждый товар посчитали трижды.</p>
+<p>Ошибка без сообщения об ошибке, из-за которой отчёты годами показывают завышенные числа. Возникает при соединении «один ко многим» сразу с двумя таблицами: если покупатель трижды открывал витрину магазина и дважды там купил, то после соединения с обеими таблицами получится 3 × 2 = 6 строк, и каждая покупка будет посчитана трижды.</p>
+<pre><code class="language-sql">-- ✘ выручка магазина, умноженная на число просмотров витрины
+SELECT s.name, SUM(pr.price) AS revenue
+FROM store s
+JOIN product pr      ON pr.store_id = s.id
+JOIN purchase pu     ON pu.product_id = pr.id
+JOIN store_visit sv  ON sv.store_id = s.id
+GROUP BY s.name;
+</code></pre>
+<p>Запрос синтаксически безупречен и работает без единого предупреждения — он просто суммирует ровно то, что получилось после соединения. Заметить можно только зная, что искать.</p>
+<p><strong>Как чинить.</strong> Самый надёжный способ — агрегировать до соединения, а потом соединять уже готовые числа:</p>
+<pre><code class="language-sql">WITH revenue AS (
+    SELECT pr.store_id, SUM(pr.price) AS revenue
+    FROM purchase pu
+    JOIN product pr ON pr.id = pu.product_id
+    GROUP BY pr.store_id
+),
+visits AS (
+    SELECT store_id, COUNT(*) AS visits
+    FROM store_visit
+    GROUP BY store_id
+)
+SELECT s.name, r.revenue, v.visits
+FROM store s
+LEFT JOIN revenue r ON r.store_id = s.id
+LEFT JOIN visits  v ON v.store_id = s.id;
+</code></pre>
+<p>Здесь <code>revenue</code> и <code>visits</code> содержат по одной строке на магазин, поэтому соединение уже не размножает ничего. <code>COUNT(DISTINCT ...)</code> тоже иногда выручает, но только для подсчёта — для суммы денег он бесполезен.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Привычка на пять секунд</summary><div class="callout-body"><p>Перед <code>JOIN</code> и после него сравни <code>COUNT(*)</code>. Выросло — значит соединение размножило строки, и любые агрегаты поверх него уже врут. Эта проверка занимает несколько секунд и экономит часы разбирательств с расхождениями в отчётах.</p>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/21 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Как база выполняет JOIN</h2><div class="prose"><p><em>Аналогия:</em> соединить два списка можно по-разному: пробежать по первому и для каждой записи искать пару во втором, заранее разложить второй по ящикам, или отсортировать оба и идти навстречу. База выбирает способ сама — но полезно понимать, из чего она выбирает.</p>
+<pre><code class="language-sql">EXPLAIN ANALYZE
+SELECT c.name, pu.purchase_date
+FROM purchase pu
+JOIN customer c ON pu.customer_id = c.id;
+</code></pre>
+<p><code>EXPLAIN</code> показывает план, <code>EXPLAIN ANALYZE</code> — ещё и реально выполняет запрос, показывая фактическое время. В выводе встретится один из трёх способов соединения:</p>
+<ul>
+<li><strong>Nested Loop</strong> — для каждой строки левой таблицы ищется совпадение в правой. Хорошо, когда левая часть маленькая, а справа есть индекс. Плохо, когда обе большие: получается перебор.</li>
+<li><strong>Hash Join</strong> — правая таблица раскладывается в хеш-таблицу в памяти, левая проходится один раз. Обычный выбор для больших таблиц без подходящего индекса.</li>
+<li><strong>Merge Join</strong> — обе стороны сортируются и проходятся навстречу друг другу. Выгоден, когда данные уже отсортированы нужным образом.</li>
+</ul>
+<p>Чего в выводе видеть не хочется: <code>Seq Scan</code> по большой таблице (полный просмотр вместо использования индекса) и сильное расхождение между <code>rows=</code> в плане и <code>actual rows=</code> в результате — это значит, что планировщик ошибся в оценке и, скорее всего, выбрал не тот способ. Причина обычно в устаревшей статистике, лечится командой <code>ANALYZE имя_таблицы</code>.</p>
+<p>Подробно про индексы и чтение планов — в <a href="../lessons/2-8.html">2.8 Индексы</a>. Здесь достаточно запомнить два практических следствия:</p>
+<p><strong>Порядок JOIN в запросе не влияет на результат и почти не влияет на скорость</strong> — планировщик сам решает, в каком порядке соединять. А вот <strong>забытое условие <code>ON</code> влияет катастрофически</strong>: соединение без условия превращается в декартово произведение (§4), и запрос по двум таблицам на миллион строк каждая попытается построить триллион строк. На проде это выглядит как «база внезапно встала», и находится через <code>pg_stat_activity</code> из <a href="../lessons/2-6.html#s-14">2.6 SQL-запросы</a>, §14.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>NULL не соединяется ни с чем</summary><div class="callout-body"><p>Строки, где столбец соединения содержит <code>NULL</code>, не попадут в результат <code>INNER JOIN</code> никогда — по той же причине, по которой <code>NULL = NULL</code> не истинно. Если данные пришли из внешнего источника и в ключевом столбце возможны пропуски, это надо учитывать явно: либо через <code>LEFT JOIN</code>, либо заполняя пропуски заранее.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>17</b>/21 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li><code>UNION</code>/<code>INTERSECT</code>/<code>EXCEPT</code> требуют одинакового числа и типов столбцов; имена итоговых столбцов берутся из первого запроса.</li>
+<li><code>CROSS JOIN</code> — «все со всеми» без условия; <code>INNER JOIN</code> — то же самое, но только «осмысленные» совпадающие пары.</li>
+<li><code>LEFT</code>/<code>RIGHT</code>/<code>FULL JOIN</code> сохраняют непарные строки, заполняя недостающие значения <code>NULL</code> — классический способ найти «то, чего нет» (<code>... WHERE ... IS NULL</code>).</li>
+<li><code>generate_series</code> + <code>LEFT JOIN</code> + <code>IS NULL</code> — стандартный паттерн поиска пропусков в датах.</li>
+<li><code>CTE</code> (<code>WITH ... AS (...)</code>) делает сложные запросы читаемыми, вынося части в именованные блоки.</li>
+<li><code>IN</code> и <code>EXISTS</code> часто взаимозаменяемы по смыслу; <code>EXISTS</code> обычно эффективнее на больших данных.</li>
+<li>self-join — обычный JOIN таблицы саму с собой через разные алиасы.</li>
+<li>Условие про правую таблицу — в <code>ON</code>, иначе <code>LEFT JOIN</code> молча превращается в <code>INNER JOIN</code>. Проверка: сравни число строк с <code>INNER JOIN</code>.</li>
+<li>Соединение «один ко многим» <strong>размножает</strong> строки — <code>SUM</code> после такого JOIN завышен. Агрегируй в CTE до соединения и сверяй <code>COUNT(*)</code> до и после.</li>
+<li>Забытое условие <code>ON</code> даёт декартово произведение — на больших таблицах это выглядит как «база встала».</li>
+<li><code>NULL</code> в столбце соединения не даёт совпадений никогда.</li>
+<li><code>EXPLAIN ANALYZE</code> показывает, каким способом база соединяет: Nested Loop, Hash Join или Merge Join.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>18</b>/21 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Запросы из заданий 1 и 5 можно добавить в <code>shop-api</code> как отчётные эндпоинты (выручка по магазинам, покупатели без покупок) — это делает приложение в <a href="../projects/p1.html">P1</a> живее.</li>
+</ul>
+</div></details><article class="task" data-task="5c0d086438"><h3>Задание 1 — все виды JOIN</h3><p>Выведи пары «покупатель — магазин» по просмотрам витрин через INNER JOIN; покупателей без единой покупки через LEFT JOIN; магазины, где никто ничего не купил, через <code>NOT EXISTS</code>.<br />
+<strong>Проверка:</strong> число строк в каждом запросе объяснимо; вариант через <code>LEFT JOIN ... WHERE ... IS NULL</code> и вариант через <code>NOT EXISTS</code> дают одинаковый результат.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5c0d086438"> Сделала руками и проверила</label></article><article class="task" data-task="baafca7ebf"><h3>Задание 2 — пропуски в датах</h3><p>Через <code>generate_series</code> выведи дни марта, в которые не было ни одной покупки.<br />
+<strong>Проверка:</strong> результат совпадает с ручной проверкой по таблице покупок.</p>
+<label class="task-done"><input type="checkbox" data-task-check="baafca7ebf"> Сделала руками и проверила</label></article><article class="task" data-task="7bdf7b0327"><h3>Задание 3 — операции над множествами</h3><p>Найди магазины, в которых покупали и москвичи, и казанцы (INTERSECT); только москвичи (EXCEPT); объедини названия товаров и магазинов в один список с меткой типа (UNION ALL).<br />
+<strong>Проверка:</strong> объясняешь, когда UNION убрал дубликаты и сколько их было.</p>
+<label class="task-done"><input type="checkbox" data-task-check="7bdf7b0327"> Сделала руками и проверила</label></article><article class="task" data-task="5d51ac99ec"><h3>Задание 4 — CTE вместо вложенных подзапросов</h3><p>Перепиши любой запрос с двумя вложенными подзапросами через <code>WITH</code>.<br />
+<strong>Проверка:</strong> результат совпадает, <code>EXPLAIN</code> обоих вариантов сравнён.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5d51ac99ec"> Сделала руками и проверила</label></article><article class="task" data-task="2e05a21434"><h3>Задание 5 — размножение строк</h3><p>Посчитай выручку по магазинам, присоединив и просмотры витрин, и покупки. Найди, почему сумма завышена, и исправь через предварительную агрегацию в подзапросах.<br />
+<strong>Проверка:</strong> итог совпадает с суммой, посчитанной только по таблице покупок.</p>
+<label class="task-done"><input type="checkbox" data-task-check="2e05a21434"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>19</b>/21 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>20</b>/21 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>21</b>/21 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-6.html">2.6 SQL-запросы</a> — <code>NULL</code>, из-за которого работает ловушка с <code>WHERE</code></li>
+<li><a href="../lessons/2-8.html">2.8 Индексы</a> — индексы и чтение планов</li>
+<li><a href="../lessons/2-9.html">2.9 Агрегация</a> — агрегаты, которые ломает размножение строк</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация PostgreSQL, соединения: https://www.postgresql.org/docs/current/queries-table-expressions.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-6.html">← 2.6 SQL: первые запросы</a><a class="lesson-jump" href="2-8.html">2.8 SQL: представления и индексы →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-7", "number": "2.7", "title": "SQL: соединения и множества", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["5c0d086438", "baafca7ebf", "7bdf7b0327", "5d51ac99ec", "2e05a21434"], "quiz": [{"id": "f33f31623d", "q": "Чем LEFT JOIN отличается от INNER JOIN?", "options": ["LEFT JOIN работает быстрее", "LEFT JOIN сохраняет все строки левой таблицы, подставляя NULL там, где пары нет", "INNER JOIN сохраняет непарные строки", "Ничем"], "answer": [1], "why": "<p>так LEFT JOIN позволяет найти «то, чего нет»: магазины без покупок, покупателей без заказов.<\/p>\n"}, {"id": "469efd9aa2", "q": "Запрос с LEFT JOIN вернул столько же строк, сколько INNER JOIN. Что скорее всего случилось?", "options": ["Так и должно быть всегда", "Условие на правую таблицу стоит в WHERE и отбрасывает строки с NULL", "В таблицах нет NULL", "Перепутан порядок таблиц"], "answer": [1], "why": "<p>условия на правую таблицу ставят в ON, иначе LEFT JOIN фактически превращается в INNER.<\/p>\n"}, {"id": "761ab10deb", "q": "Чем UNION отличается от UNION ALL?", "options": ["UNION убирает дубликаты, UNION ALL — нет и работает быстрее", "UNION ALL убирает дубликаты", "UNION работает только с двумя таблицами", "Ничем"], "answer": [0], "why": "<p>удаление дубликатов требует сортировки или хеширования. Если дубликатов быть не может, берут UNION ALL.<\/p>\n"}, {"id": "9606539f3d", "q": "В таблице 12 покупателей и 8 магазинов. Сколько строк вернёт CROSS JOIN?", "options": ["20", "12", "96", "8"], "answer": [2], "why": "<p>декартово произведение — каждая строка одной таблицы с каждой строкой другой: 12 × 8.<\/p>\n"}, {"id": "28a3321aca", "q": "Почему сумма выручки завышена после JOIN сразу с покупками и просмотрами витрин?", "options": ["SUM неправильно считает decimal", "Соединение «один ко многим» с двумя таблицами размножило строки", "Есть NULL в ценах", "Нужно использовать AVG"], "answer": [1], "why": "<p>каждая покупка повторилась столько раз, сколько было просмотров. Агрегируют в CTE до соединения.<\/p>\n"}, {"id": "fac6043786", "q": "Какой паттерн находит дни без единой покупки?", "options": ["<code>SELECT DISTINCT purchase_date FROM purchase<\/code>", "<code>generate_series<\/code> по датам + LEFT JOIN с покупками + <code>WHERE ... IS NULL<\/code>", "<code>GROUP BY purchase_date HAVING COUNT(*) = 0<\/code>", "<code>NOT IN<\/code> по датам"], "answer": [1], "why": "<p>дней без покупок нет в таблице покупок вовсе, поэтому полный список дат приходится сгенерировать.<\/p>\n"}, {"id": "c4ec131f98", "q": "Какие утверждения про CTE (<code>WITH ... AS<\/code>) верны? Выбери все.", "options": ["Даёт имя промежуточному результату и делает запрос читаемее", "На CTE можно ссылаться в основном запросе как на таблицу", "CTE навсегда сохраняется в базе", "CTE нельзя использовать с JOIN"], "answer": [0, 1], "why": "<p>CTE живёт только в рамках одного запроса. Постоянно сохранённый запрос — это VIEW.<\/p>\n"}], "cards": [{"id": "dea5cd8971", "q": "Чем INNER JOIN отличается от LEFT JOIN?", "a": "<p>INNER возвращает только строки, для которых нашлась пара. LEFT — все строки левой таблицы, а где пары нет, столбцы правой — NULL.<\/p>\n"}, {"id": "94db71be9f", "q": "Почему условие в WHERE может превратить LEFT JOIN в INNER?", "a": "<p>Условие на столбец правой таблицы в WHERE отбрасывает строки, где он NULL, то есть именно непарные. Такие условия ставят в ON.<\/p>\n"}, {"id": "c29c3d9ab9", "q": "Чем UNION отличается от UNION ALL?", "a": "<p>UNION убирает дубликаты (дополнительная сортировка или хеширование), UNION ALL — нет и быстрее. Если дубликатов быть не может — UNION ALL.<\/p>\n"}, {"id": "d1ab1e361e", "q": "Чем IN отличается от EXISTS?", "a": "<p>Логически часто эквивалентны. <code>NOT IN<\/code> опасен с NULL: если подзапрос вернул NULL, результат пуст. <code>NOT EXISTS<\/code> такой проблемы не имеет.<\/p>\n"}, {"id": "7219f55a93", "q": "Какие алгоритмы соединения использует база?", "a": "<p>Nested Loop (малые наборы или индекс на внутренней таблице), Hash Join (большие наборы без индексов, по равенству), Merge Join (отсортированные входы). Выбор виден в EXPLAIN.<\/p>\n"}, {"id": "b0956db92b", "q": "Что такое self-join?", "a": "<p>Соединение таблицы с самой собой через разные псевдонимы — например, найти пары людей из одного города или сотрудника и его руководителя.<\/p>\n"}], "next": "2-8"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

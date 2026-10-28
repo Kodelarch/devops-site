@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P1 — Сервис на одном сервере — DevOps-маршрут</title>
+<meta name="description" content="Курс от Linux до Kubernetes: теория, практика руками, тесты и карточки к собеседованию">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="project">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+<main class="narrow project" data-project="p1"><div class="page-kicker">cd projects/p1</div><h1>P1 — Сервис на одном сервере</h1><div class="prose"><div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">📦</span>Стартовый каркас</div><div class="callout-body"><p>Приложение <code>shop-api</code> с тестами, Dockerfile, Compose и пайплайном — точка старта для этого проекта. Что доделать, написано в его README.</p><p><a class="btn btn-primary" href="../downloads/shop-api-starter.zip" download>Скачать shop-api-starter.zip</a></p></div></div><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Что получится</summary><div class="callout-body"><p>Виртуальная машина с Linux, на которой в Docker Compose работают приложение, PostgreSQL и nginx с HTTPS. Изменения в коде проходят через GitLab CI и сами выкатываются на сервер. Бэкапы базы делаются по расписанию и проверяются восстановлением, простой мониторинг присылает уведомления.</p>
+<p>Это проект уровня «могу самостоятельно поднять и сопровождать сервис». Его можно сделать целиком на своём компьютере в VirtualBox, без облака и без затрат.</p>
+</div></details>
+<p><strong>Уроки:</strong> <a href="../lessons/1-1.html">1.1 Linux</a>, <a href="../lessons/1-2.html">1.2 Сети</a>, <a href="../lessons/1-3.html">1.3 Bash</a>, <a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>, <a href="../lessons/2-11.html">2.11 Продвинутый SQL</a>, <a href="../lessons/3-1.html">3.1 Docker</a>, <a href="../lessons/3-2.html">3.2 CI-CD</a>, <a href="../lessons/4-1.html">4.1 Compose и Swarm</a>.</p>
+<h2>Архитектура</h2>
+<pre><code>Интернет ──443──► nginx (TLS, reverse proxy)
+                     │
+                     ▼
+                 app (Flask/FastAPI, gunicorn) ──► PostgreSQL (том)
+                     
+GitLab CI ──ssh──► сервер: docker compose pull &amp;&amp; up -d
+cron ──► backup.sh ──► pg_dump ──► /backup (7 копий)
+</code></pre>
+<h2>Требования</h2>
+<h3>Сервер</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Ubuntu Server LTS, статический IP, часовой пояс UTC, unattended-upgrades.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Пользователь <code>deploy</code>, вход только по ключу, root запрещён (<a href="../lessons/1-1.html#s-11">1.1 Linux</a>, §11).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> ufw: открыты только 22 (с твоего IP) и 80/443.</li>
+</ul>
+<h3>Приложение</h3>
+<p>Начни со стартового каркаса из папки <code>_starter/shop-api</code> в хранилище (на сайте курса — кнопка «Скачать» вверху этой страницы): первые три пункта в нём уже сделаны, твоя задача — понять, как они устроены, и описать это в README.</p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> API с CRUD-ресурсом, <code>/healthz</code> и <code>/readyz</code>, логи в JSON в stdout (<a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Конфигурация только из переменных окружения, без секретов в коде.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Тесты pytest на бизнес-логику и эндпоинты.</li>
+</ul>
+<h3>Контейнеры</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Dockerfile: slim-база, multi-stage при необходимости, <code>USER</code> не root, <code>HEALTHCHECK</code> (<a href="../lessons/3-1.html">3.1 Docker</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>compose.yaml</code>: app, db, nginx; база недоступна снаружи; <code>depends_on</code> с <code>service_healthy</code>; лимиты памяти; том для данных.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> nginx: редирект HTTP → HTTPS, сертификат (Let's Encrypt при наличии домена, иначе самоподписанный), заголовки безопасности.</li>
+</ul>
+<h3>CI/CD</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Стадии lint → test → build → deploy (<a href="../lessons/3-2.html">3.2 CI-CD</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Образ в Container Registry GitLab с тегом коммита.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Деплой по SSH на сервер только из main, ключ — в защищённой переменной.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Уведомление в Telegram об успехе или провале.</li>
+</ul>
+<h3>Эксплуатация</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>backup.sh</code> по cron: <code>pg_dump -Fc</code>, хранение 7 копий, логирование, <code>set -euo pipefail</code> (<a href="../lessons/1-3.html">1.3 Bash</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Восстановление бэкапа проверено и описано в README пошагово.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> logrotate или ограничение логов Docker (<code>max-size</code>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Простая проверка доступности: cron-скрипт с <code>curl -f /healthz</code> и уведомлением в Telegram при ошибке (полноценный мониторинг будет в P2).</li>
+</ul>
+<h2>Структура репозитория</h2>
+<pre><code>p1-server/
+  app/                 # код приложения и тесты
+  nginx/               # конфиг nginx
+  scripts/
+    backup.sh
+    restore.md
+    healthcheck.sh
+  compose.yaml
+  compose.prod.yaml
+  Dockerfile
+  .gitlab-ci.yml
+  .env.example         # пример переменных, без реальных значений
+  README.md
+</code></pre>
+<h2>Готово, когда</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Клонирование репозитория и <code>docker compose up -d</code> поднимает всё локально за пару минут.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Коммит в main через 5–10 минут работает на сервере без ручных команд.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Сервер переживает перезагрузку: всё поднимается само.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Ты можешь удалить базу и восстановить её из бэкапа по README.</li>
+</ul>
+<h2>Что рассказать на собеседовании</h2>
+<ul>
+<li>Почему nginx перед приложением, а не приложение напрямую на 443.</li>
+<li>Как устроен деплой и что будет, если новая версия не стартует.</li>
+<li>Как ты проверяешь, что бэкапы рабочие.</li>
+<li>Что бы поменяла для продакшена с реальной нагрузкой (переход к P2 и P3).</li>
+</ul>
+
+<details class="callout callout-tip"><summary><span class="callout-icon">💡</span>Связано с</summary><div class="callout-body"><ul>
+<li><a href="../projects/portfolio.html">00_Portfolio</a></li>
+<li><a href="../projects/p2.html">P2-Infra-as-Code</a> — следующий шаг</li>
+</ul>
+</div></details></div></main>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

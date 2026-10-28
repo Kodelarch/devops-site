@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.2 Основы облаков — DevOps-маршрут</title>
+<meta name="description" content="Урок 4.2: Основы облаков">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c4)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-4">← 4. Облако и IaC</a>
+    <div class="sidebar-art"><svg class="art art-cloud" viewBox="0 0 240 140" role="img" aria-label="Облако и серверы" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M84 58 C66 58 62 38 80 34 C82 16 108 12 118 26 C128 10 158 14 160 34 C180 34 184 58 164 58 Z"/>
+<path class="flow" d="M122 60 V76 M122 76 H58 V88 M122 76 V88 M122 76 H186 V88"/>
+<g class="srv v1"><rect x="38" y="90" width="40" height="28" rx="4"/><circle class="led l1" cx="70" cy="104" r="2.4"/><path class="dim" d="M45 104 H60"/></g>
+<g class="srv v2"><rect x="102" y="90" width="40" height="28" rx="4"/><circle class="led l2" cx="134" cy="104" r="2.4"/><path class="dim" d="M109 104 H124"/></g>
+<g class="srv v3"><rect x="166" y="90" width="40" height="28" rx="4"/><circle class="led l3" cx="198" cy="104" r="2.4"/><path class="dim" d="M173 104 H188"/></g>
+<text class="lbl" x="18" y="134">terraform apply</text>
+</svg></div>
+    <div class="lesson-number">lesson 4.2 · infra</div>
+    <h1 class="lesson-title">Основы облаков</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">IaaS, PaaS, SaaS — три уровня готовности</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Регионы и зоны доступности</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Виртуальная машина в облаке</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Сеть: VPC, подсети и группы безопасности</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">IAM: кто и что может</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Объектное хранилище</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Управляемые базы данных</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Балансировщики и автомасштабирование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Модель разделяемой ответственности</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Деньги: как облако разоряет</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Российские облака и особенности рынка</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>До сих пор все машины были свои: виртуалка на ноутбуке, стенд в VirtualBox, узлы кластера из Vagrant. В реальной работе инфраструктура почти всегда живёт в облаке, и это не «те же серверы, только чужие» — меняется сам способ работы: машины создаются и удаляются программно, сеть описывается конфигурацией, а за доступы отвечает отдельная система прав.</p>
+<p>В обзорах вакансий 2026 года облако входит в набор обязательных требований наравне с Linux и Docker: ждут уверенной работы хотя бы с одним провайдером из AWS, GCP, Azure или Yandex Cloud. Опыт с облаком в связке с Kubernetes даёт заметную прибавку к вилке — порядка трети.</p>
+<p>Урок намеренно не привязан к одному провайдеру. Устройство у всех одинаковое, различаются названия и детали интерфейса; освоив одно облако, второе осваиваешь за неделю.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Регион</strong> — географическая область, где у провайдера есть дата-центры (например, «Москва» или «Франкфурт»).</li>
+<li><strong>Зона доступности (AZ)</strong> — отдельный дата-центр внутри региона; их несколько, и они не должны падать одновременно.</li>
+<li><strong>VPC</strong> — своя изолированная виртуальная сеть внутри облака.</li>
+<li><strong>Группа безопасности (security group)</strong> — набор правил файрвола, привязанный к машине, а не к хосту.</li>
+<li><strong>IAM</strong> — система управления доступом: кто, к чему и что именно может делать.</li>
+<li><strong>Объектное хранилище</strong> — хранилище файлов, доступное по HTTP, без файловой системы в привычном смысле.</li>
+<li><strong>Управляемый сервис (managed)</strong> — сервис, где провайдер берёт на себя установку, обновления и резервное копирование.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>IaaS, PaaS, SaaS — три уровня готовности</h2><div class="prose"><p><em>Аналогия:</em> можно арендовать пустой цех и завозить станки самому; можно арендовать цех с уже установленными станками; а можно просто заказывать готовые детали у подрядчика. Разница в том, за что ты отвечаешь.</p>
+<ul>
+<li><strong>IaaS</strong> (инфраструктура как услуга) — тебе дают виртуальную машину, диск и сеть. Всё остальное — операционная система, обновления, приложение, бэкапы — твоё. Пример: обычная виртуалка в облаке.</li>
+<li><strong>PaaS</strong> (платформа как услуга) — провайдер даёт работающий сервис, а ты пользуешься. Пример: управляемый PostgreSQL, где обновления, репликация и резервные копии настроены за тебя.</li>
+<li><strong>SaaS</strong> (софт как услуга) — готовый продукт, которым просто пользуются. Пример: почта, таск-трекер.</li>
+</ul>
+<p>Практический выбор между IaaS и PaaS почти всегда сводится к одному вопросу: <strong>сколько стоит твоё время</strong>. Управляемая база дороже виртуалки с самостоятельно поставленным PostgreSQL примерно вдвое — но в эту разницу входят настроенная репликация, автоматические бэкапы, обновления без простоя и дежурство провайдера. Для команды из двух человек это почти всегда выгодно; для крупной команды с профильными инженерами — не обязательно.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Регионы и зоны доступности</h2><div class="prose"><p><em>Аналогия:</em> регион — город, зона доступности — отдельное здание в этом городе. Пожар в одном здании не должен останавливать работу всей компании.</p>
+<p><strong>Регион</strong> выбирают по трём причинам: близость к пользователям (задержка сети), требования законодательства к хранению данных и цена — она заметно различается между регионами.</p>
+<p><strong>Зона доступности</strong> — физически отдельный дата-центр со своим питанием и охлаждением. Отсюда главное правило проектирования: <strong>машины размещают минимум в двух зонах</strong>. Сервис, все узлы которого стоят в одной зоне, гарантированно ляжет при её отказе, и никакой кластер тут не поможет.</p>
+<p>За передачу данных между зонами обычно берут деньги, а между регионами — больше. Это влияет и на архитектуру, и на счёт.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Виртуальная машина в облаке</h2><div class="prose"><p><em>Аналогия:</em> тот же сервер из урока 1.1, но создаётся за минуту командой и так же быстро уничтожается.</p>
+<pre><code class="language-bash"># Yandex Cloud
+yc compute instance create --name web-1 --zone ru-central1-a \
+  --network-interface subnet-name=private,nat-ip-version=ipv4 \
+  --ssh-key ~/.ssh/id_ed25519.pub
+
+# AWS
+aws ec2 run-instances --image-id ami-xxxx --instance-type t3.micro \
+  --key-name mykey --subnet-id subnet-xxxx
+</code></pre>
+<p>Что важно понимать с самого начала:</p>
+<p><strong>Машина одноразовая.</strong> Это прямое продолжение принципов из <a href="../lessons/2-5.html#s-12">2.5 Бэкенд-сервис</a>, §12: состояние не хранится на самой машине, настройка выполняется автоматически, а не руками. Машину, настроенную вручную по SSH, невозможно воспроизвести — и когда она однажды исчезнет, восстанавливать будет нечего. Автоматизацией настройки занимается <a href="../lessons/4-3.html">4.3 Ansible</a>, созданием самих машин — <a href="../lessons/4-4.html">4.4 Terraform</a>.</p>
+<p><strong>Диск живёт отдельно.</strong> Диск — самостоятельный ресурс, который можно отключить от одной машины и подключить к другой. При удалении машины диск по умолчанию может как удалиться, так и остаться — эту настройку стоит проверять всегда.</p>
+<p><strong>Прерываемые машины</strong> (spot, preemptible) стоят в разы дешевле, но провайдер может забрать их в любой момент с коротким предупреждением. Годятся для сборки в CI, обработки данных и всего, что переживает внезапную остановку. Не годятся для баз и сервисов с состоянием.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Сеть: VPC, подсети и группы безопасности</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do7b-vpc.svg" alt="" /><br />
+<em>Аналогия:</em> VPC — арендованный этаж в бизнес-центре: свои комнаты, своя внутренняя нумерация, а на входе охрана, пускающая только по списку.</p>
+<p><strong>VPC</strong> — изолированная сеть, где ты сам задаёшь диапазон адресов (обычно из приватных диапазонов <a href="../lessons/1-2.html#s-1">1.2 Сети</a>, §1, например <code>10.0.0.0/16</code>). Внутри неё создают <strong>подсети</strong>, по одной на зону доступности.</p>
+<p>Ключевое разделение, которое надо усвоить сразу:</p>
+<ul>
+<li><strong>Публичная подсеть</strong> — ресурсы могут иметь публичный IP и быть доступны из интернета. Сюда ставят балансировщик и NAT-шлюз.</li>
+<li><strong>Приватная подсеть</strong> — публичных адресов нет, снаружи достучаться нельзя вовсе. Сюда ставят приложения и базы данных.</li>
+</ul>
+<p>Приложению всё равно нужно ходить наружу — за обновлениями, к внешним API. Для этого существует <strong>NAT-шлюз</strong>: он выпускает трафик из приватной подсети, но не пропускает входящие соединения. Механика ровно та же, что разбиралась в <a href="../lessons/1-2.html#s-10">1.2 Сети</a>, §10.</p>
+<p><strong>Группы безопасности</strong> — файрвол уровня облака, привязанный к машине. По умолчанию входящий трафик запрещён полностью, и правила добавляют явно. Отличие от <code>ufw</code> из урока 1.2 принципиальное и очень удобное: правило можно задать <strong>не адресом, а ссылкой на другую группу</strong>.</p>
+<pre><code>Группа &quot;db&quot;:   разрешить входящий 5432 от группы &quot;app&quot;
+Группа &quot;app&quot;:  разрешить входящий 8000 от группы &quot;lb&quot;
+Группа &quot;lb&quot;:   разрешить входящий 443 отовсюду
+</code></pre>
+<p>Такая схема не ломается при пересоздании машин и смене их адресов — она описывает роли, а не конкретные хосты.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>База в публичной подсети — типовая утечка</summary><div class="callout-body"><p>Самая частая ошибка новичка в облаке: поднять базу с публичным IP «чтобы удобно подключаться DBeaver'ом». Через несколько часов её найдут сканеры, и если пароль слабый или порт открыт всему интернету, содержимое утечёт. Правило простое: <strong>публичный адрес есть только у того, к чему обращаются снаружи</strong>. Для доступа к приватной базе используют бастионный хост или SSH-туннель (<a href="../lessons/1-2.html#s-12">1.2 Сети</a>, §12).</p>
+</div></details></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>IAM: кто и что может</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do7b-iam.svg" alt="" /><br />
+<em>Аналогия:</em> пропускная система в здании. У каждого сотрудника карта, открывающая ровно те двери, которые нужны для работы, а не все сразу.</p>
+<p>IAM отвечает на три вопроса: <strong>кто</strong> (пользователь, сервисный аккаунт), <strong>что может</strong> (набор разрешений) и <strong>с чем</strong> (конкретный ресурс).</p>
+<p>Практические правила, которые проверяют на собеседовании:</p>
+<p><strong>Корневым аккаунтом не пользуются.</strong> Он нужен для первичной настройки и оплаты. Для работы создают отдельных пользователей с ограниченными правами, а на корневой ставят двухфакторную аутентификацию в первый же день.</p>
+<p><strong>Принцип наименьших привилегий.</strong> Права выдают ровно те, что нужны для задачи. Соблазн написать «разрешить всё на всём» и «потом сузить» велик — и сужают почти никогда.</p>
+<p><strong>Роли вместо ключей.</strong> Это самая важная мысль раздела. Статический ключ доступа — строка, которая не истекает и которую легко потерять: она попадает в код, в историю git, в лог пайплайна. Публичные репозитории сканируются ботами непрерывно, и утёкший ключ находят за минуты — после чего на аккаунте появляются машины для майнинга, оплаченные с твоей карты.</p>
+<p>Альтернатива — <strong>роль, привязанная к ресурсу</strong>: машине или контейнеру назначается роль, и облако само выдаёт ей временные учётные данные. Ключей не существует физически, красть нечего.</p>
+<pre><code class="language-yaml"># было: ключ в переменных окружения
+AWS_ACCESS_KEY_ID: AKIA...
+AWS_SECRET_ACCESS_KEY: wJalr...
+
+# стало: роль на машине, ключей нет вовсе
+</code></pre>
+<p>Если статический ключ всё же нужен (например, для локальной разработки) — он живёт в переменных CI/CD с флагами Masked и Protected (<a href="../lessons/3-2.html#s-11">3.2 CI-CD</a>, §11) и регулярно меняется.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Объектное хранилище</h2><div class="prose"><p><em>Аналогия:</em> не файловая система, а огромная камера хранения: сдаёшь предмет, получаешь номерок, по номерку забираешь. Нельзя «открыть на середине» или «дописать в конец» — только положить целиком и забрать целиком.</p>
+<p>Объектное хранилище (S3 в AWS, Object Storage в Yandex Cloud) — самый используемый сервис после виртуальных машин. Файлы («объекты») складываются в «корзины» (buckets) и доступны по HTTP.</p>
+<pre><code class="language-bash">aws s3 cp report.pdf s3://my-bucket/reports/
+aws s3 ls s3://my-bucket/reports/
+aws s3 sync ./static s3://my-bucket/static/
+</code></pre>
+<p>Где применяется: статика сайтов, загруженные пользователями файлы, резервные копии, артефакты сборок, логи для долгого хранения.</p>
+<p>Три вещи, которые отличают понимание от простого умения загрузить файл:</p>
+<p><strong>Классы хранения.</strong> Данные, к которым обращаются раз в год, хранятся в «холодном» классе в разы дешевле — ценой задержки при извлечении. Для бэкапов из <a href="../lessons/2-11.html#s-15">2.11 Продвинутый SQL</a>, §15 это прямая экономия.</p>
+<p><strong>Правила жизненного цикла.</strong> Автоматическое правило вида «перевести в холодный класс через 30 дней, удалить через 365» — способ не платить за то, что давно не нужно, и не делать этого руками.</p>
+<p><strong>Версионирование.</strong> Включённое версионирование хранит предыдущие версии объектов, защищая от случайного перезаписывания и удаления.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Публичная корзина — регулярная новость об утечке</summary><div class="callout-body"><p>Открыть корзину «на чтение всем» — одно движение в интерфейсе, и его делают, чтобы «быстро проверить». Забывают закрыть примерно всегда. Утечки такого рода — постоянный сюжет в новостях о безопасности, и это не уязвимость облака, а настройка пользователя. Провайдеры добавили несколько предупреждений и блокировок по умолчанию, но обойти их по-прежнему можно.</p>
+</div></details></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Управляемые базы данных</h2><div class="prose"><p><em>Аналогия:</em> разница между «купить автомобиль и обслуживать самому» и «взять в аренду с техобслуживанием».</p>
+<p>Управляемая база (RDS, Managed PostgreSQL) — тот же PostgreSQL, но провайдер берёт на себя установку, обновления, репликацию, автоматические резервные копии и восстановление на момент времени.</p>
+<p>Что при этом остаётся твоим, и это ровно то, чему был посвящён весь блок SQL: схема, запросы, индексы (<a href="../lessons/2-8.html">2.8 Индексы</a>), длительность транзакций (<a href="../lessons/2-10.html">2.10 Транзакции</a>) и права доступа. Управляемая база не спасёт от запроса без индекса и от забытой открытой транзакции.</p>
+<p>Чего лишаешься: доступа к самой машине и части расширений, а также свободы в тонкой настройке параметров. Для большинства задач это приемлемая цена.</p>
+<p>Отдельно стоит знать про <strong>репликацию для чтения</strong>: реплики принимают только <code>SELECT</code> и разгружают основную базу. И помнить вывод из <a href="../lessons/2-11.html#s-15">2.11 Продвинутый SQL</a>, §15: <strong>реплика не является резервной копией</strong>, ошибочный <code>DROP TABLE</code> повторится и на ней.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Балансировщики и автомасштабирование</h2><div class="prose"><p><em>Аналогия:</em> балансировщик — администратор, распределяющий посетителей по свободным окнам. Автомасштабирование — правило «когда очередь длиннее пяти человек, открыть ещё одно окно».</p>
+<p><strong>Балансировщик</strong> принимает трафик и распределяет его по здоровым экземплярам приложения. Ключевое слово — здоровым: он опрашивает эндпоинт проверки состояния и перестаёт слать трафик туда, где проверка не проходит. Это тот самый <code>/readyz</code> из <a href="../lessons/2-5.html#s-11">2.5 Бэкенд-сервис</a>, §11, и теперь понятно, кто его читает.</p>
+<p>Балансировщик же обычно завершает TLS: сертификат живёт на нём, а до приложения трафик идёт незашифрованным внутри приватной сети. Заодно снимается вопрос автопродления сертификатов из <a href="../lessons/1-2.html#s-3">1.2 Сети</a>, §3.</p>
+<p><strong>Автомасштабирование</strong> добавляет и убирает экземпляры по метрике — загрузке процессора, числу запросов, глубине очереди. Две вещи, о которых стоит знать сразу: масштабирование не мгновенно (новая машина поднимается минуты, и всплеск нагрузки она может не успеть отработать), и оно бесполезно для сервисов с состоянием — масштабируется только то, что не хранит данные в себе.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Модель разделяемой ответственности</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do7b-shared-responsibility.svg" alt="" /><br />
+<em>Аналогия:</em> арендодатель отвечает за исправность дома и коммуникаций, арендатор — за то, что происходит внутри квартиры и заперта ли дверь.</p>
+<p>Формулировка, которую стоит запомнить дословно: провайдер отвечает за безопасность <strong>самого облака</strong>, клиент — за безопасность <strong>того, что он в облаке размещает</strong>.</p>
+<p>Что остаётся твоим на любом уровне услуги: <strong>сами данные, права доступа к ним и правильность настроек</strong>. Открытая наружу корзина, база с публичным адресом, ключ в репозитории — это не уязвимости провайдера, а конфигурация клиента.</p>
+<p>Из этого следует практический вывод, который многие узнают поздно: <strong>бэкапы в облаке — по-прежнему твоя задача</strong>. Управляемый сервис делает автоматические копии, но нужно проверить, включены ли они, какой у них срок хранения и разворачивались ли они хоть раз (<a href="../lessons/2-11.html#s-15">2.11 Продвинутый SQL</a>, §15). А для данных на обычной виртуалке провайдер не делает ничего.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Деньги: как облако разоряет</h2><div class="prose"><p><em>Аналогия:</em> счётчик такси, который никто не выключил. Машина стоит, а счётчик идёт.</p>
+<p>Отдельный раздел, потому что для новичка это самая частая болезненная встреча с облаком.</p>
+<p><strong>Считается всё и постоянно.</strong> Остановленная машина не тарифицируется по процессору, но её диск и зарезервированный публичный IP — тарифицируются. Забытый балансировщик, снапшот на терабайт, кластер, поднятый «на посмотреть» в пятницу — всё это работает и в выходные.</p>
+<p><strong>Исходящий трафик стоит денег.</strong> Входящий обычно бесплатен, исходящий — нет, и на отдаче файлов пользователям он легко становится главной статьёй расхода. Трафик между зонами доступности тоже платный.</p>
+<p><strong>Управляемые сервисы удобны и дороги.</strong> Кластер Kubernetes с тремя узлами, управляемой базой и балансировщиком стоит заметных денег в месяц даже без нагрузки.</p>
+<p>Что делать с первого дня:</p>
+<ul>
+<li><strong>Бюджет и оповещения.</strong> Ставится за пять минут, присылает письмо при превышении порога. Это единственная защита от счёта-сюрприза.</li>
+<li><strong>Теги на ресурсы.</strong> Каждый ресурс помечается проектом и владельцем — иначе через полгода никто не знает, что это за машина и можно ли её удалить.</li>
+<li><strong>Уничтожать учебные стенды.</strong> Привычка <code>terraform destroy</code> после занятия (<a href="../lessons/4-4.html">4.4 Terraform</a>) экономит больше, чем любая оптимизация.</li>
+<li><strong>Смотреть отчёт по расходам раз в неделю.</strong> Аномалия видна сразу, если на неё смотреть.</li>
+</ul>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Бесплатные уровни заканчиваются</summary><div class="callout-body"><p>У всех провайдеров есть пробный период или бесплатный уровень, и на нём удобно учиться. Но он ограничен по времени и по объёму, а после исчерпания ресурсы <strong>продолжают работать и тарифицироваться</strong> — без отдельного предупреждения. Календарное напоминание за неделю до окончания пробного периода стоит поставить сразу.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/17 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Российские облака и особенности рынка</h2><div class="prose"><p>Для рынка, где ты ищешь работу, картина разделилась.</p>
+<p><strong>В российских компаниях</strong> — Yandex Cloud, VK Cloud, Selectel, Cloud.ru. Yandex Cloud и VK Cloud заметно присутствуют в продуктовых компаниях и госсекторе как часть импортозамещения. Их устройство повторяет мировые аналоги: те же VPC, группы безопасности, объектное хранилище, управляемые базы, Kubernetes. Многие сервисы намеренно совместимы с API AWS — например, объектное хранилище работает через тот же S3-протокол, и <code>aws s3</code> с ним работает после смены адреса.</p>
+<p><strong>В зарубежных компаниях и на удалёнке</strong> — AWS с большим отрывом, дальше Azure и GCP. Сертификации (AWS Solutions Architect Associate и подобные) там реально смотрят, в российских вакансиях — заметно реже.</p>
+<p>Практический совет: <strong>учиться на том, что доступно, и понимать принципы</strong>. Yandex Cloud удобен для старта — интерфейс на русском, оплата картой РФ, бесплатный грант для начала. Понятия, изученные там, переносятся на AWS почти один в один; в резюме честно пишут, с чем работал, и добавляют, что принципы одинаковы.</p>
+<p>Отдельно про сеть: доступ к AWS и GCP из России может требовать дополнительных усилий, и оплата зарубежной картой — отдельная задача. Это стоит учитывать при планировании обучения, а не обнаруживать на середине курса.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>13</b>/17 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li><strong>IaaS/PaaS/SaaS</strong> — уровни готовности; выбор между виртуалкой и управляемым сервисом сводится к стоимости твоего времени.</li>
+<li>Ресурсы размещают <strong>минимум в двух зонах доступности</strong>, иначе отказ одного дата-центра кладёт сервис целиком.</li>
+<li><strong>Публичный IP — только у того, к чему обращаются снаружи.</strong> Приложения и базы живут в приватной подсети, наружу ходят через NAT-шлюз.</li>
+<li>Группы безопасности задают правила <strong>ссылками на другие группы</strong>, а не адресами — так конфигурация переживает пересоздание машин.</li>
+<li><strong>Роли вместо статических ключей.</strong> Утёкший ключ находят боты за минуты; роль, привязанная к ресурсу, красть нечего.</li>
+<li>Корневым аккаунтом не работают, на него сразу ставят двухфакторную аутентификацию. Права выдают минимально необходимые.</li>
+<li>Объектное хранилище: классы хранения и правила жизненного цикла экономят деньги; публичная корзина — регулярный сюжет новостей об утечках.</li>
+<li>Управляемая база снимает эксплуатацию, но не спасает от плохих запросов и длинных транзакций. <strong>Реплика — не бэкап.</strong></li>
+<li>Балансировщик читает <code>/readyz</code> и обычно завершает TLS. Автомасштабирование не мгновенно и бесполезно для сервисов с состоянием.</li>
+<li>Ответственность разделена: провайдер отвечает за облако, ты — за данные, доступы и настройки. Бэкапы всё равно твоя забота.</li>
+<li><strong>Бюджет с оповещением ставится в первый день.</strong> Считается всё: остановленная машина, зарезервированный IP, исходящий трафик.</li>
+<li>Принципы одинаковы у всех провайдеров; учиться разумно на доступном, в резюме честно указывать конкретный опыт.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>14</b>/17 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–4 — облачная часть <a href="../projects/p2.html">P2</a>: аккаунт с бюджетом, сеть с публичной и приватной подсетями, бастион, хранилище для бэкапов.</li>
+</ul>
+</div></details><article class="task" data-task="6d499b3e4b"><h3>Задание 1 — аккаунт с защитой</h3><p>Заведи аккаунт в Yandex Cloud (или другом облаке), включи двухфакторную аутентификацию, создай отдельного пользователя или сервисный аккаунт для работы, настрой бюджет с оповещением на небольшую сумму.<br />
+<strong>Проверка:</strong> под корневым аккаунтом больше не работаешь; письмо о бюджете приходит при превышении тестового порога.</p>
+<label class="task-done"><input type="checkbox" data-task-check="6d499b3e4b"> Сделала руками и проверила</label></article><article class="task" data-task="152e33d986"><h3>Задание 2 — сеть по правилам</h3><p>Создай VPC с публичной и приватной подсетями, NAT-шлюзом и группами безопасности, ссылающимися друг на друга (lb → app → db).<br />
+<strong>Проверка:</strong> машина в приватной подсети выходит в интернет (<code>curl ifconfig.me</code> показывает адрес NAT), но недоступна снаружи.</p>
+<label class="task-done"><input type="checkbox" data-task-check="152e33d986"> Сделала руками и проверила</label></article><article class="task" data-task="2948e036ff"><h3>Задание 3 — бастион</h3><p>Подключись к машине в приватной подсети через бастионный хост (<code>ssh -J</code>).<br />
+<strong>Проверка:</strong> прямое подключение к приватной машине невозможно, через <code>-J</code> работает.</p>
+<label class="task-done"><input type="checkbox" data-task-check="2948e036ff"> Сделала руками и проверила</label></article><article class="task" data-task="92016c2810"><h3>Задание 4 — объектное хранилище</h3><p>Создай бакет с версионированием и правилом жизненного цикла (удалять старые версии через 30 дней), загрузи бэкап базы через <code>aws s3 cp</code> с endpoint облака.<br />
+<strong>Проверка:</strong> удалённый файл восстанавливается из предыдущей версии; бакет недоступен анонимно.</p>
+<label class="task-done"><input type="checkbox" data-task-check="92016c2810"> Сделала руками и проверила</label></article><article class="task" data-task="cf4588c061"><h3>Задание 5 — уборка</h3><p>Удали всё созданное и через день проверь отчёт по расходам.<br />
+<strong>Проверка:</strong> в отчёте нет начислений за забытые диски, IP-адреса и снапшоты.</p>
+<label class="task-done"><input type="checkbox" data-task-check="cf4588c061"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>15</b>/17 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>16</b>/17 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>17</b>/17 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-2.html">1.2 Сети</a> — подсети, NAT и сертификаты, которые здесь становятся настройками облака</li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — <code>/readyz</code>, который читает балансировщик</li>
+<li><a href="../lessons/4-3.html">4.3 Ansible</a> — автоматическая настройка созданных машин</li>
+<li><a href="../lessons/4-4.html">4.4 Terraform</a> — создание самой инфраструктуры кодом</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — мониторинг облачных ресурсов</li>
+<li><a href="../lessons/2-11.html">2.11 Продвинутый SQL</a> — бэкапы, ответственность за которые остаётся твоей</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Yandex Cloud: https://yandex.cloud/ru/docs</li>
+<li>AWS Well-Architected Framework: https://aws.amazon.com/architecture/well-architected/</li>
+<li>Обзор требований к DevOps-инженеру 2026 (Hexlet): https://ru.hexlet.io/blog/posts/devops-inzhener-2026</li>
+<li>Модель разделяемой ответственности AWS: https://aws.amazon.com/compliance/shared-responsibility-model/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="4-1.html">← 4.1 Docker Compose и Swarm</a><a class="lesson-jump" href="4-3.html">4.3 Ansible: настройка серверов кодом →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "4-2", "number": "4.2", "title": "Основы облаков", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["6d499b3e4b", "152e33d986", "2948e036ff", "92016c2810", "cf4588c061"], "quiz": [{"id": "be4767503f", "q": "Где должна жить база данных в облачной сети?", "options": ["В публичной подсети с белым IP", "В приватной подсети без публичного адреса", "На машине с балансировщиком", "В объектном хранилище"], "answer": [1], "why": "<p>публичный адрес — только у того, к чему обращаются снаружи. Базы с белым IP находят сканеры за часы.<\/p>\n"}, {"id": "4df67417a1", "q": "Зачем размещать сервис минимум в двух зонах доступности?", "options": ["Так дешевле", "Чтобы отказ одного дата-центра не положил сервис целиком", "Так быстрее отвечает DNS", "Это требование облака"], "answer": [1], "why": "<p>зона — отдельный дата-центр со своим питанием. Все узлы в одной зоне упадут вместе с ней.<\/p>\n"}, {"id": "1bde0e42d4", "q": "Почему роли лучше статических ключей доступа?", "options": ["Роли дешевле", "Роль выдаёт временные учётные данные — нет постоянного ключа, который может утечь", "Ключи не работают в облаке", "Роли быстрее"], "answer": [1], "why": "<p>утёкший ключ находят боты за минуты, а у роли красть нечего.<\/p>\n"}, {"id": "38ac101060", "q": "За что облако берёт деньги, даже если машина остановлена? Выбери все.", "options": ["Диск", "Зарезервированный публичный IP", "Процессорное время остановленной машины", "Снапшоты"], "answer": [0, 1, 3], "why": "<p>остановленная машина не платит за процессор, но всё, что она занимает, продолжает тарифицироваться.<\/p>\n"}, {"id": "ab1a675eef", "q": "Что делает NAT-шлюз?", "options": ["Открывает доступ к приватным машинам из интернета", "Позволяет машинам из приватной подсети ходить в интернет, не открывая их для входящих соединений", "Шифрует трафик", "Раздаёт IP-адреса"], "answer": [1], "why": "<p>так приложения получают обновления и обращаются к внешним API, оставаясь недоступными снаружи.<\/p>\n"}, {"id": "6b183c4623", "q": "Кто отвечает за то, что бакет с данными открыт всему интернету?", "options": ["Облачный провайдер", "Клиент: это его настройка", "Никто", "Тот, кто нашёл бакет"], "answer": [1], "why": "<p>провайдер отвечает за безопасность самого облака, клиент — за данные, доступы и настройки.<\/p>\n"}, {"id": "2e24e69532", "q": "Что настроить в облаке в первый же день?", "options": ["Автомасштабирование", "Бюджет с оповещением о превышении", "Kubernetes", "Второй регион"], "answer": [1], "why": "<p>это единственная защита от счёта-сюрприза за забытые ресурсы.<\/p>\n"}], "cards": [{"id": "be6fafdb4e", "q": "Чем IaaS отличается от PaaS и SaaS?", "a": "<p>IaaS — виртуальные машины, сеть и диски, остальное твоё. PaaS — готовая платформа (управляемая база, Kubernetes), провайдер отвечает за её работу. SaaS — готовый продукт для пользователей.<\/p>\n"}, {"id": "1be1c212f6", "q": "Что такое регион и зона доступности?", "a": "<p>Регион — географическая область с несколькими дата-центрами. Зона доступности — отдельный дата-центр со своим питанием. Отказоустойчивые сервисы размещают минимум в двух зонах.<\/p>\n"}, {"id": "8e2aeb9253", "q": "Чем публичная подсеть отличается от приватной?", "a": "<p>У ресурсов публичной подсети могут быть публичные адреса и доступ из интернета. Приватная доступна только изнутри VPC; наружу её ресурсы выходят через NAT-шлюз.<\/p>\n"}, {"id": "d0c129f29f", "q": "Чем security group отличается от network ACL?", "a": "<p>Security group привязана к ресурсу, хранит состояние соединений (ответный трафик разрешён автоматически), может ссылаться на другие группы. Network ACL работает на уровне подсети и без состояния.<\/p>\n"}, {"id": "b514c5d726", "q": "Почему роли лучше статических ключей?", "a": "<p>Ключ не истекает и легко утекает через код, логи и историю git. Роль, привязанная к ресурсу, выдаёт временные учётные данные — красть нечего.<\/p>\n"}, {"id": "a77f77252d", "q": "Что такое модель разделяемой ответственности?", "a": "<p>Провайдер отвечает за безопасность самого облака (железо, сеть, гипервизор), клиент — за то, что в нём размещает: данные, доступы, настройки, обновления ОС на своих машинах.<\/p>\n"}, {"id": "c0ba203252", "q": "За что облако берёт деньги, даже если машина остановлена?", "a": "<p>За диски, снапшоты, зарезервированные публичные адреса, балансировщики, исходящий трафик и управляемые сервисы.<\/p>\n"}], "next": "4-3"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

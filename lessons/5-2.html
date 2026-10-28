@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5.2 Kubernetes в работе: кластер, HTTPS, хранилище — DevOps-маршрут</title>
+<meta name="description" content="Урок 5.2: Kubernetes в работе: кластер, HTTPS, хранилище">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c5)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-5">← 5. Kubernetes и GitOps</a>
+    <div class="sidebar-art"><svg class="art art-k8s" viewBox="0 0 240 140" role="img" aria-label="Кластер Kubernetes" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g class="spin"><polygon points="120.0,26.0 151.3,41.1 159.0,74.9 137.4,102.0 102.6,102.0 81.0,74.9 88.7,41.1"/><path class="dim" d="M120 66 L120.0,32.0 M120 66 L146.6,44.8 M120 66 L153.1,73.6 M120 66 L134.8,96.6 M120 66 L105.2,96.6 M120 66 L86.9,73.6 M120 66 L93.4,44.8"/></g>
+<circle cx="120" cy="66" r="9"/>
+<rect class="pod d0" x="149.3" y="11.5" width="12" height="12" rx="3"/><rect class="pod d1" x="171.1" y="78.5" width="12" height="12" rx="3"/><rect class="pod d2" x="114.0" y="120.0" width="12" height="12" rx="3"/><rect class="pod d3" x="56.9" y="78.5" width="12" height="12" rx="3"/><rect class="pod d4" x="78.7" y="11.5" width="12" height="12" rx="3"/>
+<text class="lbl" x="18" y="134">kubectl get pods</text>
+</svg></div>
+    <div class="lesson-number">lesson 5.2 · k8s</div>
+    <h1 class="lesson-title">Kubernetes в работе: кластер, HTTPS, хранилище</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">k3s: тот же Kubernetes, но компактнее</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Master и worker: топология кластера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Подключение worker-узлов к кластеру</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Встроенный Traefik или свой Ingress Controller</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Gateway API: преемник Ingress</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">cert-manager и wildcard-сертификат</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Ingress: связываем домен, контроллер и сертификат воедино</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Persistent Volume: хранилище, которое переживёт под</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Смоук-тесты на живом кластере</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Prometheus Operator: декларативный мониторинг</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">StatefulSet: когда поды не взаимозаменяемы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">StorageClass: хранилище, которое создаётся само</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">DaemonSet, Job и CronJob: остальные типы нагрузок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">RBAC: права доступа к API кластера</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">NetworkPolicy: сеть внутри кластера по умолчанию открыта</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Автомасштабирование и PodDisruptionBudget</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">Размещение подов: nodeSelector, affinity и taints</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В уроке 5.1 весь кластер жил на одной машине внутри minikube — удобно для обучения, но далеко от реальности. В этом уроке мы собираем настоящий многоузловой кластер k3s на нескольких VM, выпускаем ему настоящий HTTPS-сертификат, даём базе данных постоянное хранилище, которое переживёт перезапуск пода, и подключаем автоматический сбор метрик — именно так выглядит production-кластер, а не учебный стенд.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>k3s</strong> — облегчённый дистрибутив Kubernetes, тот же самый API, но компактнее и проще в установке.</li>
+<li><strong>Master (control plane) / worker node</strong> — управляющий узел кластера и рабочие узлы, на которых реально исполняются поды.</li>
+<li><strong>Ingress Controller</strong> — компонент, который принимает внешний HTTP(S)-трафик и распределяет его по сервисам внутри кластера согласно правилам.</li>
+<li><strong>cert-manager</strong> — инструмент, который сам выпускает и продлевает TLS-сертификаты внутри кластера.</li>
+<li><strong>PV / PVC (Persistent Volume / Persistent Volume Claim)</strong> — постоянное хранилище данных, которое не исчезает вместе с подом.</li>
+<li><strong>Prometheus Operator</strong> — надстройка над Prometheus, позволяющая управлять мониторингом декларативно, через манифесты, а не вручную.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>k3s: тот же Kubernetes, но компактнее</h2><div class="prose"><p><em>Аналогия:</em> полноценный Kubernetes — как огромный портовый кран, для установки и обслуживания которого нужна целая бригада. k3s — компактный складной кран: поднимает по тем же законам физики, но помещается на обычный грузовик и собирается почти без посторонней помощи.</p>
+<p>k3s — это официальный облегчённый дистрибутив Kubernetes от Rancher: тот же самый API и те же манифесты, что и в «большом» Kubernetes, но упакованные в один бинарник, с более лёгкими внутренними компонентами (например, SQLite вместо etcd по умолчанию для небольших кластеров). Именно поэтому его часто выбирают для обучения, edge-устройств и небольших продакшн-кластеров — он не «игрушечный», а полностью совместимый с реальным Kubernetes.</p>
+<p><img loading="lazy" src="../assets/diagrams/do11-k3svsk8s.webp" alt="" /></p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Master и worker: топология кластера</h2><div class="prose"><p><em>Аналогия:</em> master — диспетчерская, которая знает, что происходит на всей стройке, кому какую задачу дать и как всё это учитывается; worker — сами строительные площадки, где реально кладут кирпичи (запускаются поды).</p>
+<pre><code class="language-bash"># на master-узле: поднимаем control plane,
+# сразу отключаем встроенный Ingress Controller
+curl -sfL https://get.k3s.io | sh -s - server --disable=traefik
+
+# токен для присоединения worker-узлов
+cat /var/lib/rancher/k3s/server/node-token
+</code></pre>
+<p>Master отвечает за «мозг» кластера: API-сервер, планировщик (какой под на какой узел поставить), контроллеры, отслеживающие состояние. Worker-узлы физически исполняют поды — именно на них расходуются CPU и память приложения.</p>
+<p><img loading="lazy" src="../assets/diagrams/do11-topology.webp" alt="" /></p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Подключение worker-узлов к кластеру</h2><div class="prose"><p><em>Аналогия:</em> выдать новому сотруднику пропуск (токен) и адрес головного офиса (адрес мастера), чтобы он мог явиться на смену и его сразу узнали как своего.</p>
+<pre><code class="language-bash">export NODE_TOKEN=&lt;токен_с_мастера&gt;
+
+curl -sfL https://get.k3s.io | \
+  K3S_URL=https://&lt;ip_мастера&gt;:6443 \
+  K3S_TOKEN=$NODE_TOKEN sh -s - agent
+</code></pre>
+<pre><code class="language-bash"># проверяем с мастера, что узел присоединился
+kubectl get nodes
+</code></pre>
+<p>Каждый worker-узел запускается с адресом мастера (<code>K3S_URL</code>/<code>--server</code>) и токеном (<code>K3S_TOKEN</code>/<code>--token</code>) — это доказательство, что узел действительно имеет право присоединиться именно к этому кластеру, а не к случайному чужому.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Встроенный Traefik или свой Ingress Controller</h2><div class="prose"><p><em>Аналогия:</em> k3s «из коробки» уже приходит со своей мебелью на ресепшене (Traefik) — если хочешь поставить свою, сначала нужно явно вынести старую, а не пытаться поставить новую поверх.</p>
+<p>k3s по умолчанию устанавливает Traefik в роли Ingress Controller — для учебного кластера и для небольших боевых его вполне достаточно, и в этом курсе мы его оставляем. Traefik понимает и классические объекты Ingress, и новый <strong>Gateway API</strong> (§5).</p>
+<p>Годами самым популярным контроллером был <strong>ingress-nginx</strong>, и в статьях и чужих кластерах он встречается на каждом шагу. Но в ноябре 2025 года Kubernetes объявил о его выводе из эксплуатации: с марта 2026 года проект больше не выпускает обновлений, в том числе исправлений уязвимостей. Уже работающие установки продолжают работать, но <strong>новые кластеры на нём не строят</strong>, а старые постепенно переводят на другие контроллеры (Traefik, HAProxy, NGINX Gateway Fabric, Envoy Gateway и др.) и на Gateway API. Выбор контроллера — не вопрос «правильно или нет»: важно, чтобы он поддерживался и был одинаковым во всех окружениях команды. Если всё же ставишь другой контроллер, встроенный Traefik отключают флагом <code>--disable=traefik</code>, чтобы два контроллера не спорили за один трафик.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Gateway API: преемник Ingress</h2><div class="prose"><p><em>Аналогия:</em> Ingress — одна общая вывеска на входе, которую правят все подряд. Gateway API разделяет роли: администратор кластера отвечает за сам вход (Gateway), а команда приложения — только за свои маршруты (HTTPRoute).</p>
+<p>Ingress умеет немногое, и всё сверх простого роутинга контроллеры добавляли своими аннотациями — у каждого своими. <strong>Gateway API</strong> — стандартная замена: те же возможности описаны полями, одинаковыми для всех контроллеров. Включаем его во встроенном Traefik:</p>
+<pre><code class="language-bash"># CRD Gateway API (в k3s их нет по умолчанию)
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+</code></pre>
+<pre><code class="language-yaml"># /var/lib/rancher/k3s/server/manifests/traefik-config.yaml — k3s подхватит сам
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+</code></pre>
+<p>Маршрут приложения тогда выглядит так:</p>
+<pre><code class="language-yaml">apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: shop
+spec:
+  parentRefs:
+    - name: traefik-gateway      # Gateway, который создал чарт Traefik
+      namespace: kube-system
+  hostnames: [&quot;shop.example.com&quot;]
+  rules:
+    - backendRefs:
+        - name: shop-api
+          port: 80
+</code></pre>
+<pre><code class="language-bash">kubectl get gateway -A        # вход и его адрес
+kubectl get httproute         # маршруты и их статус Accepted
+</code></pre>
+<p>Ingress никуда не делся и в курсе встречается дальше — его понимают все контроллеры, и его ещё много в живых кластерах. Но новые проекты всё чаще начинают сразу с Gateway API.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>cert-manager и wildcard-сертификат</h2><div class="prose"><p><em>Аналогия:</em> cert-manager — это автоматическая нотариальная контора внутри кластера: сама запрашивает печать (сертификат) у удостоверяющего центра, сама следит за сроком годности и сама переоформляет его заранее, без напоминаний со стороны человека.</p>
+<pre><code class="language-yaml">apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-wildcard
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: you@example.com
+    privateKeySecretRef:
+      name: letsencrypt-wildcard-key
+    solvers:
+      - dns01:
+          cloudflare:
+            email: you@example.com
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
+</code></pre>
+<p>Почему именно <code>dns01</code>, а не более простой <code>http01</code>: <code>http01</code>-проверка доказывает владение доменом, размещая специальный файл по определённому URL на этом домене (<code>http://домен/.well-known/acme-challenge/...</code>) — но для wildcard-имени вроде <code>*.example.com</code> нет одного конкретного URL, который покрывал бы сразу все возможные поддомены. <code>dns01</code>-проверка вместо этого требует создать специальную TXT-запись в DNS домена — а раз DNS настраивается на уровне всего домена целиком, одна такая запись подтверждает владение сразу всеми поддоменами. Поэтому wildcard-сертификаты технически возможны только через <code>dns01</code>, и cert-manager для этого нужен доступ к API DNS-провайдера (в примере — Cloudflare) через токен, сохранённый в отдельном Secret.</p>
+<pre><code class="language-yaml">apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-cert
+spec:
+  secretName: wildcard-tls
+  issuerRef:
+    name: letsencrypt-wildcard
+    kind: ClusterIssuer
+  dnsNames:
+    - &quot;*.example.com&quot;
+</code></pre>
+<p><code>ClusterIssuer</code> описывает, у кого именно запрашивать сертификаты (например, у Let's Encrypt) и как подтверждать владение доменом. <code>Certificate</code> с wildcard-именем <code>*.example.com</code> покрывает сразу любое количество поддоменов одним сертификатом — не нужно заказывать отдельный сертификат для каждого нового поддомена вручную.</p>
+<p><img loading="lazy" src="../assets/diagrams/do11-certmanager.webp" alt="" /></p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ingress: связываем домен, контроллер и сертификат воедино</h2><div class="prose"><p><em>Аналогия:</em> если Ingress Controller — это сам ресепшен, а сертификат — печать в паспортном столе, то ресурс <code>Ingress</code> — это подписанный пропуск: «для этого конкретного адреса обращаться на эту стойку, предъявлять вот эту печать».</p>
+<pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-wildcard
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - app.example.com
+      secretName: wildcard-tls
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shop-api
+                port:
+                  number: 80
+</code></pre>
+<p>Ресурс <code>Ingress</code> описывает конкретное правило маршрутизации: на какой домен (<code>host</code>), через какой контроллер (<code>ingressClassName</code>), с каким сертификатом (<code>tls.secretName</code>) и в какой внутренний <code>Service</code> направлять трафик. Аннотация <code>cert-manager.io/cluster-issuer</code> — сигнал cert-manager'у автоматически выпустить и подставить сюда сертификат для указанного домена.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Persistent Volume: хранилище, которое переживёт под</h2><div class="prose"><p><em>Аналогия:</em> собственная файловая система пода — как гостиничный номер: при выезде гостя всё убирают подчистую. PV — это отдельно арендованная камера хранения: она никуда не девается, даже когда номер (под) уже сдан следующему постояльцу.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/postgres
+</code></pre>
+<pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+</code></pre>
+<p><code>PersistentVolume</code> (PV) — это сам физический ресурс хранилища, доступный кластеру. <code>PersistentVolumeClaim</code> (PVC) — «заявка» пода на хранилище нужного объёма и типа доступа; Kubernetes сам находит подходящий PV и связывает его с этой заявкой. Под с PostgreSQL монтирует именно PVC, а не PV напрямую — поэтому даже при пересоздании пода данные базы остаются на месте.</p>
+<p><img loading="lazy" src="../assets/diagrams/do11-pv.webp" alt="" /></p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Осторожно с hostPath в многоузловом кластере</summary><div class="callout-body"><p><code>hostPath</code> в примере выше указывает на папку <code>/data/postgres</code> на конкретном физическом узле — но это папка именно на том узле, где PV был создан, а не «где-то в кластере вообще». Если под с PostgreSQL пересоздастся и Kubernetes решит запустить его на другом worker-узле (а у нас их в этом уроке два), новый под увидит пустую папку на новом узле — старые данные с прежнего узла останутся физически недоступны. <code>hostPath</code> годится только для однонодовых учебных стендов вроде minikube из урока 5.1. В реальном многоузловом кластере вместо этого используют либо <code>nodeAffinity</code> (жёстко прибивают под к тому же узлу, где лежат данные — компромиссный вариант), либо, что правильнее, <strong>StorageClass</strong> с динамическим провижининг — механизм, при котором PV создаётся автоматически на настоящем сетевом хранилище (например, облачном диске или NFS), не привязанном к конкретной физической машине, и переживает переезд пода на любой другой узел кластера.</p>
+</div></details></div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Смоук-тесты на живом кластере</h2><div class="prose"><p><em>Аналогия:</em> когда завод построен и запущен, перед сдачей заказчику по нему проходит автоматизированный контролёр с чек-листом — стучится в каждую дверь и проверяет ответ, а не полагается на то, что «должно же работать».</p>
+<p>Смоук-тест (smoke test) — короткая проверка сразу после выкатки: «включили — не задымилось». Несколько запросов к главным эндпоинтам через настоящий домен:</p>
+<pre><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+BASE=https://shop.example.com
+
+curl -fsS &quot;$BASE/healthz&quot; &gt; /dev/null
+curl -fsS &quot;$BASE/readyz&quot;  &gt; /dev/null
+curl -fsS &quot;$BASE/products/1&quot; | grep -q '&quot;title&quot;'
+echo &quot;smoke OK&quot;
+</code></pre>
+<p><code>curl -f</code> возвращает ошибку при ответе 4xx/5xx, <code>-sS</code> убирает индикатор загрузки, но оставляет сообщения об ошибках. Если любая проверка не прошла, скрипт завершится с ненулевым кодом, и пайплайн остановится до того, как изменения поедут дальше. Для набора побольше пишут тесты на pytest с библиотекой <code>requests</code> или используют коллекции Postman, которые в CI запускает утилита <code>newman</code>.</p>
+<p>Смысл не в отдельных проверках, а в том, что они проходят <strong>весь путь целиком</strong>: домен → HTTPS → Ingress → Service → под → база данных. Каждый компонент мог пройти свои тесты по отдельности, а вместе не работать из-за одной опечатки в имени Service.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Prometheus Operator: декларативный мониторинг</h2><div class="prose"><p><em>Аналогия:</em> обычный Prometheus нужно вручную донастраивать каждый раз, когда появляется новый сервис для наблюдения — как будто самому каждый раз перепрокладывать провода. Prometheus Operator — подрядчик, который сам следит за проводкой: ты просто описываешь декларативно, что нужно мониторить, а он сам приводит конфигурацию Prometheus в нужный вид.</p>
+<pre><code class="language-bash">kubectl create namespace monitoring
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install kube-prometheus prometheus-community/kube-prometheus-stack -n monitoring
+
+kubectl get pods -n monitoring
+</code></pre>
+<p>Prometheus Operator добавляет в Kubernetes собственные типы объектов (CRD), например <code>ServiceMonitor</code> — вместо того, чтобы вручную редактировать конфигурационный файл Prometheus при появлении нового сервиса, достаточно создать манифест <code>ServiceMonitor</code>, и Prometheus Operator сам обновит конфигурацию сбора метрик. Команда <code>kubectl get pods -n monitoring</code> показывает, что весь стек (сам Prometheus, Alertmanager, Grafana, служебные компоненты Operator'а) поднялся и работает в своём отдельном namespace — том же самом принципе изоляции, что и в уроке 4.5, только здесь весь стек ставится не вручную, а через готовый Helm-чарт.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>StatefulSet: когда поды не взаимозаменяемы</h2><div class="prose"><p><em>Аналогия:</em> Deployment управляет сменой грузчиков — любой может выйти вместо любого, важно только их количество. StatefulSet управляет бригадой, где у каждого свой именной шкафчик с инструментом: третий не может просто выйти вместо первого, потому что инструмент лежит не у него.</p>
+<p>В конце 5.1 мы упёрлись в вопрос: почему базу данных нельзя развернуть обычным Deployment. Ответ — в трёх свойствах, которых у Deployment нет.</p>
+<p><img loading="lazy" src="../assets/diagrams/do11-statefulset.svg" alt="" /></p>
+<p>Deployment создаёт взаимозаменяемые поды со случайными суффиксами в именах. Для приложения без состояния это ровно то, что нужно: любой под обслужит любой запрос. Но у базы данных состояние есть, и оно лежит на диске.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pg
+spec:
+  serviceName: pg-headless   # обязательное поле: даёт подам DNS-имена
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pg
+  template:
+    metadata:
+      labels:
+        app: pg
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:      # свой PVC для каждого пода, а не один на всех
+    - metadata:
+        name: data
+      spec:
+        accessModes: [&quot;ReadWriteOnce&quot;]
+        resources:
+          requests:
+            storage: 10Gi
+</code></pre>
+<p>Ключевое отличие — <code>volumeClaimTemplates</code>. Это не «один PVC на весь набор», а шаблон: Kubernetes создаст <code>data-pg-0</code>, <code>data-pg-1</code>, <code>data-pg-2</code> — по отдельному тому на каждый под. При пересоздании пода <code>pg-1</code> он получит обратно <strong>свой</strong> том <code>data-pg-1</code>, а не чей-то чужой.</p>
+<p>Три свойства, ради которых существует StatefulSet:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Свойство</th>
+<th>Deployment</th>
+<th>StatefulSet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Имена подов</td>
+<td>случайные, меняются</td>
+<td><code>имя-0</code>, <code>имя-1</code>, … навсегда</td>
+</tr>
+<tr>
+<td>Порядок запуска</td>
+<td>все разом</td>
+<td>строго по одному: 0, затем 1, затем 2</td>
+</tr>
+<tr>
+<td>Порядок удаления</td>
+<td>в любом</td>
+<td>обратный: сначала последний</td>
+</tr>
+<tr>
+<td>Хранилище</td>
+<td>общее или временное</td>
+<td>свой PVC у каждого пода</td>
+</tr>
+<tr>
+<td>Адресация пода</td>
+<td>невозможна</td>
+<td><code>pg-0.pg-headless.default.svc.cluster.local</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Поле <code>serviceName</code> требует так называемый <strong>headless-сервис</strong> — Service с <code>clusterIP: None</code>. Обычный Service выдаёт один виртуальный адрес и балансирует запросы между подами; headless вместо этого возвращает в DNS адреса всех подов по отдельности, что и позволяет обратиться именно к <code>pg-0</code>. Это важно для кластеров с репликацией: реплики должны знать, кто ведущий, а без стабильных имён договориться об этом невозможно.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>StatefulSet — не «база данных под ключ»</summary><div class="callout-body"><p>Он даёт только инфраструктурные гарантии: имя, диск, порядок. Настройку репликации, выбор ведущего узла, резервное копирование и восстановление он не делает — этим занимается либо оператор базы данных (для PostgreSQL это CloudNativePG или Zalando Postgres Operator), либо вы вручную. На собеседовании вопрос «как вы запускали базу в Kubernetes» часто продолжается вопросом «а кто у вас делал бэкапы» — и StatefulSet на него не отвечает.</p>
+<p>Отдельно стоит знать честный ответ, который ценится выше: <strong>в проде базу часто вообще не запускают в Kubernetes</strong>, а берут управляемую услугу у облачного провайдера. Причина в том, что кластер даёт готовые ответы на отказ приложения, но не на отказ базы — репликация, резервные копии и восстановление на момент времени остаются вашей заботой в любом случае.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>StorageClass: хранилище, которое создаётся само</h2><div class="prose"><p><em>Аналогия:</em> PV вручную — это как заранее построить сто гаражей и надеяться, что они подойдут будущим машинам по размеру. StorageClass — договорённость со строительной фирмой: гараж нужного размера появится тогда, когда приедет машина.</p>
+<p>В §8 мы создавали <code>PersistentVolume</code> руками. В настоящем кластере так не делают: на каждую новую заявку админ создавал бы том вручную. Вместо этого объявляют <strong>StorageClass</strong> — описание того, где и как создавать тома автоматически.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes: [&quot;ReadWriteOnce&quot;]
+  storageClassName: fast-ssd    # имя класса вместо ручного поиска PV
+  resources:
+    requests:
+      storage: 10Gi
+</code></pre>
+<p>Указали класс — и PV создаётся сам, под нужный объём, на настоящем сетевом хранилище. Это и называется <strong>динамическим провижинингом</strong>. В k3s из этого урока класс по умолчанию уже есть (<code>local-path</code>), в облаке им будет облачный диск.</p>
+<p>Три режима доступа, которые надо различать:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Расшифровка</th>
+<th>Что означает</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ReadWriteOnce</code></td>
+<td>RWO</td>
+<td>Монтируется на запись только с одного узла. Самый частый и почти всё, что есть у блочных дисков</td>
+</tr>
+<tr>
+<td><code>ReadOnlyMany</code></td>
+<td>ROX</td>
+<td>Много узлов, только чтение</td>
+</tr>
+<tr>
+<td><code>ReadWriteMany</code></td>
+<td>RWX</td>
+<td>Много узлов на запись. Нужна сетевая ФС — NFS, CephFS. Обычный облачный диск так не умеет</td>
+</tr>
+</tbody>
+</table></div>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Ловушка reclaimPolicy</summary><div class="callout-body"><p>У PV есть параметр <code>persistentVolumeReclaimPolicy</code>. Значение <code>Delete</code> — том исчезает вместе с PVC; <code>Retain</code> — остаётся. У большинства StorageClass по умолчанию стоит <strong><code>Delete</code></strong>.</p>
+<p>Практический смысл: <code>kubectl delete pvc postgres-pvc</code> в проде может означать безвозвратное удаление данных базы. Для томов с данными класс с политикой <code>Retain</code> выбирают осознанно — тогда после удаления заявки диск остаётся и его можно подключить обратно.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>DaemonSet, Job и CronJob: остальные типы нагрузок</h2><div class="prose"><p><em>Аналогия:</em> Deployment — постоянный штат нужной численности. DaemonSet — вахтёр на каждом этаже, ровно по одному. Job — подрядчик, который приходит, делает работу и уходит. CronJob — тот же подрядчик по расписанию.</p>
+<p><strong>DaemonSet</strong> запускает ровно по одному поду на каждом узле кластера — и автоматически добавляет под на новый узел, когда тот присоединяется. Так разворачивают всё, что должно наблюдать за самим узлом: сборщик логов, <code>node-exporter</code> из урока 4.5, сетевой агент.</p>
+<p><strong>Job</strong> выполняет задачу до успешного завершения и останавливается. Именно им запускают миграции базы данных перед выкладкой новой версии — Deployment для этого не подходит, потому что он перезапускал бы завершившийся под бесконечно.</p>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+spec:
+  backoffLimit: 3            # сколько раз повторить при неудаче
+  template:
+    spec:
+      restartPolicy: Never   # обязательно: иначе Job не сможет завершиться
+      containers:
+        - name: migrate
+          image: myapp:1.4.2
+          command: [&quot;alembic&quot;, &quot;upgrade&quot;, &quot;head&quot;]
+</code></pre>
+<p><strong>CronJob</strong> создаёт Job по расписанию в формате crontab — том же самом, что был в уроке 1.1. Резервные копии, отчёты, очистка старых записей.</p>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pg-backup
+spec:
+  schedule: &quot;0 3 * * *&quot;              # каждый день в 03:00
+  concurrencyPolicy: Forbid          # не запускать, если прошлый ещё идёт
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: dump
+              image: postgres:17
+              command: [&quot;sh&quot;, &quot;-c&quot;, &quot;pg_dump -h pg-0.pg-headless &gt; /backup/$(date +%F).sql&quot;]
+</code></pre>
+<p>Поле <code>concurrencyPolicy: Forbid</code> — не украшение. Со значением по умолчанию (<code>Allow</code>) резервное копирование, которое длится дольше суток, запустится вторым экземпляром поверх первого; два <code>pg_dump</code> начнут писать в один файл, и ни одна копия не окажется целой.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>RBAC: права доступа к API кластера</h2><div class="prose"><p><em>Аналогия:</em> права в Kubernetes выдаются не человеку напрямую, а через приказ о назначении. Должностная инструкция (Role) сама по себе никого ни к чему не допускает — она начинает действовать только после приказа (RoleBinding), где указано, кого именно на неё назначили.</p>
+<p><img loading="lazy" src="../assets/diagrams/do11-rbac.svg" alt="" /></p>
+<p>Каждый под работает от имени какой-то учётной записи — <code>ServiceAccount</code>. Если её не указать, под получит учётку <code>default</code> своего пространства имён. Токен этой учётки монтируется внутрь контейнера, и через него под может обращаться к API кластера.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-reader
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role                     # действует внутри одного namespace
+metadata:
+  name: configmap-reader
+rules:
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;configmaps&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding              # без этого объекта роль не выдана никому
+metadata:
+  name: app-reads-configmaps
+subjects:
+  - kind: ServiceAccount
+    name: app-reader
+roleRef:
+  kind: Role
+  name: configmap-reader
+  apiGroup: rbac.authorization.k8s.io
+</code></pre>
+<p>Пара <code>Role</code>/<code>RoleBinding</code> действует внутри одного пространства имён. Пара <code>ClusterRole</code>/<code>ClusterRoleBinding</code> — во всём кластере, и именно она нужна для ресурсов, у которых пространства имён нет вовсе: узлов, самих пространств имён, PersistentVolume.</p>
+<p>Проверить свои права можно, не разбирая манифесты глазами:</p>
+<pre><code class="language-bash"># могу ли я удалять поды в этом пространстве имён
+kubectl auth can-i delete pods
+
+# а вот эта учётка — может?
+kubectl auth can-i list secrets --as=system:serviceaccount:default:app-reader
+</code></pre>
+<p>Флаг <code>--as</code> крайне полезен: он показывает права от лица чужой учётной записи и позволяет проверить конфигурацию до того, как приложение упрётся в отказ доступа.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Что реально проверяют на собеседовании</summary><div class="callout-body"><p>Вопрос звучит как «расскажите про RBAC», а проверяют понимание принципа минимальных привилегий. Ответ «выдали cluster-admin, чтобы работало» — то же самое, что запуск всего от root. Скомпрометированный под с такими правами означает скомпрометированный кластер: атакующий читает все Secret'ы, включая ключи от облака и доступы к базам.</p>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>NetworkPolicy: сеть внутри кластера по умолчанию открыта</h2><div class="prose"><p><em>Аналогия:</em> по умолчанию кластер — это офис без внутренних дверей: любой сотрудник может зайти в любой кабинет, включая бухгалтерию. NetworkPolicy — те самые двери с пропусками, которых изначально нет.</p>
+<p>Важный факт, который многих удивляет: <strong>любой под в кластере может обратиться к любому другому поду, в любом пространстве имён</strong>. Пространства имён разделяют объекты, но не сеть. Скомпрометированный фронтенд по умолчанию имеет прямой сетевой доступ к базе данных.</p>
+<pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pg-allow-api-only
+spec:
+  podSelector:
+    matchLabels:
+      app: pg              # правило применяется к подам базы
+  policyTypes: [&quot;Ingress&quot;]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api     # входящие разрешены только от подов API
+      ports:
+        - protocol: TCP
+          port: 5432
+</code></pre>
+<p>Логика правил устроена так: пока на под не нацелена ни одна политика, ему разрешено всё. Как только появилась хотя бы одна политика с <code>policyTypes: [&quot;Ingress&quot;]</code>, для этого пода запрещается весь входящий трафик, кроме явно перечисленного. Политики складываются: разрешено то, что разрешает хотя бы одна.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Политика без сетевого плагина не работает</summary><div class="callout-body"><p>Манифест <code>NetworkPolicy</code> применится успешно в любом кластере, но выполнять его должен сетевой плагин (CNI). Calico и Cilium это умеют, а базовый Flannel — нет. В кластере с Flannel политика будет спокойно лежать в API и не фильтровать ничего. Ровно та же ловушка, что с Ingress без контроллера из урока 5.1: объект есть, исполнителя нет, ошибки не будет.</p>
+<p>Проверять надо не наличием манифеста, а попыткой соединения: <code>kubectl exec</code> в под, которому доступ запрещён, и <code>nc -zv pg 5432</code> оттуда.</p>
+</div></details></div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Автомасштабирование и PodDisruptionBudget</h2><div class="prose"><p><em>Аналогия:</em> HPA — регулятор числа касс в супермаркете: очередь выросла, открыли ещё одну. PDB — правило «одновременно на перерыв уходит не больше одной кассирши», чтобы магазин не остался вообще без касс.</p>
+<p><strong>HorizontalPodAutoscaler</strong> меняет число реплик в зависимости от нагрузки.</p>
+<pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70    # процент ОТ requests, не от узла
+</code></pre>
+<p>Две вещи, на которых спотыкаются постоянно:</p>
+<ul>
+<li><strong><code>averageUtilization</code> считается в процентах от <code>requests</code>, а не от мощности узла.</strong> Если у пода не указан <code>requests.cpu</code>, HPA просто не может вычислить загрузку и не работает вовсе. Это прямая связь с §12 предыдущего урока: ресурсы указывают не только ради вытеснения.</li>
+<li><strong>Нужен <code>metrics-server</code>.</strong> Без него HPA не видит потребления и молча стоит на месте. Признак — <code>&lt;unknown&gt;</code> в колонке TARGETS вывода <code>kubectl get hpa</code>.</li>
+</ul>
+<p><strong>PodDisruptionBudget</strong> защищает от добровольных нарушений — обслуживания узлов, обновлений, ручного вытеснения подов:</p>
+<pre><code class="language-yaml">apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-pdb
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: api
+</code></pre>
+<p>Теперь <code>kubectl drain</code> при обслуживании узла не сможет увести реплики ниже двух — он дождётся, пока новые поды поднимутся в другом месте. Без PDB обслуживание узла в кластере из двух узлов может на минуту оставить сервис вообще без работающих подов.</p>
+</div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Размещение подов: nodeSelector, affinity и taints</h2><div class="prose"><p><em>Аналогия:</em> nodeSelector — заявка сотрудника «хочу работать в здании с лифтом». Taint — табличка на здании «посторонним вход воспрещён», а toleration — пропуск, который позволяет её проигнорировать. Заметьте: пропуск разрешает войти, но не обязывает — сотрудник всё ещё может выбрать другое здание.</p>
+<p>По умолчанию планировщик ставит под туда, где есть ресурсы. Управлять этим можно с двух сторон.</p>
+<p><strong>Со стороны пода</strong> — простое требование по меткам узла:</p>
+<pre><code class="language-yaml">spec:
+  nodeSelector:
+    disktype: ssd
+</code></pre>
+<p>Для более гибких условий существует <code>affinity</code>: <code>requiredDuringScheduling…</code> — жёсткое требование, без него под не запустится вовсе; <code>preferredDuringScheduling…</code> — пожелание, при невозможности под всё равно разместится. Отдельно есть <code>podAntiAffinity</code> — «не ставить эти поды на один узел», чем добиваются, чтобы три реплики не оказались на одной машине и не умерли вместе с ней.</p>
+<p><strong>Со стороны узла</strong> — taint, отталкивающий поды:</p>
+<pre><code class="language-bash">kubectl taint nodes worker-2 dedicated=gpu:NoSchedule
+</code></pre>
+<p>Теперь на <code>worker-2</code> не встанет ни один под, кроме тех, у кого есть соответствующий toleration. Так выделяют узлы под особые задачи — с GPU, с быстрыми дисками. Управляющий узел кластера обычно помечен таким taint'ом изначально, поэтому обычные приложения на него не попадают.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Разница, которую часто путают</summary><div class="callout-body"><p><strong>Toleration не притягивает, а только разрешает.</strong> Под с toleration <em>может</em> попасть на помеченный узел, но планировщик с тем же успехом поставит его на любой обычный. Чтобы под гарантированно оказался именно на выделенном узле, нужны оба механизма: toleration (чтобы пустили) плюс <code>nodeSelector</code> или affinity (чтобы направило).</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>19</b>/23 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>k3s — полноценный Kubernetes API в облегчённой упаковке, подходит и для обучения, и для реальных небольших кластеров.</li>
+<li>Master управляет кластером, worker-узлы реально исполняют поды; присоединение worker'а происходит по адресу мастера и токену.</li>
+<li>Встроенный в k3s Traefik — нормальный выбор для Ingress и Gateway API. ingress-nginx с марта 2026 года не поддерживается: новые кластеры на нём не строят.</li>
+<li>Gateway API — стандартная замена Ingress: Gateway (вход, зона админа) + HTTPRoute (маршруты приложения).</li>
+<li>cert-manager сам выпускает и продлевает TLS-сертификаты; wildcard-сертификат покрывает сразу все поддомены.</li>
+<li>Ingress — это правило, которое связывает домен, Ingress Controller и сертификат с конкретным внутренним Service.</li>
+<li>PV/PVC дают поду с базой данных постоянное хранилище, не привязанное к жизненному циклу самого пода.</li>
+<li>hostPath годится только для однонодовых стендов; в реальном многоузловом кластере нужен StorageClass с динамическим провижининг.</li>
+<li>wildcard-сертификаты возможны только через dns01-проверку (TXT-запись в DNS), потому что http01 не может подтвердить владение сразу всеми поддоменами.</li>
+<li>Смоук-тесты после выкатки проверяют не отдельные компоненты, а весь путь запроса целиком, от домена до базы данных.</li>
+<li>Prometheus Operator превращает настройку мониторинга в декларативные манифесты вместо ручной правки конфигов.</li>
+<li><strong>StatefulSet</strong> даёт подам стабильные имена, строгий порядок запуска и <strong>свой PVC на каждый под</strong> через <code>volumeClaimTemplates</code>. Это то, чего нет у Deployment и без чего база данных повреждает свои данные.</li>
+<li>StatefulSet отвечает только за инфраструктуру: репликацию, бэкапы и восстановление он не делает. В проде базу часто вообще выносят в управляемую услугу облака.</li>
+<li>StorageClass создаёт тома автоматически. У большинства классов <code>reclaimPolicy: Delete</code> — <strong>удаление PVC удаляет данные</strong>; для боевых томов выбирают <code>Retain</code>.</li>
+<li><code>ReadWriteOnce</code> — один узел на запись, и это всё, что умеет обычный блочный диск. <code>ReadWriteMany</code> требует сетевой файловой системы.</li>
+<li>Job выполняется до завершения (миграции), CronJob — по расписанию (бэкапы), DaemonSet — по одному поду на каждый узел (сбор логов и метрик).</li>
+<li>RBAC читают с привязки: <code>RoleBinding</code> отвечает и на «кому», и на «что». Роль без привязки не даёт никому ничего. Проверять правами <code>kubectl auth can-i ... --as=</code>.</li>
+<li><strong>Сеть в кластере по умолчанию полностью открыта</strong>: любой под достучится до базы. NetworkPolicy закрывает её, но работает только с подходящим CNI — с Flannel манифест применится и не сделает ничего.</li>
+<li>HPA считает загрузку <strong>в процентах от <code>requests</code></strong>: без указанных ресурсов и без metrics-server он молча не работает.</li>
+<li>PodDisruptionBudget не даёт обслуживанию узлов увести число живых реплик ниже порога.</li>
+<li>Toleration только <strong>разрешает</strong> попасть на помеченный узел, но не направляет туда. Чтобы под гарантированно оказался на выделенном узле, нужны toleration и nodeSelector вместе.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>20</b>/23 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–5 — раздел «Кластер» и «Приложение в кластере» в <a href="../projects/p3.html">P3</a>: k3s, Traefik с HTTPS, база в StatefulSet, RBAC, NetworkPolicy, HPA.</li>
+</ul>
+</div></details><article class="task" data-task="d5513e501f"><h3>Задание 1 — кластер k3s</h3><p>Подними k3s на трёх машинах (1 сервер, 2 агента), встроенный Traefik оставь.<br />
+<strong>Проверка:</strong> <code>kubectl get nodes</code> показывает три Ready-узла; поды распределяются по агентам.</p>
+<label class="task-done"><input type="checkbox" data-task-check="d5513e501f"> Сделала руками и проверила</label></article><article class="task" data-task="580c4eb04a"><h3>Задание 2 — Ingress и HTTPS</h3><p>Поставь cert-manager и опубликуй приложение через Ingress на Traefik (по желанию — через HTTPRoute из §5), выпусти сертификат (Let's Encrypt staging при наличии домена или самоподписанный ClusterIssuer).<br />
+<strong>Проверка:</strong> <code>curl -v https://...</code> показывает сертификат от cert-manager; Certificate в статусе Ready.</p>
+<label class="task-done"><input type="checkbox" data-task-check="580c4eb04a"> Сделала руками и проверила</label></article><article class="task" data-task="3b3bbdecdf"><h3>Задание 3 — хранилище и StatefulSet</h3><p>Разверни PostgreSQL StatefulSet'ом с volumeClaimTemplates.<br />
+<strong>Проверка:</strong> после удаления пода база поднимается с теми же данными и тем же именем <code>postgres-0</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="3b3bbdecdf"> Сделала руками и проверила</label></article><article class="task" data-task="02e169b700"><h3>Задание 4 — RBAC и NetworkPolicy</h3><p>Создай ServiceAccount, который может только читать поды в одном namespace, и NetworkPolicy «база принимает соединения только от приложения».<br />
+<strong>Проверка:</strong> <code>kubectl auth can-i delete pods --as=system:serviceaccount:shop:reader</code> → <code>no</code>; под из другого namespace не подключается к базе.</p>
+<label class="task-done"><input type="checkbox" data-task-check="02e169b700"> Сделала руками и проверила</label></article><article class="task" data-task="309f241ac8"><h3>Задание 5 — автомасштабирование</h3><p>Настрой HPA по CPU (порог 50%) и PodDisruptionBudget <code>minAvailable: 1</code>.<br />
+<strong>Проверка:</strong> под нагрузкой число реплик растёт, после неё падает; <code>kubectl drain</code> узла не убирает последнюю реплику.</p>
+<label class="task-done"><input type="checkbox" data-task-check="309f241ac8"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>21</b>/23 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>22</b>/23 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>23</b>/23 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a></li>
+<li><a href="../lessons/5-1.html">5.1 Kubernetes</a></li>
+<li><a href="../lessons/5-3.html">5.3 Helm и Kustomize</a></li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Kubernetes: хранилище — https://kubernetes.io/docs/concepts/storage/</li>
+<li>Kubernetes: RBAC — https://kubernetes.io/docs/reference/access-authn-authz/rbac/</li>
+<li>cert-manager: https://cert-manager.io/docs/</li>
+<li>k3s: https://docs.k3s.io/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="5-1.html">← 5.1 Kubernetes с нуля</a><a class="lesson-jump" href="5-3.html">5.3 Helm и Kustomize →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "5-2", "number": "5.2", "title": "Kubernetes в работе: кластер, HTTPS, хранилище", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["d5513e501f", "580c4eb04a", "3b3bbdecdf", "02e169b700", "309f241ac8"], "quiz": [{"id": "506dfe74b8", "q": "Чем StatefulSet отличается от Deployment?", "options": ["Ничем", "Даёт подам стабильные имена, порядок запуска и собственный том на каждую реплику", "Работает только с одной репликой", "Не поддерживает обновления"], "answer": [1], "why": "<p>базам и кластерным системам важно, кто есть кто: <code>postgres-0<\/code> должен остаться <code>postgres-0<\/code> с тем же диском.<\/p>\n"}, {"id": "d538de766a", "q": "Что будет с данными, если удалить PVC, у которого StorageClass с <code>reclaimPolicy: Delete<\/code>?", "options": ["Ничего, данные останутся", "Том и данные будут удалены", "Данные переедут на другой узел", "Kubernetes не даст удалить PVC"], "answer": [1], "why": "<p>для боевых томов выбирают <code>Retain<\/code>, чтобы случайное удаление PVC не уничтожило данные.<\/p>\n"}, {"id": "846831e622", "q": "Почему wildcard-сертификат <code>*.example.com<\/code> можно получить только через проверку dns01?", "options": ["http01 не поддерживает HTTPS", "Владение всеми поддоменами сразу доказывается только записью в DNS", "dns01 бесплатный, а http01 нет", "cert-manager не поддерживает http01"], "answer": [1], "why": "<p>http01 проверяет конкретное имя через HTTP-запрос, а поддоменов может быть сколько угодно.<\/p>\n"}, {"id": "5d060db9c5", "q": "По умолчанию могут ли поды из разных namespace обращаться друг к другу?", "options": ["Нет", "Да, сеть кластера открыта; ограничения задают NetworkPolicy", "Только через Ingress", "Только если у них одинаковые метки"], "answer": [1], "why": "<p>namespace — граница для имён и прав, а не для сети.<\/p>\n"}, {"id": "84090bfe6f", "q": "Что делает HorizontalPodAutoscaler?", "options": ["Добавляет узлы в кластер", "Меняет число реплик Deployment по метрике, например загрузке CPU", "Увеличивает лимиты памяти пода", "Перезапускает упавшие поды"], "answer": [1], "why": "<p>HPA масштабирует горизонтально — числом подов. Узлы добавляет другой компонент — Cluster Autoscaler.<\/p>\n"}, {"id": "bf896dcb78", "q": "Зачем PodDisruptionBudget?", "options": ["Ограничить расходы на облако", "Не дать плановым операциям (drain узла, обновление) одновременно остановить слишком много подов", "Перезапускать поды по расписанию", "Ограничить трафик"], "answer": [1], "why": "<p>при обслуживании узлов сервис должен оставаться доступным хотя бы в минимальном числе реплик.<\/p>\n"}, {"id": "d3ac617972", "q": "Какая команда проверит права сервисного аккаунта?", "options": ["<code>kubectl get sa<\/code>", "<code>kubectl auth can-i delete pods --as=system:serviceaccount:shop:reader<\/code>", "<code>kubectl describe rbac<\/code>", "<code>kubectl logs<\/code>"], "answer": [1], "why": "<p><code>auth can-i<\/code> отвечает yes или no от имени указанного субъекта.<\/p>\n"}], "cards": [{"id": "a7bd465bb3", "q": "Чем Deployment отличается от StatefulSet?", "a": "<p>StatefulSet даёт подам стабильные имена, порядок запуска и собственный том на каждую реплику — для баз и кластерных систем. Deployment — для взаимозаменяемых подов без состояния.<\/p>\n"}, {"id": "7fdad7584b", "q": "Что такое PV, PVC и StorageClass?", "a": "<p>PV — реальный том в кластере, PVC — запрос пода на хранилище, StorageClass — описание, как создавать тома автоматически по запросу.<\/p>\n"}, {"id": "e3c4f7addc", "q": "Что делает Ingress Controller?", "a": "<p>Реализует правила Ingress: принимает внешний HTTP(S)-трафик и маршрутизирует его к Service по имени хоста и пути. Сам объект Ingress без контроллера ничего не делает.<\/p>\n"}, {"id": "439e8c8c42", "q": "Чем DaemonSet отличается от Deployment?", "a": "<p>DaemonSet запускает по одному поду на каждом (или выбранном) узле — для агентов логов, мониторинга, сетевых плагинов.<\/p>\n"}, {"id": "e0dd60d4d4", "q": "Что такое taints и tolerations?", "a": "<p>Taint на узле отталкивает поды, toleration в поде позволяет ему всё же размещаться на таком узле. Используют для выделенных узлов (GPU, системные).<\/p>\n"}, {"id": "6f9db4ef28", "q": "По умолчанию поды в разных namespace могут общаться?", "a": "<p>Да, сеть кластера плоская и открытая. Ограничения задают NetworkPolicy, и только если сетевой плагин их поддерживает.<\/p>\n"}, {"id": "623928db80", "q": "Что такое PodDisruptionBudget?", "a": "<p>Ограничение на число подов, которые можно одновременно остановить при плановых операциях (drain узла, обновление кластера), чтобы сервис оставался доступным.<\/p>\n"}], "next": "5-3"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

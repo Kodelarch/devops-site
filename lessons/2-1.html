@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.1 Python с нуля — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.1: Python с нуля">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.1 · code</div>
+    <h1 class="lesson-title">Python с нуля</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Что такое программа для интерпретатора</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Переменные и типы данных</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Операции над числами и строками</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Условия: if / elif / else</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Циклы: for и while</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Списки (list)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Словари (dict)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Кортежи и множества</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Списковые включения (comprehensions)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Функции</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Область видимости переменных</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Классы и объекты — ООП с нуля</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Импорт модулей</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Ошибки и исключения</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Работа с файлами</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Скрипт целиком: точка входа и аргументы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">venv и pip — окружение проекта</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-18" data-step="s-18"><span class="step-icon">§</span><span class="step-title">Ловушки, на которых спотыкаются все</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Все следующие уроки (2.2 и дальше) написаны в предположении, что ты уже понимаешь, что такое переменная, цикл, функция и класс. Если раньше не программировал — начни отсюда. Это не про DevOps, это про сам язык: кирпичики, из которых потом строится всё остальное.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Интерпретатор</strong> — программа, которая читает твой код построчно и сразу его выполняет (в отличие от компилятора, который сначала переводит весь код в машинный, и только потом запускает).</li>
+<li><strong>Переменная</strong> — имя, под которым в памяти хранится значение; можно менять, что под этим именем лежит.</li>
+<li><strong>Тип данных</strong> — какого рода значение хранится (число, текст, список и т.д.) — от типа зависит, какие операции с значением вообще возможны.</li>
+<li><strong>Область видимости (scope)</strong> — часть кода, где конкретная переменная «видна» и доступна.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Что такое программа для интерпретатора</h2><div class="prose"><p><em>Аналогия:</em> интерпретатор Python — как человек, читающий кулинарный рецепт вслух и сразу выполняющий каждый шаг, прежде чем перейти к следующему. Он не видит весь рецепт заранее — только текущую строку.</p>
+<pre><code class="language-python">print(&quot;Привет, мир&quot;)   # эта строка выполнится первой
+x = 5                    # эта — второй
+print(x)                 # эта — третьей, выведет 5
+</code></pre>
+<p>Код выполняется сверху вниз, строка за строкой (если не встретится команда, которая явно меняет порядок — про них дальше). <code>print()</code> — команда «покажи это на экране», самый частый способ увидеть, что происходит внутри программы.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Переменные и типы данных</h2><div class="prose"><p><em>Аналогия:</em> переменная — как подписанная коробка на складе: на коробке написано имя (<code>age</code>), а внутри лежит содержимое (<code>25</code>). В любой момент можно переложить в ту же коробку что-то другое.</p>
+<pre><code class="language-python">age = 25          # int — целое число
+price = 19.99      # float — число с плавающей точкой
+name = &quot;Алиса&quot;      # str — строка (текст)
+is_ready = True     # bool — логическое значение (True/False)
+</code></pre>
+<p>Python сам определяет тип по значению — не нужно заранее объявлять «эта переменная будет числом». Узнать тип можно через <code>type(age)</code> — вернёт <code>&lt;class 'int'&gt;</code>.</p>
+<p><img loading="lazy" src="../assets/diagrams/app0-python-variables.webp" alt="" /></p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Частая ошибка новичка</summary><div class="callout-body"><p><code>&quot;5&quot; + &quot;3&quot;</code> даёт <code>&quot;53&quot;</code> (склеивание строк), а <code>5 + 3</code> даёт <code>8</code> (сложение чисел). Кавычки вокруг числа превращают его в текст — это разные типы, и <code>+</code> для них работает по-разному.</p>
+</div></details></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Операции над числами и строками</h2><div class="prose"><p><em>Аналогия:</em> операции над числами — как на калькуляторе, только добавляется пара специфичных для программирования: <code>//</code> (целочисленное деление, отбрасывает остаток) и <code>%</code> (остаток от деления) — та самая операция, что уже встречалась в уроке 2.2 для разбора числа по цифрам.</p>
+<pre><code class="language-python">7 / 2    # 3.5   — обычное деление
+7 // 2   # 3     — целочисленное деление
+7 % 2    # 1     — остаток от деления
+2 ** 5   # 32    — возведение в степень
+</code></pre>
+<p>Со строками работает конкатенация (<code>+</code>) и повторение (<code>*</code>):</p>
+<pre><code class="language-python">&quot;ha&quot; * 3          # &quot;hahaha&quot;
+&quot;Привет&quot; + &quot;, &quot; + &quot;мир&quot;   # &quot;Привет, мир&quot;
+</code></pre>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Условия: if / elif / else</h2><div class="prose"><p><em>Аналогия:</em> развилка на дороге — если дорога мокрая, едешь медленнее; если сухая — обычная скорость. Условие проверяется один раз, выбирается ровно одна ветка.</p>
+<pre><code class="language-python">age = 17
+
+if age &gt;= 18:
+    print(&quot;Доступ разрешён&quot;)
+elif age &gt;= 14:
+    print(&quot;Нужно согласие родителей&quot;)
+else:
+    print(&quot;Доступ запрещён&quot;)
+</code></pre>
+<p>Отступы (пробелы в начале строки) в Python — не украшение, а часть синтаксиса: именно они показывают, какой код относится к какой ветке <code>if</code>. Если сбить отступ — код или не запустится, или сработает не так, как задумано.</p>
+<p><img loading="lazy" src="../assets/diagrams/app0-python-conditions.webp" alt="" /></p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Сравнение и логика</summary><div class="callout-body"><p><code>==</code> сравнивает значения (<code>5 == 5</code> → <code>True</code>), <code>=</code> присваивает значение — это разные операторы, спутать их с непривычки легко. <code>and</code>, <code>or</code>, <code>not</code> комбинируют условия: <code>age &gt;= 14 and age &lt; 18</code>.</p>
+</div></details></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Циклы: for и while</h2><div class="prose"><p><em>Аналогия:</em> <code>for</code> — как обход всех писем в почтовом ящике по одному, пока письма не кончатся. <code>while</code> — как «продолжай грести, пока не доплывёшь до берега»: условие проверяется перед каждым повтором, и число повторов заранее неизвестно.</p>
+<pre><code class="language-python">for i in range(5):        # 0, 1, 2, 3, 4
+    print(i)
+</code></pre>
+<p><code>range(5)</code> — не список, а специальный «генератор последовательности чисел», который выдаёт числа от 0 до 4 включительно (то есть ровно 5 штук, но последнее число на единицу меньше аргумента) — эта особенность «начинается с 0, заканчивается перед указанным числом» встречается в Python постоянно, в том числе в срезах списков чуть ниже.</p>
+<pre><code class="language-python">
+fruits = [&quot;яблоко&quot;, &quot;банан&quot;, &quot;вишня&quot;]
+for fruit in fruits:
+    print(fruit)
+
+count = 0
+while count &lt; 3:
+    print(count)
+    count += 1             # без этой строки цикл никогда не закончится
+</code></pre>
+<p><code>for</code> используют, когда заранее известно, по чему проходить (диапазон чисел, список, строка). <code>while</code> — когда конец заранее неизвестен и зависит от условия, которое может измениться в любой момент.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Списки (list)</h2><div class="prose"><p><em>Аналогия:</em> список — как полка с пронумерованными ячейками, где нумерация начинается с 0, а не с 1. Можно достать содержимое конкретной ячейки, добавить новую или убрать существующую.</p>
+<pre><code class="language-python">numbers = [10, 20, 30, 40]
+
+numbers[0]        # 10   — первый элемент
+numbers[-1]        # 40   — последний элемент
+numbers[1:3]       # [20, 30]  — срез: со второго по третий (не включая 4-й)
+# общий вид среза: список[начало:конец] — включает элемент &quot;начало&quot;,
+# но не включает элемент &quot;конец&quot;, ровно как и range() выше
+
+numbers.append(50)  # добавить в конец → [10, 20, 30, 40, 50]
+numbers.remove(20)  # удалить значение 20 → [10, 30, 40, 50]
+len(numbers)         # 4  — количество элементов
+</code></pre>
+<p>Списки изменяемы (mutable) — можно менять содержимое той же самой коробки, не создавая новую. Списки уже встречались во всех уроках 2.2–2.5 — это одна из самых часто используемых структур в Python вообще.</p>
+<p><img loading="lazy" src="../assets/diagrams/app0-python-list.webp" alt="" /></p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Словари (dict)</h2><div class="prose"><p><em>Аналогия:</em> словарь — как настоящий бумажный словарь: не по номеру страницы ищешь слово, а по самому слову (ключу) находишь его значение (перевод).</p>
+<pre><code class="language-python">person = {&quot;name&quot;: &quot;Алиса&quot;, &quot;age&quot;: 25}
+
+person[&quot;name&quot;]        # &quot;Алиса&quot;
+person[&quot;city&quot;] = &quot;Москва&quot;   # добавить новую пару ключ-значение
+person.get(&quot;job&quot;, &quot;не указано&quot;)   # безопасное чтение: вернёт &quot;не указано&quot;, если ключа нет
+
+for key, value in person.items():
+    print(key, &quot;→&quot;, value)
+</code></pre>
+<p>Ключом словаря может быть почти что угодно неизменяемое (строка, число), значением — вообще что угодно, включая другой словарь или список. JSON, который встречался в уроке 2.2 — это ровно словари и списки, только записанные текстом.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Кортежи и множества</h2><div class="prose"><p><em>Аналогия:</em> если список — полка, куда можно доложить и откуда можно убрать, то кортеж — запаянная упаковка: содержимое видно, но поменять его нельзя. А множество — мешок, где каждый предмет встречается ровно один раз, и порядок в нём не имеет значения.</p>
+<pre><code class="language-python">point = (10, 20)          # кортеж (tuple) — неизменяемый
+point[0]                   # 10 — читать можно
+# point[0] = 5             # TypeError — менять нельзя
+
+tags = {&quot;linux&quot;, &quot;devops&quot;, &quot;linux&quot;}   # множество (set)
+print(tags)                             # {'linux', 'devops'} — дубликат исчез
+tags.add(&quot;python&quot;)
+&quot;linux&quot; in tags                          # True — проверка за постоянное время
+</code></pre>
+<p><strong>Кортеж</strong> нужен там, где набор значений не должен меняться: координаты, пара «ключ-значение», возврат нескольких значений из функции (<code>return name, age</code> — это как раз кортеж). Ещё одно практическое отличие: кортеж можно использовать как ключ словаря, а список — нельзя, потому что ключ обязан быть неизменяемым.</p>
+<p><strong>Множество</strong> решает две задачи. Первая — убрать дубликаты одной операцией: <code>unique = set(my_list)</code>. Вторая, более важная — быстрая проверка принадлежности. Поиск <code>x in list</code> перебирает список целиком, а <code>x in set</code> находит ответ мгновенно независимо от размера. На списке в миллион элементов разница видна невооружённым глазом.</p>
+<pre><code class="language-python">a = {1, 2, 3}
+b = {3, 4, 5}
+a &amp; b        # {3}        — пересечение: что есть в обоих
+a | b        # {1,2,3,4,5} — объединение
+a - b        # {1, 2}     — разность: что есть в a, но нет в b
+</code></pre>
+<p>Эти операции пригодятся, например, чтобы сравнить список установленных пакетов с требуемым и получить «чего не хватает» одной строкой.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Списковые включения (comprehensions)</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы диктовать «возьми пустую корзину, обойди все яблоки, каждое проверь, подходящие положи в корзину», сказать одной фразой: «корзина из всех спелых яблок».</p>
+<pre><code class="language-python"># было
+squares = []
+for n in range(10):
+    squares.append(n ** 2)
+
+# стало
+squares = [n ** 2 for n in range(10)]
+
+# с условием
+even = [n for n in range(20) if n % 2 == 0]
+
+# работает и для словарей, и для множеств
+lengths = {word: len(word) for word in [&quot;ab&quot;, &quot;cde&quot;]}
+unique_first = {word[0] for word in [&quot;apple&quot;, &quot;avocado&quot;, &quot;banana&quot;]}
+</code></pre>
+<p>Читается справа налево от <code>for</code>: «для каждого n из range(10) — взять n ** 2». Конструкция настолько распространена в Python, что незнание её сразу выдаёт новичка при чтении чужого кода.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Когда не надо</summary><div class="callout-body"><p>Включения хороши для одной простой операции. Как только внутрь просится второе условие, вложенный цикл или вызов на три строки — обычный цикл читается лучше. Правило простое: если строку нельзя прочитать вслух за один раз, разворачивай обратно в цикл.</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Функции</h2><div class="prose"><p><em>Аналогия:</em> функция — как кофемашина: один раз настраиваешь рецепт внутри, а потом просто нажимаешь кнопку (вызываешь функцию по имени) сколько угодно раз, не переписывая рецепт заново.</p>
+<pre><code class="language-python">def greet(name):
+    return f&quot;Привет, {name}!&quot;
+
+message = greet(&quot;Алиса&quot;)
+print(message)     # Привет, Алиса!
+
+def add(a, b=10):        # b=10 — значение по умолчанию, если не передали
+    return a + b
+
+add(5)        # 15  (b взялось по умолчанию)
+add(5, 3)     # 8
+</code></pre>
+<p><code>return</code> — команда «отдать результат наружу и закончить работу функции». Функция без <code>return</code> всё равно отработает, но результат её работы будет <code>None</code> — специальное значение «ничего».</p>
+<p>Строка <code>f&quot;Привет, {name}!&quot;</code> — это <strong>f-строка</strong> (сокращение от formatted string): буква <code>f</code> прямо перед открывающей кавычкой говорит Python, что внутри такой строки фигурные скобки <code>{ }</code> — это не обычный текст, а место, куда нужно подставить значение переменной. Без буквы <code>f</code> фигурные скобки просто напечатались бы буквально, как есть. Это самый удобный способ вставлять значения переменных прямо внутрь текста, не склеивая строку вручную через <code>+</code>.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Зачем вообще нужны функции</summary><div class="callout-body"><p>Если один и тот же код нужен в нескольких местах программы — не копируешь его несколько раз, а оформляешь как функцию и вызываешь по имени. Изменить логику потом придётся только в одном месте.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Область видимости переменных</h2><div class="prose"><p><em>Аналогия:</em> переменная внутри функции — как разговор в закрытом кабинете: то, что обсуждали внутри, снаружи не слышно, если специально не вынести решение наружу через <code>return</code>.</p>
+<pre><code class="language-python">def calculate():
+    result = 42     # локальная переменная — существует только внутри функции
+    return result
+
+calculate()
+print(result)   # NameError: result не существует за пределами функции
+</code></pre>
+<p>Переменные, объявленные внутри функции, называются <strong>локальными</strong> — они «исчезают», как только функция завершила работу. Переменные вне всех функций — <strong>глобальные</strong>, видны отовсюду в файле. Хорошая практика — не полагаться на глобальные переменные внутри функций, а передавать нужные значения как аргументы.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Классы и объекты — ООП с нуля</h2><div class="prose"><p><em>Аналогия:</em> класс — это чертёж дома, а объект — конкретный построенный по этому чертежу дом. По одному чертежу можно построить сколько угодно домов, и у каждого будет своя мебель (свои данные), но одинаковая планировка (одинаковые методы).</p>
+<pre><code class="language-python">class Dog:
+    def __init__(self, name, age):
+        self.name = name     # атрибут — данные, принадлежащие конкретному объекту
+        self.age = age
+
+    def bark(self):          # метод — функция внутри класса
+        return f&quot;{self.name} говорит: Гав!&quot;
+
+rex = Dog(&quot;Рекс&quot;, 3)     # создание объекта (экземпляра) класса Dog
+buddy = Dog(&quot;Бадди&quot;, 5)
+
+print(rex.bark())        # Рекс говорит: Гав!
+print(buddy.name)        # Бадди
+</code></pre>
+<p><code>__init__</code> — специальный метод, который вызывается автоматически при создании объекта (<code>Dog(&quot;Рекс&quot;, 3)</code>) — он настраивает начальное состояние. <code>self</code> — это ссылка на «текущий конкретный объект»: именно поэтому у <code>rex</code> и <code>buddy</code> разные <code>name</code>, хотя оба созданы из одного класса <code>Dog</code>. Классы уже активно использовались в уроке 2.3, 2.4 и 2.5 — там, где заводился <code>Enemy</code>, <code>Status</code>, <code>GameStorage</code>.</p>
+<p><img loading="lazy" src="../assets/diagrams/app0-python-class.webp" alt="" /></p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Импорт модулей</h2><div class="prose"><p><em>Аналогия:</em> модуль — это готовая книга рецептов, написанная кем-то другим (или тобой самим в другом файле). Вместо того чтобы изобретать рецепт заново, ты просто открываешь нужную книгу и берёшь готовый рецепт.</p>
+<pre><code class="language-python">import random
+random.randint(1, 10)      # случайное число от 1 до 10
+
+from itertools import combinations   # взять только одну конкретную вещь из модуля
+combinations([1, 2, 3], 2)
+</code></pre>
+<p><code>import module</code> даёт доступ ко всему модулю через точку (<code>random.randint</code>), а <code>from module import x</code> достаёт из модуля что-то одно по имени — так короче, если нужна ровно одна функция. Оба варианта уже встречались в уроках 2.2–2.5 (<code>import json</code>, <code>from itertools import combinations</code>, <code>from enum import Enum</code>).</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Ошибки и исключения</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app0-exceptions.svg" alt="" /><br />
+<em>Аналогия:</em> исключение — как сработавшая пожарная сигнализация: программа останавливает обычный ход дел и ищет того, кто готов взять ситуацию на себя. Не нашла — здание эвакуируется целиком, то есть программа падает.</p>
+<pre><code class="language-python">try:
+    with open(&quot;config.json&quot;) as f:
+        data = json.load(f)
+except FileNotFoundError:
+    print(&quot;Файл конфигурации не найден, беру значения по умолчанию&quot;)
+    data = {}
+except json.JSONDecodeError as e:
+    print(f&quot;Конфиг повреждён: {e}&quot;)
+    raise                      # пробросить дальше — пусть падает
+else:
+    print(&quot;Конфиг прочитан успешно&quot;)
+finally:
+    print(&quot;Эта строка выполнится в любом случае&quot;)
+</code></pre>
+<p>Четыре блока с разными ролями. В <code>try</code> кладут <strong>только рискованную строку</strong> — чем меньше кода внутри, тем точнее понятно, что именно упало. <code>except</code> ловит конкретный тип ошибки. <code>else</code> выполняется, только если ошибки не было. <code>finally</code> — всегда, независимо ни от чего; здесь закрывают файлы, соединения и снимают блокировки. Прямой аналог <code>trap ... EXIT</code> из <a href="../lessons/1-3.html">1.3 Bash</a>.</p>
+<p>Типы ошибок, которые встретятся сразу: <code>FileNotFoundError</code> (нет файла), <code>KeyError</code> (нет ключа в словаре), <code>IndexError</code> (индекс за пределами списка), <code>ValueError</code> (значение неподходящее, например <code>int(&quot;привет&quot;)</code>), <code>TypeError</code> (операция над несовместимыми типами), <code>ZeroDivisionError</code>.</p>
+<p>Своё исключение возбуждают через <code>raise</code>:</p>
+<pre><code class="language-python">def set_threshold(value):
+    if not 0 &lt;= value &lt;= 100:
+        raise ValueError(f&quot;Порог должен быть от 0 до 100, получено {value}&quot;)
+</code></pre>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Голый except — худшее, что можно написать</summary><div class="callout-body"><pre><code class="language-python">try:
+    do_something()
+except:          # ✘ ловит вообще всё, включая твои же опечатки
+    pass          # ✘ и молча их проглатывает
+</code></pre>
+<p>Такая конструкция превращает падение с понятным сообщением в тихую поломку, которую потом ищут часами. Она же поймает <code>KeyboardInterrupt</code> и не даст остановить программу с клавиатуры. Лови конкретный тип; если действительно нужно поймать широко — хотя бы <code>except Exception as e</code> и обязательно <strong>залогируй</strong> <code>e</code>, а не глотай.</p>
+<p>В контексте DevOps это та же ловушка, что bash без <code>set -e</code>: скрипт с проглоченной ошибкой отчитается кодом 0, и пайплайн будет зелёным при сломанном результате.</p>
+</div></details></div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Работа с файлами</h2><div class="prose"><p><em>Аналогия:</em> открыть файл — как взять книгу в библиотеке: пока она у тебя, её не может взять никто другой, и вернуть её нужно обязательно, даже если ты передумал читать.</p>
+<pre><code class="language-python"># чтение целиком
+with open(&quot;report.txt&quot;, encoding=&quot;utf-8&quot;) as f:
+    content = f.read()
+
+# построчно — так читают большие файлы, не загружая их в память целиком
+with open(&quot;/var/log/app.log&quot;, encoding=&quot;utf-8&quot;) as f:
+    for line in f:
+        if &quot;ERROR&quot; in line:
+            print(line.strip())
+
+# запись
+with open(&quot;result.txt&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+    f.write(&quot;готово\n&quot;)
+
+# дописать в конец, не стирая
+with open(&quot;result.txt&quot;, &quot;a&quot;, encoding=&quot;utf-8&quot;) as f:
+    f.write(&quot;ещё строка\n&quot;)
+</code></pre>
+<p>Конструкция <code>with</code> — главное, что нужно усвоить: она <strong>гарантированно закрывает файл</strong> при выходе из блока, даже если внутри произошла ошибка. Открывать файл без <code>with</code> можно, но тогда закрывать придётся вручную, и при исключении файл останется открытым. Незакрытые файлы — источник утечки дескрипторов, той самой, из-за которой в <a href="../lessons/1-1.html">1.1 Linux</a> место на диске не возвращалось после удаления.</p>
+<p>Режимы: <code>&quot;r&quot;</code> — чтение (по умолчанию), <code>&quot;w&quot;</code> — запись <strong>с полной перезаписью</strong>, <code>&quot;a&quot;</code> — дописать в конец, <code>&quot;x&quot;</code> — создать, но упасть, если файл уже есть.</p>
+<p>Параметр <code>encoding=&quot;utf-8&quot;</code> стоит писать всегда. Без него Python берёт кодировку системы, и код, работающий на Linux, ломается на Windows — ровно тот класс ошибок, который потом невозможно воспроизвести.</p>
+<p>Для путей удобнее современный <code>pathlib</code>, а не склеивание строк:</p>
+<pre><code class="language-python">from pathlib import Path
+
+config = Path(&quot;/etc/myapp&quot;) / &quot;config.json&quot;    # правильные разделители на любой ОС
+if config.exists():
+    text = config.read_text(encoding=&quot;utf-8&quot;)
+</code></pre>
+<p>JSON — формат, с которым в DevOps сталкиваешься постоянно (ответы API, конфиги, вывод многих утилит):</p>
+<pre><code class="language-python">import json
+
+data = json.loads('{&quot;name&quot;: &quot;app&quot;, &quot;port&quot;: 8080}')   # из строки в словарь
+data[&quot;port&quot;]                                            # 8080
+text = json.dumps(data, indent=2, ensure_ascii=False)    # обратно в строку, читаемо
+</code></pre>
+</div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Скрипт целиком: точка входа и аргументы</h2><div class="prose"><p><em>Аналогия:</em> <code>if __name__ == &quot;__main__&quot;</code> — как надпись «главный вход» на здании: файл можно и импортировать как библиотеку через боковую дверь, и запустить напрямую через главный вход, и поведение должно различаться.</p>
+<pre><code class="language-python">#!/usr/bin/env python3
+&quot;&quot;&quot;Проверяет занятость диска и сообщает, если превышен порог.&quot;&quot;&quot;
+
+import argparse
+import shutil
+import sys
+
+
+def check_disk(path: str, threshold: int) -&gt; int:
+    usage = shutil.disk_usage(path)
+    percent = usage.used / usage.total * 100
+    print(f&quot;{path}: занято {percent:.1f}%&quot;)
+    return 0 if percent &lt; threshold else 1
+
+
+def main() -&gt; int:
+    parser = argparse.ArgumentParser(description=&quot;Проверка занятости диска&quot;)
+    parser.add_argument(&quot;path&quot;, help=&quot;точка монтирования&quot;)
+    parser.add_argument(&quot;-t&quot;, &quot;--threshold&quot;, type=int, default=80,
+                        help=&quot;порог в процентах (по умолчанию 80)&quot;)
+    args = parser.parse_args()
+
+    return check_disk(args.path, args.threshold)
+
+
+if __name__ == &quot;__main__&quot;:
+    sys.exit(main())
+</code></pre>
+<p>Разбор того, что здесь важно. Строка <code>if __name__ == &quot;__main__&quot;:</code> означает «выполнять это, только если файл запущен напрямую, а не импортирован». Без неё при импорте твоего файла в другой скрипт весь код тут же выполнится — редко то, что нужно.</p>
+<p><code>sys.exit(main())</code> передаёт наружу <strong>код завершения</strong>, ровно тот же механизм, что в bash (<a href="../lessons/1-3.html#s-1">1.3 Bash</a>, §1): 0 — успех, ненулевое — проблема. Именно его читает systemd, cron и CI-пайплайн.</p>
+<p><code>argparse</code> — стандартный разбор аргументов командной строки, прямой аналог <code>getopts</code>. Он сам генерирует справку по <code>-h</code>, проверяет типы и ругается на недостающие аргументы. Простой <code>sys.argv</code> тоже существует, но <code>argparse</code> бесплатно даёт всё то, что иначе пришлось бы писать руками.</p>
+<p>Двоеточия в <code>def check_disk(path: str, threshold: int) -&gt; int:</code> — <strong>аннотации типов</strong>. На выполнение они не влияют, но объясняют читателю и редактору, что функция принимает и что возвращает. В рабочих проектах их пишут почти всегда.</p>
+</div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>venv и pip — окружение проекта</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app0-venv.svg" alt="" /><br />
+<em>Аналогия:</em> виртуальное окружение — отдельный ящик с инструментами под конкретный проект вместо одной общей свалки в гараже.</p>
+<p>Проблема, которую это решает: проекту А нужна библиотека версии 2.25, проекту Б — 2.31. Если ставить обе в системный Python, вторая установка сломает первый проект. Виртуальное окружение даёт каждому проекту свой изолированный набор пакетов.</p>
+<pre><code class="language-bash">python3 -m venv .venv                # создать окружение в папке проекта
+source .venv/bin/activate             # войти — в приглашении появится (.venv)
+pip install requests                   # ставится в окружение, не в систему
+pip freeze &gt; requirements.txt           # зафиксировать точные версии
+pip install -r requirements.txt          # воспроизвести окружение на другой машине
+deactivate                                # выйти
+</code></pre>
+<p><code>requirements.txt</code> — то, ради чего всё это и делается: файл с точными версиями, по которому окружение восстанавливается один в один на любой машине. Он коммитится в репозиторий, а сама папка <code>.venv</code> — <strong>никогда</strong> (её место в <code>.gitignore</code>, см. <a href="../lessons/0-1.html#s-5">0.1 Git</a>, §5).</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Не ставь пакеты в системный Python</summary><div class="callout-body"><p><code>sudo pip install</code> — команда, которую не стоит выполнять почти никогда. Системный Python принадлежит пакетному менеджеру ОС, и подмена его библиотек ломает системные утилиты, которые на них рассчитывают. На свежих Ubuntu и Debian это даже запрещено принудительно: попытка выдаст ошибку <code>externally-managed-environment</code>. Правильная реакция — не искать обход, а создать venv.</p>
+<p>Для утилит, которые нужны глобально (например, <code>ansible</code>), есть <code>pipx</code>: он ставит каждую в собственное изолированное окружение и делает доступной из любого места.</p>
+</div></details>
+<p>Инструменты посовременнее, которые встретятся в вакансиях: <strong>poetry</strong> и <strong>uv</strong> решают ту же задачу, но управляют и зависимостями, и окружением из одного файла <code>pyproject.toml</code>. Начинать стоит с <code>venv</code> и <code>pip</code> — их понимание нужно, чтобы разобраться в остальных.</p>
+</div></section><section class="step" id="s-18" data-kind="theory"><div class="step-kicker">// шаг <b>19</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Ловушки, на которых спотыкаются все</h2><div class="prose"><p><strong>Изменяемый аргумент по умолчанию.</strong> Самая известная ловушка Python:</p>
+<pre><code class="language-python">def add_item(item, basket=[]):     # ✘ список создаётся ОДИН раз при объявлении функции
+    basket.append(item)
+    return basket
+
+add_item(&quot;яблоко&quot;)     # ['яблоко']
+add_item(&quot;банан&quot;)      # ['яблоко', 'банан'] — не то, что ожидалось!
+</code></pre>
+<p>Правильно — <code>def add_item(item, basket=None):</code> и внутри <code>if basket is None: basket = []</code>.</p>
+<p><strong><code>is</code> против <code>==</code>.</strong> <code>==</code> сравнивает значения, <code>is</code> — что это буквально один и тот же объект в памяти. Для чисел и строк <code>is</code> иногда «случайно» работает из-за внутренних оптимизаций, и потом ломается на других данных. Правило: <code>is</code> используют только с <code>None</code>, <code>True</code> и <code>False</code>.</p>
+<p><strong>Копирование списка.</strong> <code>new = old</code> не создаёт копию — это второе имя того же списка, и изменение через одно имя видно через другое. Копия — <code>new = old.copy()</code> или <code>new = old[:]</code>. Для вложенных структур нужен <code>copy.deepcopy()</code>.</p>
+<p><strong>Целочисленное деление у отрицательных.</strong> <code>-7 // 2</code> даёт <code>-4</code>, а не <code>-3</code>: Python округляет вниз, а не к нулю. Стоит помнить при работе с координатами и разбиением на страницы.</p>
+<p><strong>Сравнение чисел с плавающей точкой.</strong> <code>0.1 + 0.2 == 0.3</code> даёт <code>False</code> — это не баг Python, а свойство двоичного представления дробей. Сравнивают через допуск: <code>math.isclose(a, b)</code>.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>20</b>/24 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Код выполняется построчно сверху вниз, отступы — часть синтаксиса, а не украшение.</li>
+<li><code>=</code> присваивает, <code>==</code> сравнивает — это разные операторы.</li>
+<li><code>for</code> — когда заранее известно, по чему идти; <code>while</code> — когда конец зависит от условия.</li>
+<li>Списки и словари — две самые часто используемые структуры данных в Python.</li>
+<li>Функция принимает аргументы и через <code>return</code> отдаёт результат наружу; переменные внутри неё не видны снаружи.</li>
+<li>Класс — чертёж, объект — конкретный экземпляр по этому чертежу; <code>self</code> отличает один объект от другого.</li>
+<li><code>import</code> — способ переиспользовать чужой (или свой) код без копирования.</li>
+<li>Кортеж неизменяем и годится в ключи словаря; множество убирает дубликаты и проверяет принадлежность мгновенно.</li>
+<li>Списковое включение <code>[x for x in ...]</code> заменяет цикл с <code>append</code> — но только пока строка читается вслух за один раз.</li>
+<li><code>try/except/else/finally</code>: лови <strong>конкретный</strong> тип ошибки, <code>finally</code> выполняется всегда. Голый <code>except: pass</code> — худшее, что можно написать.</li>
+<li>Файлы открывай через <code>with</code> и всегда указывай <code>encoding=&quot;utf-8&quot;</code>.</li>
+<li><code>if __name__ == &quot;__main__&quot;</code> — точка входа; <code>sys.exit(main())</code> отдаёт код завершения, который читают systemd, cron и CI.</li>
+<li><code>argparse</code> — аналог <code>getopts</code>: сам делает справку и проверяет типы.</li>
+<li>Каждому проекту — свой <code>venv</code>; <code>requirements.txt</code> коммитим, папку <code>.venv</code> — нет. <code>sudo pip install</code> не делаем никогда.</li>
+<li>Изменяемый аргумент по умолчанию (<code>def f(x=[])</code>) создаётся один раз на всю жизнь функции — используй <code>None</code>.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>21</b>/24 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1 и 3 (venv, CLI с <code>argparse</code>) — каркас утилиты из мини-проекта <a href="../projects/m2.html">M2</a>.</li>
+</ul>
+</div></details><article class="task" data-task="0fbefe355e"><h3>Задание 1 — окружение проекта</h3><p>Создай проект с <code>venv</code>, поставь <code>requests</code>, зафиксируй зависимости в <code>requirements.txt</code>, добавь <code>.venv/</code> в <code>.gitignore</code>.<br />
+<strong>Проверка:</strong> на чистой машине <code>python -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt</code> воспроизводит окружение; <code>pip freeze</code> совпадает с файлом.</p>
+<label class="task-done"><input type="checkbox" data-task-check="0fbefe355e"> Сделала руками и проверила</label></article><article class="task" data-task="2dc3f9b5c8"><h3>Задание 2 — разбор лога</h3><p>Напиши скрипт, который читает лог nginx построчно (<code>with open</code>), считает запросы по кодам ответа в словаре и печатает топ-5 IP.<br />
+<strong>Проверка:</strong> результат совпадает с <code>awk '{print $9}' access.log | sort | uniq -c</code>. Файл на 1 ГБ обрабатывается без роста памяти (чтение построчно, а не <code>read()</code> целиком).</p>
+<label class="task-done"><input type="checkbox" data-task-check="2dc3f9b5c8"> Сделала руками и проверила</label></article><article class="task" data-task="99b7a0abd4"><h3>Задание 3 — CLI с аргументами</h3><p>Оформи скрипт с <code>if __name__ == &quot;__main__&quot;:</code> и <code>argparse</code>: путь к логу обязательный, <code>--top N</code> необязательный. Несуществующий файл — понятное сообщение и код выхода 1, без трейсбека.<br />
+<strong>Проверка:</strong> <code>python logstat.py --help</code> показывает справку, <code>python logstat.py nope.log; echo $?</code> даёт <code>1</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="99b7a0abd4"> Сделала руками и проверила</label></article><article class="task" data-task="fe68545ba9"><h3>Задание 4 — класс</h3><p>Опиши класс <code>Server</code> с полями <code>name</code>, <code>ip</code>, <code>role</code> и методом <code>is_private()</code>, проверяющим, что адрес из приватного диапазона (модуль <code>ipaddress</code>). Загрузи список серверов из JSON.<br />
+<strong>Проверка:</strong> <code>[s.name for s in servers if not s.is_private()]</code> выводит только публичные.</p>
+<label class="task-done"><input type="checkbox" data-task-check="fe68545ba9"> Сделала руками и проверила</label></article><article class="task" data-task="4bc739c1dd"><h3>Задание 5 — ловушки</h3><p>Воспроизведи и исправь три ловушки из §18: изменяемый аргумент по умолчанию, изменение списка во время итерации, сравнение <code>is</code> вместо <code>==</code> для строк.<br />
+<strong>Проверка:</strong> для каждой — короткий тест, который падает до исправления и проходит после.</p>
+<label class="task-done"><input type="checkbox" data-task-check="4bc739c1dd"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>22</b>/24 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>23</b>/24 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>24</b>/24 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-2.html">2.2 Python для автоматизации</a> — где эти кирпичики начинают складываться в задачи</li>
+<li><a href="../lessons/1-3.html">1.3 Bash</a> — bash, у которого Python перенимает коды завершения и идею уборки за собой</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Официальный учебник Python: https://docs.python.org/3/tutorial/</li>
+<li>PEP 8 — стиль кода: https://peps.python.org/pep-0008/</li>
+<li>Документация Python: https://docs.python.org/3/tutorial/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="1-4.html">← 1.4 Метрики, логи и алерты</a><a class="lesson-jump" href="2-2.html">2.2 Python для автоматизации →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-1", "number": "2.1", "title": "Python с нуля", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "s-18", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["0fbefe355e", "2dc3f9b5c8", "99b7a0abd4", "fe68545ba9", "4bc739c1dd"], "quiz": [{"id": "356549c9df", "q": "Что не так с функцией <code>def add(item, items=[])<\/code>?", "options": ["Ничего, это нормальная запись", "Список по умолчанию создаётся один раз и общий для всех вызовов", "Нельзя давать аргументам значения по умолчанию", "Списки нельзя передавать в функции"], "answer": [1], "why": "<p>изменяемое значение по умолчанию живёт между вызовами. Правильно — <code>items=None<\/code> и создание списка внутри функции.<\/p>\n"}, {"id": "a2ccb859d2", "q": "Чем кортеж (tuple) отличается от списка?", "options": ["Кортеж быстрее сортируется", "Кортеж нельзя изменить, поэтому его можно использовать ключом словаря", "В кортеже могут быть только числа", "Ничем"], "answer": [1], "why": "<p>неизменяемость делает кортеж хешируемым и сигнализирует, что данные не должны меняться.<\/p>\n"}, {"id": "e5c3561807", "q": "Зачем открывать файл через <code>with open(...) as f<\/code>?", "options": ["Так быстрее", "Файл гарантированно закроется, даже если внутри блока случится ошибка", "Иначе нельзя читать русский текст", "Чтобы файл открылся только для чтения"], "answer": [1], "why": "<p>контекстный менеджер сам вызывает закрытие. Незакрытые файлы — утечка дескрипторов.<\/p>\n"}, {"id": "7e688e064d", "q": "Для чего нужен блок <code>if __name__ == &quot;__main__&quot;:<\/code>?", "options": ["Чтобы скрипт запускался только от администратора", "Код под ним выполняется только при прямом запуске файла, но не при импорте", "Чтобы ускорить запуск", "Это обязательная строка в каждом файле"], "answer": [1], "why": "<p>так один файл может быть и модулем с функциями, и самостоятельной программой.<\/p>\n"}, {"id": "5175f1e9b7", "q": "Зачем проекту отдельное виртуальное окружение <code>venv<\/code>?", "options": ["Чтобы Python работал быстрее", "Чтобы зависимости проекта не конфликтовали с системным Python и другими проектами", "Чтобы код нельзя было скопировать", "Без него нельзя импортировать модули"], "answer": [1], "why": "<p>разные проекты требуют разных версий библиотек, а системный Python в Linux используют сами системные утилиты.<\/p>\n"}, {"id": "6ec80536c5", "q": "Как правильно перехватывать исключения?", "options": ["<code>except:<\/code> — ловить всё подряд", "Ловить конкретный тип, например <code>except FileNotFoundError:<\/code>, и сообщать об ошибке", "Никогда не ловить исключения", "<code>except Exception: pass<\/code>"], "answer": [1], "why": "<p>голый <code>except<\/code> и <code>pass<\/code> глотают и настоящие ошибки, и Ctrl+C — потом невозможно понять, что сломалось.<\/p>\n"}, {"id": "7766088f62", "q": "Чем <code>==<\/code> отличается от <code>is<\/code>?", "options": ["<code>==<\/code> сравнивает значения, <code>is<\/code> — что это один и тот же объект", "Это одно и то же", "<code>is<\/code> работает только со строками", "<code>==<\/code> сравнивает типы"], "answer": [0], "why": "<p><code>is<\/code> используют для <code>None<\/code>, <code>True<\/code>, <code>False<\/code>. Для сравнения строк и чисел — только <code>==<\/code>.<\/p>\n"}], "cards": [{"id": "1f5b364e6c", "q": "Чем list отличается от tuple?", "a": "<p>Список изменяемый, кортеж — нет. Кортеж можно использовать ключом словаря и элементом множества, он чуть быстрее и сигнализирует, что данные не должны меняться.<\/p>\n"}, {"id": "ac24438e83", "q": "Почему словарь и множество ищут быстро?", "a": "<p>Они построены на хеш-таблицах: поиск по ключу в среднем O(1). Поэтому ключи должны быть хешируемыми (неизменяемыми).<\/p>\n"}, {"id": "307610d085", "q": "Что не так с <code>def f(items=[])<\/code>?", "a": "<p>Значение по умолчанию создаётся один раз при определении функции, и список разделяется между всеми вызовами. Правильно: <code>items=None<\/code>, внутри <code>if items is None: items = []<\/code>.<\/p>\n"}, {"id": "7ac2d2f269", "q": "Зачем нужен venv?", "a": "<p>Изолирует зависимости проекта от системного Python и других проектов: разные проекты могут требовать разных версий одной библиотеки, а системный Python в Linux используют сами системные утилиты.<\/p>\n"}, {"id": "26fafc819a", "q": "Чем <code>is<\/code> отличается от <code>==<\/code>?", "a": "<p><code>==<\/code> сравнивает значения, <code>is<\/code> — что это один и тот же объект в памяти. <code>is<\/code> используют только для <code>None<\/code>, <code>True<\/code>, <code>False<\/code>.<\/p>\n"}, {"id": "d0e1c91139", "q": "Зачем <code>with open(...)<\/code>?", "a": "<p>Контекстный менеджер гарантирует закрытие файла даже при исключении. Незакрытые файлы — утечка дескрипторов.<\/p>\n"}, {"id": "42e831a008", "q": "Что делает <code>if __name__ == &quot;__main__&quot;:<\/code>?", "a": "<p>Код под условием выполняется только при прямом запуске файла, а не при импорте его как модуля. Позволяет одновременно иметь переиспользуемые функции и точку входа.<\/p>\n"}, {"id": "4fecc8f54b", "q": "Как перехватить исключение правильно?", "a": "<p>Ловить конкретный тип (<code>except FileNotFoundError<\/code>), а не голый <code>except:<\/code>, который глотает всё, включая Ctrl+C. Не подавлять ошибку молча — логировать или пробрасывать дальше.<\/p>\n"}], "next": "2-2"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

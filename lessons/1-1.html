@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1.1 Linux: сервер с нуля — DevOps-маршрут</title>
+<meta name="description" content="Урок 1.1: Linux: сервер с нуля">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c1)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-1">← 1. Linux и сети</a>
+    <div class="sidebar-art"><svg class="art art-linux" viewBox="0 0 240 140" role="img" aria-label="Сервер и сеть" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect x="18" y="22" width="76" height="96" rx="7"/>
+<rect class="dim" x="28" y="34" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="61" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="88" width="56" height="18" rx="3"/>
+<circle class="led l1" cx="74" cy="43" r="2.6"/>
+<circle class="led l2" cx="74" cy="70" r="2.6"/>
+<circle class="led l3" cx="74" cy="97" r="2.6"/>
+<path class="dim" d="M35 43 H58 M35 70 H52 M35 97 H62"/>
+<path class="dim" d="M94 70 H160"/>
+<rect class="packet p1" x="96" y="66" width="8" height="8" rx="2"/>
+<rect class="packet p2" x="96" y="66" width="8" height="8" rx="2"/>
+<circle cx="192" cy="70" r="32"/>
+<ellipse class="dim" cx="192" cy="70" rx="13" ry="32"/>
+<path class="dim" d="M160 70 H224 M164 54 H220 M164 86 H220"/>
+<text class="lbl" x="26" y="134">$ ssh prod</text>
+</svg></div>
+    <div class="lesson-number">lesson 1.1 · linux</div>
+    <h1 class="lesson-title">Linux: сервер с нуля</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Виртуальные машины</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Файловая система</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Права доступа</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Пользователи и sudo</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Процессы и сигналы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Память, swap и OOM killer</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">systemd: службы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">journald: журнал служб</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Bash</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Пакетные менеджеры</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">SSH</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Сеть: DHCP и статика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Текстовые редакторы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Обновления и время</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Дисковое пространство</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Логи и cron</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">logrotate: чтобы логи не съели диск</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-18" data-step="s-18"><span class="step-icon">§</span><span class="step-title">Сервис не работает: порядок разбора</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Почти всё в DevOps в итоге происходит на Linux-сервере: контейнеры — это процессы Linux, узлы Kubernetes — машины с Linux, раннеры CI — тоже Linux. Это первый урок, предыдущего нет, поэтому читаем так, будто раньше с Linux дела вообще не имели.</p>
+<p>На собеседовании junior DevOps Linux проверяют всегда и подробно: права, процессы и сигналы, systemd, логи, диск, SSH. Большая часть вопросов звучит как «сервис не работает — что будешь смотреть», и последний раздел урока как раз про это.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Терминал</strong> — окно, куда вводишь команды текстом вместо кликов мышкой.</li>
+<li><strong>Команда</strong> — одна инструкция терминалу, например <code>ls</code> («покажи файлы»).</li>
+<li><strong>Пакет</strong> — готовая программа, упакованная в один файл для удобной установки.</li>
+<li><strong>Демон</strong> — программа-служба, которая крутится в фоне и ждёт запросов.</li>
+<li><strong>root</strong> — главный пользователь системы, у которого есть права на абсолютно всё.</li>
+<li><strong>Ядро (kernel)</strong> — сердце ОС: программа, которая напрямую общается с железом.</li>
+<li><strong>systemd</strong> — система, которая запускает службы при старте и следит за ними.</li>
+<li><strong>PID</strong> — номер процесса.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Виртуальные машины</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-vm.webp" alt="" /><br />
+<em>Аналогия:</em> виртуальная машина — компьютер внутри файла. Реального железа не появляется, но система думает, что у неё есть свой процессор, память и диск — всё это «одолжено» у настоящего компьютера.</p>
+<p>Так проще всего попробовать Linux, не переустанавливая Windows. Варианты:</p>
+<ul>
+<li><strong>WSL</strong> — встроенный в Windows способ запустить настоящую Ubuntu без отдельного виртуализатора. Удобно для повседневной работы с командами.</li>
+<li><strong>VirtualBox</strong> или Hyper-V — полноценная машина со своей сетью. Нужна, когда изучаешь сеть, systemd и загрузку системы.</li>
+<li><strong>Vagrant</strong> — машины из файла описания, поднимаются одной командой (<a href="../lessons/4-1.html#s-3">4.1 Compose и Swarm</a>, §3).</li>
+</ul>
+<p>Серверы ставят <strong>без графического интерфейса</strong> — управление только через терминал. Для практики берут <strong>Ubuntu Server LTS</strong>: её чаще всего встречаешь в вакансиях и в облаках.</p>
+<pre><code class="language-bash">cat /etc/os-release   # какой дистрибутив и версия
+uname -r              # версия ядра
+hostnamectl           # имя машины, ОС, ядро, виртуализация
+</code></pre>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Файловая система</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-filesystem-tree.webp" alt="" /><br />
+<em>Аналогия:</em> один большой шкаф с папками. В Windows таких шкафов несколько (C:, D:), а в Linux — всегда один, называется «корень», обозначается <code>/</code>.</p>
+<p>Всё растёт из этого корня, и у каждой верхней папки есть смысл:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Путь</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/etc</code></td>
+<td>конфиги системы и сервисов</td>
+</tr>
+<tr>
+<td><code>/var</code>, <code>/var/log</code></td>
+<td>изменяемые данные, логи</td>
+</tr>
+<tr>
+<td><code>/home/&lt;user&gt;</code></td>
+<td>домашняя папка пользователя</td>
+</tr>
+<tr>
+<td><code>/root</code></td>
+<td>домашняя папка root</td>
+</tr>
+<tr>
+<td><code>/usr/bin</code>, <code>/bin</code></td>
+<td>сами программы</td>
+</tr>
+<tr>
+<td><code>/tmp</code></td>
+<td>временные файлы, чистятся сами</td>
+</tr>
+<tr>
+<td><code>/proc</code>, <code>/sys</code></td>
+<td>виртуальные ФС — живое состояние ядра и процессов</td>
+</tr>
+<tr>
+<td><code>/dev</code></td>
+<td>файлы устройств (диски, терминалы)</td>
+</tr>
+<tr>
+<td><code>/opt</code></td>
+<td>сторонний софт вне пакетного менеджера</td>
+</tr>
+<tr>
+<td><code>/mnt</code>, <code>/media</code></td>
+<td>точки монтирования внешних дисков</td>
+</tr>
+</tbody>
+</table></div>
+<p>Путь бывает <strong>абсолютный</strong> (начинается с <code>/</code>, работает откуда угодно) и <strong>относительный</strong> — от текущего места (<code>.</code> — тут же, <code>..</code> — на уровень выше, <code>~</code> — домашняя папка).</p>
+<pre><code class="language-bash">pwd                         # где я сейчас нахожусь
+cd /var/log                 # перейти
+ls -la                      # список файлов, включая скрытые, с правами
+find /etc -name &quot;*.conf&quot;    # найти файлы по имени
+mkdir -p a/b/c              # создать сразу все вложенные папки
+cp -r src/ dst/             # скопировать папку целиком
+mv old new                  # переместить или переименовать
+rm -rf dir/                 # удалить папку рекурсивно — опасно, сначала проверь путь
+</code></pre>
+<p>Звёздочка <code>*</code> — подстановочный символ («любое количество любых символов»), поэтому <code>find</code> находит любой файл, имя которого заканчивается на <code>.conf</code>. У <code>rm -rf</code> два флага: <code>-r</code> — удалить вместе со всем содержимым, <code>-f</code> — не спрашивать подтверждения. Сочетание делает команду опасной: она молча удаляет всё по указанному пути. Корзины в терминале нет.</p>
+<p><strong>Симлинк</strong> (<code>ln -s</code>) — ярлык: отдельный файл с путём к другому файлу; сломается, если оригинал удалить. <strong>Жёсткая ссылка</strong> (<code>ln</code>) — второе имя для тех же данных на диске; данные живы, пока жива хоть одна ссылка.</p>
+<p><strong>«Всё есть файл».</strong> В Linux файлами представлены не только документы, но и устройства (<code>/dev/sda</code>), состояние процессов (<code>/proc/1234/status</code>) и параметры ядра (<code>/proc/sys/...</code>). Поэтому многие диагностические вещи читаются обычным <code>cat</code>.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Права доступа</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-permissions-rwx.webp" alt="" /><br />
+<em>Аналогия:</em> замок на двери. У каждого файла есть хозяин, его «семья» (группа) и «все остальные» — и для каждого отдельно решается, можно ли читать, писать или запускать.</p>
+<p><code>ls -la</code> показывает строку вроде <code>-rw-r--r--</code>: тип файла, потом три раза по три буквы — права хозяина, группы, всех остальных. <code>r</code> — читать, <code>w</code> — изменять, <code>x</code> — запускать как программу (для папки — входить в неё). Цифра — сумма r=4, w=2, x=1 на каждую тройку:</p>
+<ul>
+<li><code>644</code> = <code>rw-r--r--</code> — типично для конфигов.</li>
+<li><code>755</code> = <code>rwxr-xr-x</code> — скрипты, программы, папки.</li>
+<li><code>600</code> = <code>rw-------</code> — приватные файлы, например SSH-ключ.</li>
+</ul>
+<pre><code class="language-bash">chmod 755 script.sh        # выдать права числом
+chmod u+x script.sh        # или символьно: добавить хозяину право на выполнение
+chmod g-w,o-rwx file       # убрать запись у группы, всё у остальных
+chown user:group file      # сменить хозяина и группу разом
+umask                      # маска прав по умолчанию для новых файлов
+</code></pre>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>chmod 777 — не решение</summary><div class="callout-body"><p>Когда «не хватает прав», соблазн написать <code>chmod -R 777</code> велик: ошибка пропадает. Вместе с ней пропадает и защита — любой процесс на машине может переписать файл. Правильный путь — понять, <strong>от какого пользователя</strong> работает процесс, и выдать права именно ему: сменить владельца или добавить пользователя в группу.</p>
+</div></details>
+<details class="callout callout-warning"><summary><span class="callout-icon">⚠️</span>Спецбиты, если хочешь глубже</summary><div class="callout-body"><ul>
+<li><strong>SUID</strong> (<code>chmod u+s</code>) — программа выполняется с правами её владельца, а не того, кто запустил (пример: <code>/usr/bin/passwd</code>).</li>
+<li><strong>SGID</strong> (<code>chmod g+s</code>) на директории — новые файлы наследуют группу директории.</li>
+<li><strong>Sticky bit</strong> (<code>chmod +t</code>, пример <code>/tmp</code>) — удалить файл может только его владелец, даже если у остальных есть право записи в саму директорию.</li>
+</ul>
+</div></details>
+<figure class="explain" data-anim="chmod"><figcaption><span class="explain-tag">▶ схема</span>Собери права кликами и посмотри, какое число получится</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Пользователи и sudo</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-sudo.webp" alt="" /><br />
+<em>Аналогия:</em> один аккаунт-администратор на всех — как один ключ от офиса на всю компанию. Отдельные пользователи — именные пропуска.</p>
+<pre><code class="language-bash">sudo adduser newuser
+sudo usermod -aG sudo newuser   # разрешить пользоваться sudo
+sudo usermod -aG adm newuser    # доступ к логам без полного root
+id newuser                      # в каких группах состоит
+getent passwd newuser           # запись в /etc/passwd
+</code></pre>
+<p><strong>Группа</strong> — набор пользователей, которым разом выдали одинаковый доступ. У <code>usermod</code> флаг <code>-a</code> (append) обязательно идёт вместе с <code>-G</code>: без <code>-a</code> команда <strong>заменит</strong> все группы пользователя на указанную и легко лишит его прав, которые уже были.</p>
+<p><code>sudo</code> — не «волшебное слово», а «выполни это от имени root, но запиши в журнал, что это сделал я». Безопаснее, чем постоянно работать под root: там одна опечатка ломает систему без предупреждения, и непонятно, кто что сделал. Права на sudo настраиваются в <code>/etc/sudoers</code> — редактируют его только через <code>sudo visudo</code>, который проверяет синтаксис: сломанный sudoers оставляет систему без администратора.</p>
+<p><strong>Сервисные пользователи.</strong> Каждая служба работает от своего пользователя без права входа: nginx — от <code>www-data</code>, PostgreSQL — от <code>postgres</code>. Взлом одной службы не даёт доступ к файлам другой. Свои приложения запускают так же:</p>
+<pre><code class="language-bash">sudo useradd --system --no-create-home --shell /usr/sbin/nologin app
+</code></pre>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Процессы и сигналы</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-processes-signals.webp" alt="" /><br />
+<em>Аналогия:</em> процесс — запущенная программа. У каждой есть номер (PID), родитель, владелец, и с ней можно взаимодействовать: посмотреть, что она делает, или попросить остановиться.</p>
+<pre><code class="language-bash">ps aux                  # все процессы: a — все, u — с владельцем, x — и без терминала
+ps aux --sort=-%mem | head    # самые прожорливые по памяти
+pgrep -a nginx          # найти процессы по имени
+top                     # живой список: load average, CPU, память
+htop                    # то же удобнее: F6 сортировка, F4 фильтр, F9 сигнал
+</code></pre>
+<p><strong>Load average</strong> в <code>top</code> — три числа: средняя очередь на процессор за 1, 5 и 15 минут. Сравнивают с числом ядер (<code>nproc</code>): на 4 ядрах load 4 — полная загрузка, 8 — процессы ждут в очереди.</p>
+<p><strong>Сигналы</strong> — способ сообщить процессу о событии:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Сигнал</th>
+<th>Номер</th>
+<th>Что значит</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SIGTERM</code></td>
+<td>15</td>
+<td>Вежливая просьба завершиться: сохранить данные, закрыть соединения</td>
+</tr>
+<tr>
+<td><code>SIGKILL</code></td>
+<td>9</td>
+<td>Убить немедленно. Процесс не может его перехватить</td>
+</tr>
+<tr>
+<td><code>SIGINT</code></td>
+<td>2</td>
+<td>То, что посылает <code>Ctrl+C</code></td>
+</tr>
+<tr>
+<td><code>SIGHUP</code></td>
+<td>1</td>
+<td>Исторически «терминал закрылся»; многие демоны по нему перечитывают конфиг</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-bash">kill 1234          # по умолчанию SIGTERM
+kill -9 1234       # SIGKILL — только если SIGTERM не помог
+pkill -HUP nginx   # отправить сигнал по имени
+</code></pre>
+<p>Порядок важен: сначала <code>SIGTERM</code> и несколько секунд ожидания, <code>SIGKILL</code> — только если процесс не отреагировал. <code>kill -9</code> сразу лишает приложение шанса завершить запись в базу или дослать ответы. Ровно так же ведут себя Docker и Kubernetes при остановке контейнера: сначала SIGTERM, через период ожидания — SIGKILL (<a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>).</p>
+<p>Фоновые задачи:</p>
+<pre><code class="language-bash">long_command &amp;          # запустить в фоне
+jobs                    # фоновые задачи текущего терминала
+fg %1                   # вернуть задачу 1 на передний план
+nohup long_command &amp;    # переживёт закрытие терминала
+</code></pre>
+<p><code>%1</code> — номер задачи в списке <code>jobs</code>, а не PID. Обычная фоновая задача завершится при закрытии терминала, <code>nohup</code> от этого защищает. Для долгой работы по SSH удобнее <code>tmux</code>: сессия продолжает жить после отключения, и к ней можно вернуться.</p>
+<p><strong>Зомби</strong> — процесс, который завершился, но родитель ещё не забрал его код выхода. Ресурсов почти не ест, но много зомби — признак ошибки в родительском процессе.</p>
+
+<figure class="explain" data-anim="process-signals"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: отправь процессу сигналы</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Память, swap и OOM killer</h2><div class="prose"><p><em>Аналогия:</em> память — рабочий стол. Swap — тумбочка рядом: туда можно убрать бумаги, но доставать их долго. Когда стол завален и тумбочка полна, приходит уборщик и выбрасывает самую большую стопку, не спрашивая.</p>
+<pre><code class="language-bash">free -h
+#               total   used   free   shared  buff/cache  available
+# Mem:          7.7Gi  2.1Gi  0.4Gi   0.1Gi       5.2Gi      5.3Gi
+# Swap:         2.0Gi     0B  2.0Gi
+</code></pre>
+<p>Самая частая ошибка новичка — смотреть на <code>free</code> и паниковать, что свободно 0.4 ГБ. Linux специально занимает свободную память под <strong>кэш диска</strong> (<code>buff/cache</code>): это ускоряет чтение файлов, а при нехватке кэш мгновенно освобождается. Смотреть нужно на <strong><code>available</code></strong> — сколько реально можно отдать программам.</p>
+<p><strong>Swap</strong> — место на диске, куда ядро выгружает редко используемые страницы памяти. Немного swap полезно. Активная работа со swap (видно в <code>vmstat 1</code>, колонки <code>si</code>/<code>so</code>) означает, что памяти не хватает, и всё становится очень медленным.</p>
+<p><strong>OOM killer</strong> (Out Of Memory) — механизм ядра на крайний случай: если памяти не осталось совсем, ядро выбирает процесс и убивает его <code>SIGKILL</code>. Выбирает в основном по размеру — поэтому жертвой часто становится самый важный и прожорливый процесс, например база данных.</p>
+<pre><code class="language-bash">sudo dmesg -T | grep -i -E &quot;killed process|out of memory&quot;
+journalctl -k | grep -i oom
+</code></pre>
+<p>Признаки того, что процесс убил OOM killer: сервис внезапно перезапустился без ошибок в собственном логе, а в журнале ядра есть <code>Killed process 1234 (postgres)</code>. В контейнерах то же самое выглядит как статус <code>OOMKilled</code> (<a href="../lessons/5-1.html#s-12">5.1 Kubernetes</a>, §12): там лимит задаёт сам контейнер.</p>
+<p>Защищаются лимитами памяти для служб и контейнеров (<a href="../lessons/4-1.html#s-11">4.1 Compose и Swarm</a>, §11) и мониторингом <code>available</code> с алертом заранее (<a href="../lessons/4-5.html">4.5 Наблюдаемость</a>).</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>systemd: службы</h2><div class="prose"><p><em>Аналогия:</em> systemd — управляющий зданием. Знает, какие службы должны работать, запускает их утром в правильном порядке, перезапускает упавшие и ведёт журнал.</p>
+<p>Почти во всех современных дистрибутивах службами управляет <strong>systemd</strong>. Основная команда — <code>systemctl</code>:</p>
+<pre><code class="language-bash">systemctl status nginx          # состояние, PID, последние строки лога
+sudo systemctl start nginx      # запустить
+sudo systemctl stop nginx       # остановить
+sudo systemctl restart nginx    # остановить и запустить заново
+sudo systemctl reload nginx     # перечитать конфиг без остановки
+sudo systemctl enable nginx     # запускать при загрузке системы
+sudo systemctl enable --now nginx   # включить и сразу запустить
+systemctl list-units --type=service --state=failed   # все упавшие службы
+</code></pre>
+<p><strong>restart и reload — разные вещи.</strong> <code>restart</code> останавливает процесс и запускает заново: все текущие соединения рвутся. <code>reload</code> просит процесс перечитать конфигурацию на ходу (обычно сигналом <code>SIGHUP</code>, §5) — соединения сохраняются. Для nginx и большинства веб-серверов после правки конфига делают <code>reload</code>. Не все службы его поддерживают; тогда <code>systemctl</code> сообщит об ошибке.</p>
+<p><strong>start и enable — тоже разные.</strong> <code>start</code> запускает сейчас, но после перезагрузки служба не поднимется. <code>enable</code> включает автозапуск, но сейчас ничего не запускает. Частая ошибка — поставить сервис, запустить через <code>start</code>, а после первой перезагрузки сервера обнаружить, что он не работает.</p>
+<p><strong>Свой сервис.</strong> Любую программу можно оформить службой — это правильнее, чем <code>nohup</code> или <code>screen</code>:</p>
+<pre><code class="language-ini"># /etc/systemd/system/myapp.service
+[Unit]
+Description=My application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=app
+WorkingDirectory=/opt/myapp
+ExecStart=/opt/myapp/venv/bin/python app.py
+Restart=on-failure
+RestartSec=5
+Environment=PORT=8000
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<pre><code class="language-bash">sudo systemctl daemon-reload        # после любого изменения unit-файлов
+sudo systemctl enable --now myapp
+</code></pre>
+<p>Что даёт такой unit: запуск при загрузке, автоматический перезапуск при падении (<code>Restart=on-failure</code>), работа от отдельного пользователя (§4), лимит памяти (<code>MemoryMax</code>, §6) и весь вывод программы в journald (§8). Забытый <code>daemon-reload</code> после правки unit-файла — классическая причина «я поменял, а ничего не изменилось».</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>journald: журнал служб</h2><div class="prose"><p><em>Аналогия:</em> единый журнал дежурного, куда пишут все службы здания, вместо стопки тетрадей в каждом кабинете.</p>
+<p>Всё, что службы systemd пишут в stdout и stderr, попадает в <strong>journald</strong>. Читается через <code>journalctl</code>:</p>
+<pre><code class="language-bash">journalctl -u nginx                     # лог конкретной службы
+journalctl -u nginx -f                  # следить в реальном времени, как tail -f
+journalctl -u nginx --since &quot;1 hour ago&quot;
+journalctl -u nginx -n 50 --no-pager    # последние 50 строк
+journalctl -p err -b                    # только ошибки с момента загрузки
+journalctl -k                           # сообщения ядра
+journalctl --disk-usage                 # сколько места занимает журнал
+</code></pre>
+<p>Флаг <code>-u</code> (unit) — главный: показывает только нужную службу, а не весь системный шум. Скрипт, оформленный unit-ом из §7, автоматически пишет в journald — именно так логи из <a href="../lessons/1-3.html">1.3 Bash</a> оказываются в одном месте с системными.</p>
+<p>Журнал по умолчанию может не переживать перезагрузку. Чтобы хранить его на диске, создают каталог <code>/var/log/journal</code> или ставят <code>Storage=persistent</code> в <code>/etc/systemd/journald.conf</code>. Размер ограничивают там же (<code>SystemMaxUse=500M</code>), иначе журнал однажды займёт весь диск.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>Bash</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-bash-pipe.webp" alt="" /><br />
+<em>Аналогия:</em> bash — язык, на котором отдаёшь команды текстом вместо кликов мышкой. Со временем это оказывается быстрее и куда легче автоматизировать.</p>
+<p>Переменные и условия:</p>
+<pre><code class="language-bash">NAME=&quot;value&quot;            # без пробелов вокруг =
+echo &quot;$NAME&quot;            # переменные — всегда в кавычках
+
+if [ -f file.txt ]; then
+  echo &quot;есть&quot;
+else
+  echo &quot;нет&quot;
+fi
+
+for f in /var/log/*.log; do
+  echo &quot;$f&quot;
+done
+</code></pre>
+<p>Пробелы вокруг <code>=</code> недопустимы: bash воспримет <code>NAME = value</code> как вызов команды <code>NAME</code>. В <code>[ -f file.txt ]</code> флаг <code>-f</code> проверяет, что файл существует; <code>-d</code> — что это папка, <code>-z</code> — что строка пустая, <code>-n</code> — что не пустая.</p>
+<p><strong>Конвейер</strong> <code>|</code> передаёт вывод одной команды на вход следующей, перенаправления пишут в файлы:</p>
+<pre><code class="language-bash">grep ERROR app.log | wc -l     # сколько строк с ERROR
+command &gt; out.log              # вывод в файл (перезапись)
+command &gt;&gt; out.log             # дописать в конец
+command 2&gt; err.log             # только ошибки (поток stderr)
+command &gt; all.log 2&gt;&amp;1         # и вывод, и ошибки в один файл
+</code></pre>
+<p>У каждой программы два выходных потока: <strong>stdout</strong> (1) для обычного вывода и <strong>stderr</strong> (2) для ошибок. <code>2&gt;&amp;1</code> означает «отправь ошибки туда же, куда идёт обычный вывод».</p>
+<p>Текстовые утилиты, без которых редкий скрипт обходится:</p>
+<pre><code class="language-bash">grep -v &quot;debug&quot; file.log         # исключить совпадения
+grep -r &quot;listen&quot; /etc/nginx/     # искать по всем файлам в папке
+cut -d',' -f2 file.csv           # 2-е поле по разделителю
+sort file.txt | uniq -c          # отсортировать и посчитать повторы
+awk '{print $1, $3}' file.log    # 1-я и 3-я колонки
+sed 's/old/new/g' file.txt       # заменить текст
+tail -f /var/log/syslog          # следить за концом файла
+find . -name &quot;*.tmp&quot; | xargs rm  # передать результат как аргументы
+</code></pre>
+<p><code>sort</code> перед <code>uniq</code> обязателен: <code>uniq</code> убирает только <strong>соседние</strong> повторы. <code>sed 's/old/new/g'</code>: <code>s</code> — заменить, <code>g</code> — все вхождения в строке, а не только первое.</p>
+<p>Скрипт — файл с командами, начинается с shebang и строгого режима:</p>
+<pre><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail     # упасть при ошибке, на необъявленной переменной и в конвейере
+</code></pre>
+<pre><code class="language-bash">chmod +x deploy.sh
+./deploy.sh
+</code></pre>
+<p>Подробно о скриптах — параметры, функции, кавычки, <code>trap</code>, shellcheck — в <a href="../lessons/1-3.html">1.3 Bash</a>.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Пакетные менеджеры</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-package-manager.webp" alt="" /><br />
+<em>Аналогия:</em> как магазин приложений, только для Linux — устанавливает, обновляет и полностью удаляет программы без мусора, а заодно подтягивает всё, что им нужно для работы.</p>
+<pre><code class="language-bash">sudo apt update                 # обновить список доступных пакетов
+sudo apt install -y nginx       # установить
+sudo apt remove nginx           # удалить (конфиги остаются)
+sudo apt purge nginx            # удалить вместе с конфигами
+apt search nginx                # найти пакет
+apt show nginx                  # описание и версия
+dpkg -L nginx                   # какие файлы принёс пакет
+apt list --installed | grep nginx
+</code></pre>
+<p><code>apt update</code> не обновляет программы, а только скачивает свежий список пакетов. Без него <code>apt install</code> может пытаться поставить версию, которой уже нет в репозитории.</p>
+<p><strong>Сторонние репозитории.</strong> Docker, PostgreSQL новых версий, Grafana ставят из репозиториев производителя: добавляется ключ подписи и строка с адресом репозитория, потом обычный <code>apt install</code>. Подпись гарантирует, что пакет не подменили по дороге.</p>
+<p>На RHEL, Rocky, Fedora вместо <code>apt</code> — <code>dnf</code> (<code>dnf install</code>, <code>dnf remove</code>). В Alpine, которую часто используют в контейнерах, — <code>apk add</code>.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>SSH</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-ssh-gatekeeper.webp" alt="" /><br />
+<em>Аналогия:</em> sshd — дежурный вахтёр: слушает свою дверь (порт 22) и пускает только тех, у кого подходящий ключ.</p>
+<p>SSH — способ управлять удалённым сервером через зашифрованное соединение. На сервере работает служба <code>sshd</code>, на твоей машине — клиент <code>ssh</code>.</p>
+<pre><code class="language-bash">sudo apt install -y openssh-server
+sudo systemctl enable --now ssh
+ss -tlnp | grep :22            # слушает ли порт: -t TCP, -l слушающие, -n числа, -p процесс
+</code></pre>
+<p><strong>Вход по ключу</strong> вместо пароля — стандарт. Создаётся пара: приватный ключ остаётся у тебя и никому не показывается, публичный кладётся на сервер.</p>
+<pre><code class="language-bash">ssh-keygen -t ed25519 -C &quot;me@laptop&quot;     # создать пару ключей
+ssh-copy-id user@server                  # положить публичный ключ на сервер
+ssh user@server                          # войти
+</code></pre>
+<p>Публичный ключ попадает в <code>~/.ssh/authorized_keys</code> на сервере. Права важны: каталог <code>~/.ssh</code> — <code>700</code>, файл <code>authorized_keys</code> и приватный ключ — <code>600</code>. Если права шире, sshd из соображений безопасности <strong>молча откажется</strong> принимать ключ.</p>
+<p>Удобные записи для частых подключений — в <code>~/.ssh/config</code> на своей машине:</p>
+<pre><code>Host web1
+    HostName 10.0.1.11
+    User deploy
+    IdentityFile ~/.ssh/id_ed25519
+</code></pre>
+<p>После этого достаточно <code>ssh web1</code>.</p>
+<p><strong>Минимальная защита сервера</strong> в <code>/etc/ssh/sshd_config</code>:</p>
+<pre><code>PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+</code></pre>
+<pre><code class="language-bash">sudo sshd -t &amp;&amp; sudo systemctl reload ssh    # проверить конфиг и применить
+</code></pre>
+<p>Боты перебирают пароли на порту 22 любого сервера с публичным адресом круглосуточно — в <code>/var/log/auth.log</code> это видно через несколько минут после создания машины. Вход только по ключу делает перебор бессмысленным.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Не потеряй доступ</summary><div class="callout-body"><p>Меняя настройки SSH или включая файрвол (<a href="../lessons/1-2.html">1.2 Сети</a>), <strong>не закрывай текущую сессию</strong>. Открой вторую и проверь, что вход работает. Если настройки сломали доступ, первая сессия — единственный способ всё вернуть, иначе спасать сервер придётся через консоль облака или физически.</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Сеть: DHCP и статика</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-dhcp-static.webp" alt="" /><br />
+<em>Аналогия:</em> DHCP — стойка регистрации на конференции: выдаёт «бейджик» (IP) на время визита. Статика — именной пропуск, всегда один и тот же.</p>
+<pre><code class="language-bash">ip a            # интерфейсы и адреса; lo — «сеть с самим собой», 127.0.0.1
+ip r            # таблица маршрутов, default — шлюз по умолчанию
+resolvectl status   # какие DNS-серверы используются
+</code></pre>
+<p><strong>DHCP</strong> — служба, которая автоматически выдаёт машине IP-адрес, шлюз и DNS при подключении к сети. Серверам обычно нужен <strong>постоянный</strong> адрес — его задают статически. В Ubuntu это делается через <strong>netplan</strong>:</p>
+<pre><code class="language-yaml"># /etc/netplan/00-installer-config.yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses: [192.168.1.50/24]
+      routes:
+        - to: default
+          via: 192.168.1.1
+      nameservers:
+        addresses: [1.1.1.1, 8.8.8.8]
+</code></pre>
+<p><code>addresses</code> — IP с маской подсети, <code>routes</code> — куда отправлять трафик, если адрес не в локальной сети, <code>nameservers</code> — DNS-серверы. YAML чувствителен к отступам: лишний пробел — и конфиг не применится.</p>
+<pre><code class="language-bash">sudo netplan try        # применить с автоматическим откатом через 120 секунд, если не подтвердить
+sudo netplan apply
+ping -c 4 1.1.1.1       # цель: &quot;0% packet loss&quot;
+</code></pre>
+<p><code>netplan try</code> — правильный способ менять сеть на удалённой машине: если новая настройка отрезала тебя от сервера, через две минуты всё вернётся само. Подробно о сетях — в <a href="../lessons/1-2.html">1.2 Сети</a>.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Текстовые редакторы</h2><div class="prose"><p><em>Аналогия:</em> vim — не блокнот, а отдельный язык жестов: сначала бессмысленный набор клавиш, потом быстрее мыши.</p>
+<pre><code>vim test.txt
+i            — режим вставки текста; Esc — обратно в режим команд
+:wq          — сохранить и выйти; :q! — выйти без сохранения
+/слово       — поиск; n — следующее совпадение
+dd           — удалить строку; u — отменить
+:%s/старое/новое/g — заменить по всему файлу
+</code></pre>
+<p>Главное, что сбивает с толку: vim <strong>модальный</strong>. В режиме по умолчанию буквы на клавиатуре — это команды, а не текст. <code>i</code> переключает в режим вставки, <code>Esc</code> возвращает обратно. <code>:q!</code> выходит без сохранения — восклицательный знак значит «точно, без предупреждений».</p>
+<p><code>nano</code> проще: подсказки внизу экрана (<code>Ctrl+O</code> сохранить, <code>Ctrl+X</code> выйти), никаких режимов.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Почему это не мелочь</summary><div class="callout-body"><p>На реальном сервере графического редактора не будет никогда — только vim или nano. В контейнерах часто нет даже их. Без минимального владения vim не починишь конфиг в 3 часа ночи.</p>
+</div></details></div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Обновления и время</h2><div class="prose"><p><em>Аналогия:</em> обновления — как прививки: неприятно, но без них рано или поздно «продует» через давно известную дыру.</p>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt upgrade -y
+cat /var/run/reboot-required 2&gt;/dev/null   # нужна ли перезагрузка (например, после обновления ядра)
+</code></pre>
+<p>Обновления безопасности на Ubuntu может ставить сам <strong>unattended-upgrades</strong> — его стоит включить на любом сервере. Крупные обновления на продакшене делают осознанно: сначала на тестовой машине.</p>
+<p><strong>Время.</strong> Точное время критично: по нему проверяются сертификаты, сопоставляются логи с разных машин, работает cron, а Kerberos и многие базы при расхождении часов отказываются работать. Часы синхронизирует NTP:</p>
+<pre><code class="language-bash">timedatectl                          # время, часовой пояс, синхронизация
+timedatectl show -p NTPSynchronized  # цель: NTPSynchronized=yes
+sudo timedatectl set-timezone UTC
+</code></pre>
+<p><strong>Серверы живут в UTC.</strong> Местное время на сервере — постоянный источник ошибок: переход на летнее время ломает расписание cron, а логи серверов из разных часовых поясов невозможно сопоставить. Местное время показывают пользователю в интерфейсе, а на сервере и в базе всё хранится в UTC (<a href="../lessons/2-2.html">2.2 Python для автоматизации</a>).</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Дисковое пространство</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-disk-zoom.webp" alt="" /><br />
+<em>Аналогия:</em> <code>df</code> — счётчик на бензоколонке: сколько всего и сколько осталось. <code>du</code> — чек с расшифровкой, куда именно ушло топливо.</p>
+<pre><code class="language-bash">df -Th                       # размер, занято, свободно, % и тип ФС по разделам
+du -sh /var/log/*            # размер каждой папки отдельно
+du -xh / --max-depth=1 2&gt;/dev/null | sort -h   # что самое большое в корне
+ncdu /                       # то же интерактивным деревом
+lsblk                        # дерево дисков и разделов
+mount | column -t            # что и куда смонтировано
+</code></pre>
+<p>Типичные пожиратели места на сервере: логи (<code>/var/log</code>), журнал systemd (§8), образы и тома Docker (<code>/var/lib/docker</code>, чистится <code>docker system prune</code>), старые ядра и кэш пакетов (<code>apt autoremove</code>, <code>apt clean</code>).</p>
+<p><strong>Две ловушки, о которых спрашивают на собеседованиях:</strong></p>
+<p><strong>Файл удалили, а место не освободилось.</strong> Если процесс держит файл открытым, удаление через <code>rm</code> убирает только имя, а данные остаются на диске, пока процесс не закроет файл. <code>df</code> показывает полный диск, а <code>du</code> не находит, куда делось место.</p>
+<pre><code class="language-bash">sudo lsof +L1                # открытые, но удалённые файлы
+</code></pre>
+<p>Решение — перезапустить процесс, который держит файл, или очистить файл, не удаляя его: <code>: &gt; /var/log/big.log</code> (или <code>truncate -s 0</code>). Именно так логи «чистят» на живом сервере. Это та самая утечка дескрипторов из <a href="../lessons/2-1.html">2.1 Python</a>.</p>
+<p><strong>Место есть, а файлы не создаются.</strong> Кончились <strong>иноды</strong> — записи о файлах. Миллионы мелких файлов (сессии, кэш) исчерпывают их раньше, чем место.</p>
+<pre><code class="language-bash">df -i                        # использование инодов
+</code></pre>
+</div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Логи и cron</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do1-logs-cron.webp" alt="" /><br />
+<em>Аналогия:</em> системные логи — чёрный ящик самолёта: когда что-то падает, смотрят туда, а не гадают.</p>
+<p>Кроме journald (§8), многие службы пишут классические текстовые логи в <code>/var/log</code>:</p>
+<pre><code class="language-bash">less /var/log/syslog         # общий системный журнал (Ubuntu)
+less /var/log/auth.log       # входы, sudo, SSH
+less /var/log/nginx/error.log
+tail -f /var/log/nginx/access.log
+</code></pre>
+<p><code>cron</code> — планировщик: запускает команды по расписанию без участия человека.</p>
+<pre><code class="language-bash">crontab -e      # редактировать свои задачи
+crontab -l      # список задач
+</code></pre>
+<pre><code># минута  час  день_месяца  месяц  день_недели  команда
+*/2       *    *            *      *            uptime &gt;&gt; /tmp/uptime.log
+0         3    *            *      1            /opt/backup.sh &gt;&gt; /var/log/backup.log 2&gt;&amp;1
+</code></pre>
+<p>Первая строка — каждые 2 минуты, вторая — в 3:00 по понедельникам. <code>*/2</code> означает «каждое второе значение». Проверять выражения удобно на crontab.guru.</p>
+<p>Две вещи, на которых ломаются почти все первые cron-задачи:</p>
+<ul>
+<li><strong>Другое окружение.</strong> Cron запускает команды с минимальным <code>PATH</code> и без твоих переменных. Команда, работающая в терминале, в cron не находится. Решение — полные пути (<code>/usr/bin/python3</code>) или <code>PATH=</code> в начале crontab.</li>
+<li><strong>Вывод пропадает.</strong> Без перенаправления <code>&gt;&gt; файл 2&gt;&amp;1</code> ошибки задачи никто не увидит.</li>
+</ul>
+<p>Современная альтернатива cron — <strong>systemd timers</strong>: задача оформляется сервисом (§7), а расписание — отдельным <code>.timer</code>. Плюсы: лог в journald, видно время последнего и следующего запуска (<code>systemctl list-timers</code>), можно запустить вручную через <code>systemctl start</code>.</p>
+</div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>logrotate: чтобы логи не съели диск</h2><div class="prose"><p><em>Аналогия:</em> архивариус, который раз в неделю убирает старые журналы в коробку, подписывает её, а совсем старые коробки выбрасывает.</p>
+<p>Текстовые логи растут бесконечно. Без ротации один болтливый сервис за несколько недель заполняет диск, и падает всё на машине. <strong>logrotate</strong> запускается по расписанию и по правилам из <code>/etc/logrotate.d/</code> переименовывает, сжимает и удаляет старые логи:</p>
+<pre><code># /etc/logrotate.d/myapp
+/var/log/myapp/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}
+</code></pre>
+<ul>
+<li><code>daily</code> и <code>rotate 14</code> — ротировать каждый день, хранить 14 архивов.</li>
+<li><code>compress</code> и <code>delaycompress</code> — сжимать, но вчерашний файл оставить несжатым, чтобы его было удобно читать.</li>
+<li><code>missingok</code>, <code>notifempty</code> — не ругаться на отсутствующий файл и не ротировать пустой.</li>
+<li><code>copytruncate</code> — скопировать лог и очистить оригинал, не удаляя его. Нужно для программ, которые держат файл открытым и не умеют переоткрывать (ловушка из §15). Лучшая альтернатива, если программа поддерживает, — блок <code>postrotate</code> с сигналом на переоткрытие логов.</li>
+</ul>
+<pre><code class="language-bash">sudo logrotate -d /etc/logrotate.d/myapp    # проверить правила без изменений
+sudo logrotate -f /etc/logrotate.d/myapp    # ротировать принудительно
+</code></pre>
+<p>Пакеты nginx, PostgreSQL и других служб приносят свои правила logrotate сами. Для собственных приложений их пишут вручную — или, что лучше, пишут логи в stdout и отдают journald или Docker, где ограничение размера настраивается централизованно (<a href="../lessons/4-1.html">4.1 Compose и Swarm</a>).</p>
+</div></section><section class="step" id="s-18" data-kind="theory"><div class="step-kicker">// шаг <b>19</b>/24 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Сервис не работает: порядок разбора</h2><div class="prose"><p><em>Аналогия:</em> врач на приёме идёт по одному и тому же списку: температура, давление, жалобы — и только потом анализы. Не гадает, а исключает.</p>
+<p>Вопрос «сервис не отвечает — что будешь делать» задают почти на каждом собеседовании. Хороший ответ — последовательность шагов, а не случайные команды:</p>
+<pre><code class="language-bash"># 1. Запущен ли он вообще и что говорит systemd
+systemctl status myapp
+
+# 2. Что он пишет в лог перед падением
+journalctl -u myapp -n 100 --no-pager
+
+# 3. Слушает ли нужный порт и на каком адресе
+ss -tlnp | grep 8000
+
+# 4. Отвечает ли локально, в обход сети и файрвола
+curl -v http://127.0.0.1:8000/health
+
+# 5. Хватает ли ресурсов
+df -h; df -i; free -h; uptime
+
+# 6. Не убил ли его OOM killer
+journalctl -k | grep -i oom
+
+# 7. Правильный ли конфиг
+nginx -t            # или аналог для конкретной программы
+</code></pre>
+<p>Типовые находки:</p>
+<ul>
+<li><strong><code>active (running)</code>, но порт не слушается</strong> — приложение слушает не тот порт или только <code>127.0.0.1</code>, а обращаются снаружи.</li>
+<li><strong>Отвечает на <code>127.0.0.1</code>, но не снаружи</strong> — файрвол или группа безопасности (<a href="../lessons/1-2.html">1.2 Сети</a>, <a href="../lessons/4-2.html">4.2 Облако</a>).</li>
+<li><strong><code>failed</code> с <code>status=203/EXEC</code></strong> — неверный путь в <code>ExecStart</code> или нет прав на запуск.</li>
+<li><strong>Постоянные перезапуски</strong> — смотреть лог перед каждым падением: чаще всего нет конфига, занят порт (<code>Address already in use</code>) или нет доступа к файлу.</li>
+<li><strong><code>Permission denied</code></strong> — проверить, от какого пользователя работает служба (<code>User=</code> в unit-файле), и права на файлы (§3).</li>
+</ul>
+<p>Тот же порядок потом повторяется для контейнеров (<a href="../lessons/3-1.html">3.1 Docker</a>) и подов (<a href="../lessons/5-1.html#s-15">5.1 Kubernetes</a>, §15) — меняются только команды.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>20</b>/24 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Всё растёт из одного корня <code>/</code>; конфиги — в <code>/etc</code>, логи — в <code>/var/log</code>. <strong>Симлинк</strong> — ярлык, <strong>жёсткая ссылка</strong> — второе имя тех же данных.</li>
+<li>Права — хозяин/группа/остальные × чтение/запись/выполнение. <code>chmod 777</code> — не решение.</li>
+<li><strong>sudo</strong> — повышение прав с журналом. <code>usermod -aG</code>: без <code>-a</code> пользователь теряет группы. Службы работают от своих пользователей.</li>
+<li>Сначала <strong>SIGTERM</strong>, и только потом <strong>SIGKILL</strong>.</li>
+<li>В <code>free</code> смотрят на <strong>available</strong>. OOM killer убивает процесс при полной нехватке памяти — следы в <code>dmesg</code>.</li>
+<li><strong>systemd:</strong> <code>restart</code> рвёт соединения, <code>reload</code> нет; <code>start</code> — сейчас, <code>enable</code> — при загрузке. После правки unit — <code>daemon-reload</code>.</li>
+<li>Логи службы — <code>journalctl -u имя -f</code>.</li>
+<li>Конвейер <code>|</code> склеивает команды; <code>2&gt;&amp;1</code> объединяет вывод и ошибки. В скриптах — <code>set -euo pipefail</code>.</li>
+<li><strong>SSH только по ключу</strong>, root и пароли запрещены, права <code>700/600</code>. Меняя доступ — держи открытой вторую сессию.</li>
+<li>Серверы живут в <strong>UTC</strong>, время синхронизируется по NTP.</li>
+<li><strong>df</strong> — сколько места, <strong>du</strong> — куда делось. Удалённый, но открытый файл — <code>lsof +L1</code>. Кончились иноды — <code>df -i</code>.</li>
+<li>В cron другое окружение и пропадает вывод — полные пути и перенаправление в лог.</li>
+<li><strong>logrotate</strong> не даёт логам съесть диск; для открытых файлов — <code>copytruncate</code>.</li>
+<li>Неработающий сервис разбирают по порядку: status → лог → порт → curl локально → ресурсы → OOM → конфиг.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>21</b>/24 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–2 — раздел «Сервер» в <a href="../projects/p1.html">P1</a>: статический адрес, UTC, пользователь <code>deploy</code>, вход только по ключу.</li>
+<li>Задания 1 и 2, собранные в один идемпотентный скрипт, — это мини-проект <a href="../projects/m1.html">M1</a>.</li>
+<li>Задание 3 (свой systemd-сервис) пригодится в <a href="../projects/m2.html">M2</a>: утилиту удобно запускать таймером.</li>
+</ul>
+</div></details><article class="task" data-task="92f85790d4"><h3>Задание 1 — сервер с нуля</h3><p>Поставь Ubuntu Server LTS в VirtualBox. Задай статический IP через netplan (с <code>netplan try</code>), часовой пояс UTC, включи unattended-upgrades.<br />
+<strong>Проверка:</strong> после перезагрузки <code>ip a</code> показывает твой статический адрес, <code>timedatectl</code> — <code>UTC</code> и <code>NTPSynchronized=yes</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="92f85790d4"> Сделала руками и проверила</label></article><article class="task" data-task="e8ee878369"><h3>Задание 2 — пользователь и SSH</h3><p>Создай пользователя <code>deploy</code> с правом sudo. Сгенерируй ключ ed25519 на своей машине, положи его на сервер, запрети в <code>sshd_config</code> вход root и вход по паролю.<br />
+<strong>Проверка:</strong> <code>ssh deploy@&lt;ip&gt;</code> пускает без пароля, <code>ssh root@&lt;ip&gt;</code> отклоняется, <code>ssh -o PubkeyAuthentication=no deploy@&lt;ip&gt;</code> отклоняется. Во время настройки вторая сессия оставалась открытой.</p>
+<label class="task-done"><input type="checkbox" data-task-check="e8ee878369"> Сделала руками и проверила</label></article><article class="task" data-task="1b823a2904"><h3>Задание 3 — свой сервис</h3><p>Напиши простой HTTP-сервер (<code>python3 -m http.server 8000</code> подойдёт) и оформи его systemd-юнитом с отдельным пользователем <code>app</code>, <code>Restart=on-failure</code> и <code>MemoryMax=100M</code>.<br />
+<strong>Проверка:</strong> сервис стартует после перезагрузки; <code>sudo kill -9 &lt;PID&gt;</code> — через 5 секунд он снова работает (<code>systemctl status</code> показывает новый PID); его вывод виден в <code>journalctl -u</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1b823a2904"> Сделала руками и проверила</label></article><article class="task" data-task="2fe301f713"><h3>Задание 4 — ловушка с диском</h3><p>Запусти <code>python3 -c &quot;f=open('/tmp/big','w'); f.write('x'*500_000_000); input()&quot;</code>, в другом терминале удали <code>/tmp/big</code>.<br />
+<strong>Проверка:</strong> <code>df -h</code> всё ещё показывает занятое место, <code>sudo lsof +L1</code> находит удалённый файл; после завершения Python-процесса место освободилось.</p>
+<label class="task-done"><input type="checkbox" data-task-check="2fe301f713"> Сделала руками и проверила</label></article><article class="task" data-task="c3cfcb7693"><h3>Задание 5 — cron и logrotate</h3><p>Сделай cron-задачу, которая каждые 5 минут дописывает в <code>/var/log/myapp/status.log</code> вывод <code>uptime</code> и <code>df -h /</code>. Напиши правило logrotate для этого файла.<br />
+<strong>Проверка:</strong> в логе появляются записи; <code>logrotate -f</code> создаёт сжатый архив; <code>crontab -l</code> показывает задачу с полными путями и перенаправлением <code>2&gt;&amp;1</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c3cfcb7693"> Сделала руками и проверила</label></article><article class="task" data-task="4ad4702952"><h3>Задание 6 — разбор поломки</h3><p>Попроси кого-нибудь (или сделай сам с закрытыми глазами) сломать сервис из задания 3 одним из способов: опечатка в <code>ExecStart</code>, неверные права на рабочую папку, занятый порт.<br />
+<strong>Проверка:</strong> находишь причину, следуя порядку из §18, и записываешь, на каком шаге она обнаружилась.</p>
+<label class="task-done"><input type="checkbox" data-task-check="4ad4702952"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>22</b>/24 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>23</b>/24 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>24</b>/24 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/0-1.html">0.1 Git</a> — SSH-ключи для git</li>
+<li><a href="../lessons/1-2.html">1.2 Сети</a> — сети, порты и файрвол</li>
+<li><a href="../lessons/1-3.html">1.3 Bash</a> — bash-скрипты всерьёз</li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a> — контейнеры как процессы Linux</li>
+<li><a href="../lessons/4-3.html">4.3 Ansible</a> — автоматизация всего этого на многих серверах</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — метрики памяти, диска и процессов</li>
+<li><a href="../lessons/5-1.html">5.1 Kubernetes</a> — тот же порядок разбора для подов</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Ubuntu Server documentation: https://documentation.ubuntu.com/server/</li>
+<li>systemd: https://www.freedesktop.org/software/systemd/man/</li>
+<li>The Linux Command Line (William Shotts): https://linuxcommand.org/tlcl.php</li>
+<li>crontab.guru: https://crontab.guru/</li>
+<li>man-страницы: <code>man signal</code>, <code>man systemd.service</code>, <code>man sshd_config</code>, <code>man logrotate</code></li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="0-1.html">← 0.1 Git, командная работа и английский</a><a class="lesson-jump" href="1-2.html">1.2 Сети: от TCP/IP до nginx →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "1-1", "number": "1.1", "title": "Linux: сервер с нуля", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "s-18", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["92f85790d4", "e8ee878369", "1b823a2904", "2fe301f713", "c3cfcb7693", "4ad4702952"], "quiz": [{"id": "e081d70a3d", "q": "Какой сигнал процесс НЕ может перехватить?", "options": ["SIGTERM", "SIGHUP", "SIGKILL", "SIGINT"], "answer": [2], "why": "<p>SIGKILL (9) обрабатывает ядро, процесс не успевает ни закрыть файлы, ни ответить. Поэтому сначала посылают SIGTERM.<\/p>\n"}, {"id": "e686d950dc", "q": "Что означают права <code>640<\/code> у файла?", "options": ["Все могут читать, владелец может писать", "Владелец читает и пишет, группа только читает, остальные ничего", "Владелец читает, пишет и выполняет, группа читает", "Все могут читать и писать"], "answer": [1], "why": "<p>r=4, w=2, x=1. 6 = rw-, 4 = r--, 0 = ---.<\/p>\n"}, {"id": "aaf33c3ac9", "q": "Ты поправила конфиг nginx. Какая команда применит его, не разрывая текущие соединения?", "options": ["<code>systemctl restart nginx<\/code>", "<code>systemctl reload nginx<\/code>", "<code>systemctl enable nginx<\/code>", "<code>kill -9<\/code> процесса nginx"], "answer": [1], "why": "<p>reload просит процесс перечитать конфигурацию на ходу. restart останавливает процесс и рвёт соединения, enable только включает автозапуск.<\/p>\n"}, {"id": "7c751e877d", "q": "<code>df -h<\/code> показывает, что диск заполнен на 100%, а <code>du<\/code> не находит больших файлов. Какая причина наиболее вероятна?", "options": ["Сломалась файловая система", "Удалённый файл всё ещё открыт процессом", "Кончилась оперативная память", "Неправильно показывает <code>df<\/code>"], "answer": [1], "why": "<p>пока процесс держит файл открытым, данные остаются на диске. Найти такие файлы помогает <code>lsof +L1<\/code>, освободить место — перезапуск процесса.<\/p>\n"}, {"id": "2a669b2dcc", "q": "В выводе <code>free -h<\/code> свободно 200 МБ из 8 ГБ, а <code>available<\/code> — 5 ГБ. Как оценить ситуацию?", "options": ["Память почти кончилась, нужен срочный перезапуск", "Всё нормально: Linux держит свободную память под кэш диска и отдаст её по требованию", "Нужно отключить swap", "Это ошибка утилиты <code>free<\/code>"], "answer": [1], "why": "<p>смотреть нужно на колонку <code>available<\/code> — сколько реально можно отдать программам.<\/p>\n"}, {"id": "1dcb76f072", "q": "Какие настройки <code>sshd_config<\/code> делают сервер безопаснее? Выбери все.", "options": ["<code>PermitRootLogin no<\/code>", "<code>PasswordAuthentication no<\/code>", "<code>PermitEmptyPasswords yes<\/code>", "<code>Port 22<\/code> в комментарии"], "answer": [0, 1], "why": "<p>вход только по ключу и без root делает перебор паролей бессмысленным. Пустые пароли — прямая дыра.<\/p>\n"}, {"id": "930b8a2066", "q": "Скрипт работает в терминале, но не из cron. Что проверить в первую очередь?", "options": ["Перезагрузить сервер", "Полные пути к командам и перенаправление вывода <code>&gt;&gt; лог 2&gt;&amp;1<\/code>, чтобы увидеть ошибку", "Права на <code>/etc/crontab<\/code>", "Версию bash"], "answer": [1], "why": "<p>у cron минимальный PATH и нет переменных окружения пользователя, а вывод по умолчанию никуда не пишется.<\/p>\n"}], "cards": [{"id": "8c48b95550", "q": "Чем отличается SIGTERM от SIGKILL?", "a": "<p>SIGTERM (15) — просьба завершиться, процесс может перехватить её и корректно закрыть соединения и файлы. SIGKILL (9) — немедленное уничтожение ядром, перехватить нельзя. Сначала посылают SIGTERM, SIGKILL — только если процесс не завершился.<\/p>\n"}, {"id": "ff1d6d5e06", "q": "Что значат права 755 и 644?", "a": "<p>755 — владелец читает, пишет и выполняет; группа и остальные читают и выполняют (скрипты, папки). 644 — владелец читает и пишет, остальные только читают (обычные файлы и конфиги). r=4, w=2, x=1.<\/p>\n"}, {"id": "39f614394c", "q": "Чем restart отличается от reload?", "a": "<p><code>restart<\/code> останавливает и заново запускает процесс — текущие соединения рвутся. <code>reload<\/code> просит процесс перечитать конфигурацию без остановки (обычно через SIGHUP), соединения сохраняются. Поддерживается не всеми службами.<\/p>\n"}, {"id": "a6e6a9ae07", "q": "Диск полон, но du не находит больших файлов. Почему?", "a": "<p>Скорее всего, удалённый файл всё ещё открыт процессом — данные остаются на диске до его закрытия. Находится через <code>lsof +L1<\/code>, лечится перезапуском процесса. Второй вариант — данные лежат под точкой монтирования, скрытые смонтированным поверх разделом.<\/p>\n"}, {"id": "9030962643", "q": "Место на диске есть, но файлы не создаются. Почему?", "a": "<p>Кончились иноды — проверить <code>df -i<\/code>. Обычно виноваты миллионы мелких файлов (кэш, сессии, очереди).<\/p>\n"}, {"id": "3aa8ec8584", "q": "Что такое load average?", "a": "<p>Средняя длина очереди процессов, ожидающих процессор (и, в Linux, непрерываемого ввода-вывода), за 1, 5 и 15 минут. Сравнивается с числом ядер: load выше числа ядер — процессы ждут.<\/p>\n"}, {"id": "539ccdb6ef", "q": "В free свободно 200 МБ из 8 ГБ. Это проблема?", "a": "<p>Не обязательно. Linux использует свободную память под кэш диска, и она освобождается по требованию. Смотреть нужно на колонку <code>available<\/code> и на активность swap.<\/p>\n"}, {"id": "a5b85bc851", "q": "Что такое OOM killer и как понять, что он сработал?", "a": "<p>Механизм ядра, который при полной нехватке памяти убивает процесс (обычно самый большой) сигналом SIGKILL. Следы — в <code>dmesg<\/code> или <code>journalctl -k<\/code> (<code>Killed process<\/code>), в Kubernetes — статус <code>OOMKilled<\/code>.<\/p>\n"}, {"id": "344ac6e525", "q": "Как защитить SSH на сервере?", "a": "<p>Вход только по ключу (<code>PasswordAuthentication no<\/code>), запрет входа root (<code>PermitRootLogin no<\/code>), файрвол с доступом к 22 только с нужных адресов или через бастион, при желании fail2ban. Проверка конфига <code>sshd -t<\/code> перед перезагрузкой, вторая сессия открыта.<\/p>\n"}, {"id": "dfa3cb61cd", "q": "Сервис не отвечает. Ваши действия?", "a": "<p><code>systemctl status<\/code> → <code>journalctl -u<\/code> → слушает ли порт (<code>ss -tlnp<\/code>) → отвечает ли локально (<code>curl 127.0.0.1<\/code>) → ресурсы (<code>df -h<\/code>, <code>df -i<\/code>, <code>free -h<\/code>) → OOM в журнале ядра → проверка конфига. Если локально отвечает, а снаружи нет — файрвол и сеть.<\/p>\n"}, {"id": "c81642cb56", "q": "Почему cron-задача не работает, хотя в терминале команда работает?", "a": "<p>У cron минимальный <code>PATH<\/code> и нет переменных окружения пользователя, а вывод никуда не пишется. Нужно использовать полные пути, задать переменные и перенаправить вывод в лог с <code>2&gt;&amp;1<\/code>, чтобы увидеть ошибку.<\/p>\n"}, {"id": "b2274b4a26", "q": "Чем жёсткая ссылка отличается от символической?", "a": "<p>Символическая — отдельный файл с путём к оригиналу, ломается при удалении оригинала, может указывать на папки и на другие файловые системы. Жёсткая — второе имя той же иноды, данные живут, пока есть хотя бы одна ссылка; только в пределах одной файловой системы.<\/p>\n"}], "next": "1-2"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

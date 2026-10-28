@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P3 — Kubernetes и GitOps (итоговый проект) — DevOps-маршрут</title>
+<meta name="description" content="Курс от Linux до Kubernetes: теория, практика руками, тесты и карточки к собеседованию">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="project">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+<main class="narrow project" data-project="p3"><div class="page-kicker">cd projects/p3</div><h1>P3 — Kubernetes и GitOps (итоговый проект)</h1><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Что получится</summary><div class="callout-body"><p>Приложение работает в кластере Kubernetes. Его чарт и все настройки окружений лежат в отдельном репозитории конфигурации, а Argo CD сам выкатывает изменения. Пайплайн приложения тестирует код, собирает образ, сканирует его на уязвимости и секреты и коммитит новый тег в репозиторий конфигурации — доступа к кластеру у него нет. Мониторинг, логи и алерты устанавливаются в кластер тоже через GitOps.</p>
+<p>Это и есть итоговый проект из <a href="../lessons/6-3.html">6.3 Итоговый проект</a>. Если для итогового проекта взят сторонний open-source проект из нескольких сервисов, P3 строится на нём; если нет — на приложении из P1 и P2.</p>
+</div></details>
+<p><strong>Уроки:</strong> <a href="../lessons/5-1.html">5.1 Kubernetes</a>, <a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>, <a href="../lessons/5-3.html">5.3 Helm и Kustomize</a>, <a href="../lessons/5-4.html">5.4 GitOps и Argo CD</a>, <a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>, <a href="../lessons/6-2.html">6.2 DevSecOps</a>, <a href="../lessons/6-3.html">6.3 Итоговый проект</a>.</p>
+<h2>Архитектура</h2>
+<pre><code> app-repo ──push──► GitLab CI: lint → test → build → scan → commit tag
+                                                              │
+                                                              ▼
+ deploy-repo (charts, values-*, apps/) ◄────────────── коммит тега
+        ▲
+        │ pull
+ ┌──────┴──────────── кластер k3s (3 узла) ─────────────────────┐
+ │ argocd        ── App of Apps                                  │
+ │ Traefik ── cert-manager (HTTPS)                               │
+ │ shop-staging  ── app (Deployment, HPA), PostgreSQL (StatefulSet)│
+ │ shop-prod     ── то же, синхронизация вручную                  │
+ │ monitoring    ── kube-prometheus-stack, Loki                  │
+ └───────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2>Требования</h2>
+<h3>Кластер</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> k3s на трёх машинах (в облаке через Terraform из P2 или локально через Vagrant) (<a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Traefik (Ingress или Gateway API) и cert-manager, приложение доступно по HTTPS.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Namespace на окружение, ResourceQuota и Pod Security Admission <code>restricted</code> на namespace приложений.</li>
+</ul>
+<h3>Приложение в кластере</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Helm-чарт: Deployment с пробами, requests/limits, HPA, PodDisruptionBudget, Service, Ingress (<a href="../lessons/5-3.html">5.3 Helm и Kustomize</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> PostgreSQL как зависимость чарта или StatefulSet; миграции — Job с хуком PreSync.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> NetworkPolicy: база принимает соединения только от приложения.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Секреты через Sealed Secrets или External Secrets, в git нет открытых Secret.</li>
+</ul>
+<h3>GitOps</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Отдельный репозиторий конфигурации, App of Apps (<a href="../lessons/5-4.html#s-8">5.4 GitOps и Argo CD</a>, §8).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> staging — автосинхронизация с <code>prune</code> и <code>selfHeal</code>; prod — merge request и ручная синхронизация.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Откат через <code>git revert</code> проверен.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> AppProject ограничивает источники и namespace.</li>
+</ul>
+<h3>Пайплайн и безопасность</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Стадии lint → test → build → scan → update-config (<a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> gitleaks, Semgrep, hadolint, Trivy для образа и зависимостей; блокировка только HIGH/CRITICAL с исправлением (<a href="../lessons/6-2.html">6.2 DevSecOps</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> SBOM — артефакт каждой сборки; образ подписан cosign (бонус).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> У пайплайна нет kubeconfig.</li>
+</ul>
+<h3>Наблюдаемость</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> kube-prometheus-stack и Loki через Argo CD.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> ServiceMonitor для приложения, PrometheusRule с алертами, Alertmanager в Telegram.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Дашборд приложения и дашборд кластера.</li>
+</ul>
+<h3>Документация</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> README и журнал архитектурных решений (ADR) по <a href="../lessons/6-3.html#s-10">6.3 Итоговый проект</a>, §10: архитектура, решения и их причины, проблемы и как решены, что улучшить.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Чек-лист зрелости из <a href="../lessons/6-3.html#s-12">6.3 Итоговый проект</a>, §12 закрыт.</li>
+</ul>
+<h2>Структура репозиториев</h2>
+<pre><code>shop-app/                      shop-deploy/
+  src/  tests/                   apps/
+  Dockerfile                       root.yaml
+  .gitlab-ci.yml                   shop-staging.yaml
+  .pre-commit-config.yaml          shop-prod.yaml
+  README.md                        monitoring.yaml
+                                 charts/shop/
+                                   templates/  values*.yaml
+                                 platform/
+                                   traefik/        cert-manager/  sealed-secrets/
+                                 docs/adr/
+</code></pre>
+<h2>Готово, когда</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> На чистом кластере применяется один манифест <code>root.yaml</code>, и через несколько минут всё работает.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Коммит в приложение доходит до staging без ручных действий, до prod — через одобренный merge request.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Ручное <code>kubectl scale</code> в staging откатывается Argo CD.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Удаление пода базы не теряет данные; отказ одного узла не роняет сервис.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Ты рассказываешь проект за 5 минут и отвечаешь на вопросы из <a href="../lessons/6-3.html#s-13">6.3 Итоговый проект</a>, §13.</li>
+</ul>
+<h2>Что рассказать на собеседовании</h2>
+<ul>
+<li>Путь изменения от коммита до продакшена и где на этом пути проверки безопасности.</li>
+<li>Почему GitOps и чем pull-модель лучше push в твоём случае.</li>
+<li>Как устроены секреты и почему не обычный Secret в git.</li>
+<li>Как гарантирован порядок: база и миграции раньше приложения.</li>
+<li>Что ты сделала бы дальше: canary, SLO и алерты на бюджет ошибок, бэкапы через оператор базы.</li>
+</ul>
+
+<details class="callout callout-tip"><summary><span class="callout-icon">💡</span>Связано с</summary><div class="callout-body"><ul>
+<li><a href="../projects/portfolio.html">00_Portfolio</a></li>
+<li><a href="../projects/p2.html">P2-Infra-as-Code</a> — предыдущий шаг</li>
+<li><a href="../lessons/6-3.html">6.3 Итоговый проект</a> — итоговый проект</li>
+</ul>
+</div></details></div></main>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

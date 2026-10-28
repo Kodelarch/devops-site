@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.4 Архитектура приложения и тесты — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.4: Архитектура приложения и тесты">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.4 · code</div>
+    <h1 class="lesson-title">Архитектура приложения и тесты</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Три слоя вместо одной кучи кода</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Модель предметной области</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Разные типы через один интерфейс</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Правила живут в домене</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Главный цикл</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Сохранение состояния</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Зависимости передают снаружи</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Зачем это всё на практике: тесты без сети</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Структура проекта и импорты</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Тесты по-настоящему: pytest</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Единый стиль в команде</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Терминальный интерфейс</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Скрипт на сто строк можно писать как угодно. Утилита, которую поддерживают несколько человек и которая живёт годами, без архитектуры превращается в клубок: поправил вывод — сломалась логика, заменил библиотеку HTTP — пришлось переписывать половину. Этот урок — про разделение кода на независимые слои и про тесты, которые это разделение окупают.</p>
+<p>Сквозной пример — небольшая утилита <code>uptime-checker</code>: она по расписанию проверяет сайты и порты, решает, когда пора поднимать тревогу, хранит историю и показывает сводку в терминале. Это ровно тот же принцип, по которому строятся серьёзные бэкенды (<a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>), — просто на примере, который целиком помещается в голове.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Слоистая архитектура</strong> — код разбит на независимые «этажи» (интерфейс, бизнес-логика, хранение и внешние системы), где каждый этаж не обязан знать детали устройства другого.</li>
+<li><strong>Домен (domain)</strong> — сама суть программы: её понятия и правила. Для <code>uptime-checker</code> это «проверка», «результат», «когда поднимать тревогу».</li>
+<li><strong>Инверсия зависимостей</strong> — правило «бизнес-логика не должна зависеть от конкретной технологии»: домен ничего не знает про HTTP-библиотеку, Telegram или терминал, только про свои понятия.</li>
+<li><strong>Тестовый двойник (fake, mock)</strong> — подставной объект вместо настоящей зависимости, чтобы тест не ходил в сеть и не зависел от внешнего мира.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Три слоя вместо одной кучи кода</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-roguelike-layers.svg" alt="" /><br />
+<em>Аналогия:</em> ресторан работает потому, что зал (интерфейс), кухня (домен, бизнес-логика) и склад с поставщиками (хранение и внешние системы) — разные помещения с разными обязанностями. Официант не готовит еду, повар не считает выручку и не ездит за продуктами.</p>
+<p>Для <code>uptime-checker</code> слои выглядят так:</p>
+<ul>
+<li><strong>Interface</strong> — то, с чем работает человек: команды в терминале, таблица со статусами, цветной вывод.</li>
+<li><strong>Domain</strong> — понятия и правила: что такое проверка, чем «сайт недоступен» отличается от «сайт тормозит», после скольких неудач слать алерт.</li>
+<li><strong>Infrastructure</strong> — всё, что касается внешнего мира: HTTP-запросы, TCP-соединения, файл с историей, отправка сообщений в Telegram.</li>
+</ul>
+<p>Главное правило — <strong>направление зависимостей</strong>: интерфейс и инфраструктура знают про домен, а домен не знает ни про кого. В файлах домена нет ни <code>import requests</code>, ни <code>print</code>.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Почему это важно на реальной работе</summary><div class="callout-body"><p>Точно так же устроены веб-сервисы: слой, который считает бизнес-правила (например, «можно ли списать деньги со счёта»), не должен знать, вызвали его через HTTP, консоль или очередь сообщений. Поменять интерфейс или библиотеку — не значит переписывать логику.</p>
+</div></details></div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Модель предметной области</h2><div class="prose"><p><em>Аналогия:</em> прежде чем строить дом, архитектор договаривается о словах: что такое «комната», «этаж», «несущая стена». Код начинается так же — с понятий.</p>
+<p>Понятия домена удобно описывать <strong>dataclass'ами</strong> — классами, которые в основном хранят данные:</p>
+<pre><code class="language-python"># domain/models.py
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+
+class State(Enum):
+    UP = &quot;работает&quot;
+    SLOW = &quot;тормозит&quot;
+    DOWN = &quot;недоступен&quot;
+
+@dataclass(frozen=True)
+class Target:
+    name: str
+    address: str
+    slow_ms: int = 1000           # дольше — считаем «тормозит»
+
+@dataclass
+class Result:
+    target: Target
+    ok: bool
+    latency_ms: float
+    checked_at: datetime = field(default_factory=datetime.now)
+    error: str | None = None
+</code></pre>
+<p><code>@dataclass</code> сам пишет за тебя <code>__init__</code>, понятное текстовое представление и сравнение объектов — не нужно руками перечислять каждое поле в конструкторе, как в <a href="../lessons/2-1.html#s-12">2.1 Python</a>, §12. <code>frozen=True</code> делает объект неизменяемым: цель проверки после создания поменять нельзя, а значит, её можно класть в множество и использовать ключом словаря. <code>field(default_factory=datetime.now)</code> вызывает функцию при создании каждого объекта — если написать просто <code>= datetime.now()</code>, время вычислилось бы один раз при загрузке модуля, и у всех результатов оно было бы одинаковым. <code>State</code> — перечисление из <a href="../lessons/2-3.html#s-5">2.3 Параллельность</a>, §5.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Разные типы через один интерфейс</h2><div class="prose"><p><em>Аналогия:</em> у врача, медсестры и лаборанта одна должностная обязанность — «проверить пациента», но делает её каждый по-своему. Главврачу не нужно знать подробностей, ему достаточно получить заключение.</p>
+<p>Сайт проверяют HTTP-запросом, базу — попыткой открыть TCP-соединение на её порт, домен — DNS-запросом. Способы разные, а вызывающему коду нужно одно: «проверь и верни <code>Result</code>».</p>
+<pre><code class="language-python"># domain/checks.py
+from abc import ABC, abstractmethod
+
+class Check(ABC):
+    def __init__(self, target: Target):
+        self.target = target
+
+    @abstractmethod
+    def run(self) -&gt; Result:
+        &quot;&quot;&quot;У каждого типа проверки своя реализация.&quot;&quot;&quot;
+
+class HttpCheck(Check):
+    def __init__(self, target, client):
+        super().__init__(target)
+        self.client = client                  # как ходить в сеть — передают снаружи (§7)
+
+    def run(self) -&gt; Result:
+        status, latency = self.client.get(self.target.address)
+        return Result(self.target, ok=200 &lt;= status &lt; 400, latency_ms=latency)
+
+class TcpCheck(Check):
+    def __init__(self, target, connector):
+        super().__init__(target)
+        self.connector = connector
+
+    def run(self) -&gt; Result:
+        ok, latency = self.connector.connect(self.target.address)
+        return Result(self.target, ok=ok, latency_ms=latency)
+</code></pre>
+<p><code>class HttpCheck(Check):</code> — <strong>наследование</strong>: <code>HttpCheck</code> получает всё, что описано в <code>Check</code>, и дописывает своё. <code>ABC</code> и <code>@abstractmethod</code> — защита: создать объект класса, который забыл реализовать <code>run</code>, Python просто не даст, и ошибка вылезет сразу, а не через неделю в продакшене. <code>super().__init__(target)</code> вызывает конструктор родителя, чтобы не повторять его код.</p>
+<p>Это классический <strong>полиморфизм</strong>: код, который запускает проверки, вызывает один и тот же метод <code>run()</code> — а что именно произойдёт, зависит от конкретного класса. Добавить проверку срока TLS-сертификата — значит написать ещё один класс, не трогая ничего остального.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Правила живут в домене</h2><div class="prose"><p><em>Аналогия:</em> дежурный не звонит начальнику при первом же странном звуке. У него инструкция: «если сигнал повторился три раза подряд — звонить; если уже позвонил — не звонить каждые пять минут, а сообщить, когда всё наладится».</p>
+<p>Самая ценная часть <code>uptime-checker</code> — не HTTP-запросы, а правила, когда тревожить человека. Это и есть бизнес-логика, и она живёт в домене:</p>
+<pre><code class="language-python"># domain/alerting.py
+class AlertPolicy:
+    def __init__(self, fail_threshold: int = 3):
+        self.fail_threshold = fail_threshold
+        self.failures: dict[str, int] = {}
+        self.alerting: set[str] = set()
+
+    def decide(self, result: Result) -&gt; str | None:
+        &quot;&quot;&quot;Вернуть 'alert', 'resolved' или None — ничего не делать.&quot;&quot;&quot;
+        name = result.target.name
+        if result.ok:
+            self.failures[name] = 0
+            if name in self.alerting:
+                self.alerting.discard(name)
+                return &quot;resolved&quot;
+            return None
+
+        self.failures[name] = self.failures.get(name, 0) + 1
+        if self.failures[name] &gt;= self.fail_threshold and name not in self.alerting:
+            self.alerting.add(name)
+            return &quot;alert&quot;
+        return None
+</code></pre>
+<p>Это та же идея, что <code>for: 5m</code> в правилах Prometheus и <code>send_resolved</code> в Alertmanager (<a href="../lessons/4-5.html#s-8">4.5 Наблюдаемость</a>, §8–9): одна неудача — ещё не авария, а одна авария — одно сообщение, а не сообщение каждую минуту. Класс ничего не знает ни про сеть, ни про Telegram — он получает результат и возвращает решение.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Главный цикл</h2><div class="prose"><p><em>Аналогия:</em> часовой на посту: раз в N минут обойти все точки, записать, что увидел, и действовать по инструкции.</p>
+<pre><code class="language-python"># app/runner.py
+import time
+
+def run_forever(checks, policy, notifier, storage, interval_s=30):
+    while True:
+        for check in checks:
+            result = check.run()
+            storage.append(result)
+            decision = policy.decide(result)
+            if decision:
+                notifier.send(decision, result)
+        time.sleep(interval_s)
+</code></pre>
+<p>Это слой приложения: он ничего не решает сам, а соединяет части — запускает проверки, сохраняет результат, спрашивает домен, нужно ли тревожить, и передаёт решение тому, кто умеет отправлять сообщения. Проверки здесь идут по очереди; когда целей станет сотни, их запускают параллельно через пул потоков (<a href="../lessons/2-3.html#s-8">2.3 Параллельность</a>, §8), и меняется только этот файл.</p>
+<p>В реальной эксплуатации такой процесс оформляют systemd-сервисом (<a href="../lessons/1-1.html#s-7">1.1 Linux</a>, §7) или контейнером — тогда его перезапустят при падении, а вывод попадёт в журнал.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Сохранение состояния</h2><div class="prose"><p><em>Аналогия:</em> бортовой журнал: записать текущее состояние так, чтобы после перезагрузки можно было продолжить с того же места, а через год — понять, что было.</p>
+<pre><code class="language-python"># infra/storage.py
+import json
+from pathlib import Path
+
+FORMAT_VERSION = 2
+
+def save_state(policy: AlertPolicy, path: Path):
+    data = {&quot;version&quot;: FORMAT_VERSION,
+            &quot;failures&quot;: policy.failures,
+            &quot;alerting&quot;: sorted(policy.alerting)}
+    tmp = path.with_suffix(&quot;.tmp&quot;)
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2))
+    tmp.replace(path)                      # атомарная подмена файла
+
+def load_state(path: Path) -&gt; AlertPolicy:
+    policy = AlertPolicy()
+    if not path.exists():
+        return policy
+    data = json.loads(path.read_text())
+    if data.get(&quot;version&quot;) != FORMAT_VERSION:
+        raise ValueError(f&quot;неподдерживаемая версия файла состояния: {data.get('version')}&quot;)
+    policy.failures = data[&quot;failures&quot;]
+    policy.alerting = set(data[&quot;alerting&quot;])
+    return policy
+</code></pre>
+<p>Две привычки, которые отличают рабочий код от учебного. <strong>Версия формата</strong> в файле: когда через полгода структура поменяется, программа сможет понять, что перед ней старый файл, и либо преобразовать его, либо честно отказаться — а не упасть с непонятным <code>KeyError</code>. <strong>Запись через временный файл</strong>: если процесс убьют посреди записи, на диске останется недописанный <code>.tmp</code>, а основной файл не пострадает — <code>replace</code> подменяет файл одной операцией. Состояние нужно, чтобы после перезапуска утилита не прислала заново все алерты, которые уже отправляла.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Зависимости передают снаружи</h2><div class="prose"><p><em>Аналогия:</em> повару не нужно знать, на какой машине и с какой базы приехали продукты. Ему их приносят. Сменили поставщика — кухня этого даже не заметила.</p>
+<p>В §3 <code>HttpCheck</code> не создаёт HTTP-клиент сам, а получает его в конструкторе. Это и есть <strong>внедрение зависимостей</strong> (dependency injection) — подробнее о нём в <a href="../lessons/2-5.html#s-5">2.5 Бэкенд-сервис</a>, §5. Настоящий клиент живёт в инфраструктуре:</p>
+<pre><code class="language-python"># infra/http.py
+import time
+import requests
+
+class RequestsClient:
+    def __init__(self, timeout_s: float = 5):
+        self.timeout_s = timeout_s
+
+    def get(self, url: str) -&gt; tuple[int, float]:
+        start = time.perf_counter()
+        try:
+            status = requests.get(url, timeout=self.timeout_s).status_code
+        except requests.RequestException:
+            status = 0
+        return status, (time.perf_counter() - start) * 1000
+</code></pre>
+<p>Собирается всё в одном месте — точке входа:</p>
+<pre><code class="language-python"># main.py
+client = RequestsClient(timeout_s=5)
+checks = [HttpCheck(Target(&quot;shop&quot;, &quot;https://shop.example.com/healthz&quot;), client)]
+run_forever(checks, load_state(STATE), TelegramNotifier(TOKEN, CHAT), JsonlStorage(LOG))
+</code></pre>
+<p>Захочешь перейти с <code>requests</code> на <code>httpx</code> — поменяется один файл в <code>infra/</code>, а домен, правила алертов и тесты останутся как были.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Зачем это всё на практике: тесты без сети</h2><div class="prose"><p><em>Аналогия:</em> рецепт супа проверяют в кастрюле на кухне, а не накрывая каждый раз стол на десять персон. Отделив правила от сети и экрана, их можно проверить за миллисекунды.</p>
+<p>Благодаря §7 в тесте вместо настоящего клиента можно подставить <strong>тестовый двойник</strong>, который ведёт себя ровно так, как нужно для проверки:</p>
+<pre><code class="language-python">class FakeClient:
+    def __init__(self, status=200, latency=50):
+        self.status, self.latency = status, latency
+
+    def get(self, url):
+        return self.status, self.latency
+
+def test_http_check_fails_on_500():
+    check = HttpCheck(Target(&quot;shop&quot;, &quot;https://shop&quot;), FakeClient(status=500))
+    assert check.run().ok is False
+
+def test_alert_only_after_three_failures():
+    policy = AlertPolicy(fail_threshold=3)
+    bad = Result(Target(&quot;shop&quot;, &quot;x&quot;), ok=False, latency_ms=0)
+    assert [policy.decide(bad) for _ in range(4)] == [None, None, &quot;alert&quot;, None]
+</code></pre>
+<p>Эти тесты не ходят в интернет, не зависят от того, работает ли сайт прямо сейчас, и выполняются за миллисекунды. Второй тест к тому же проверяет самое важное: алерт приходит на третьей неудаче и <strong>не повторяется</strong> на четвёртой. Именно возможность писать такие тесты — главная практическая выгода слоистой архитектуры, а не «красивый код сам по себе».</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Структура проекта и импорты</h2><div class="prose"><p><em>Аналогия:</em> пока файлов три, их можно держать в одной папке. Когда их тридцать и над ними работают четверо, нужна планировка — иначе каждый кладёт своё куда попало.</p>
+<pre><code>uptime-checker/
+├── pyproject.toml          # описание проекта и зависимостей
+├── README.md
+├── .gitignore
+├── src/
+│   └── uptime_checker/
+│       ├── __init__.py
+│       ├── domain/         # понятия и правила — ничего не импортирует извне
+│       │   ├── models.py
+│       │   ├── checks.py
+│       │   └── alerting.py
+│       ├── app/            # главный цикл, сценарии
+│       │   └── runner.py
+│       ├── infra/          # HTTP, TCP, файлы, Telegram
+│       │   ├── http.py
+│       │   ├── storage.py
+│       │   └── telegram.py
+│       └── cli.py          # точка входа и вывод в терминал
+└── tests/
+    ├── test_checks.py
+    └── test_alerting.py
+</code></pre>
+<p>Файл <code>__init__.py</code> превращает папку в <strong>пакет</strong> — набор модулей, который можно импортировать как единое целое (<code>from uptime_checker.domain import alerting</code>). В современном Python он может быть пустым, но его наличие делает структуру явной.</p>
+<p>Раскладка с папкой <code>src/</code> (так называемый src-layout) поначалу кажется лишней вложенностью, но решает конкретную проблему: без неё тесты импортируют код из рабочей папки, а не из установленного пакета — и ошибки упаковки обнаруживаются только у пользователя. С <code>src/</code> тесты вынуждены работать с тем же кодом, который получат все остальные.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Циклический импорт</summary><div class="callout-body"><p>Модуль A импортирует B, B импортирует A — Python падает с <code>ImportError</code>, и сообщение обычно указывает не туда, где настоящая причина. Это почти всегда признак того, что границы слоёв нарушены: <code>domain</code> полез в <code>infra</code>. Лечится не хитрым импортом внутри функции, а исправлением зависимости — стрелка должна смотреть внутрь, к домену.</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Тесты по-настоящему: pytest</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/app1-roguelike-test-pyramid.svg" alt="" /><br />
+<em>Аналогия:</em> тесты — не доказательство, что код идеален, а сигнализация: она не мешает войти, но громко сообщает, если что-то сдвинулось.</p>
+<p>Голые функции с <code>assert</code> из §8 работают, но запускать десятки таких функций руками невозможно. Стандарт индустрии — <code>pytest</code>:</p>
+<pre><code class="language-python"># tests/test_alerting.py
+import pytest
+from uptime_checker.domain.models import Target, Result
+from uptime_checker.domain.alerting import AlertPolicy
+
+@pytest.fixture
+def target():
+    return Target(&quot;shop&quot;, &quot;https://shop.example.com&quot;)
+
+@pytest.fixture
+def policy():
+    &quot;&quot;&quot;Свежая политика для каждого теста.&quot;&quot;&quot;
+    return AlertPolicy(fail_threshold=3)
+
+def make(target, ok):
+    return Result(target, ok=ok, latency_ms=10)
+
+def test_recovery_sends_resolved(policy, target):
+    for _ in range(3):
+        policy.decide(make(target, ok=False))
+    assert policy.decide(make(target, ok=True)) == &quot;resolved&quot;
+
+@pytest.mark.parametrize(&quot;threshold,failures,expected&quot;, [
+    (1, 1, &quot;alert&quot;),
+    (3, 2, None),
+    (3, 3, &quot;alert&quot;),
+])
+def test_threshold_table(target, threshold, failures, expected):
+    policy = AlertPolicy(fail_threshold=threshold)
+    decisions = [policy.decide(make(target, ok=False)) for _ in range(failures)]
+    assert decisions[-1] == expected
+</code></pre>
+<p>Три вещи, ради которых берут pytest. <strong>Автоматический поиск</strong>: он сам находит все файлы <code>test_*.py</code> и функции <code>test_*</code>, ничего регистрировать не нужно. <strong><code>parametrize</code></strong> прогоняет один тест на списке случаев — вместо трёх почти одинаковых функций получается одна с таблицей. <strong>Фикстуры</strong> готовят общее состояние и делают это заново для каждого теста, так что тесты не влияют друг на друга.</p>
+<pre><code class="language-bash">pytest                      # прогнать всё
+pytest -v                    # с именами тестов
+pytest tests/test_alerting.py::test_threshold_table   # один конкретный
+pytest -x                     # остановиться на первом падении
+pytest --cov=uptime_checker   # покрытие кода тестами
+</code></pre>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Про покрытие</summary><div class="callout-body"><p>Покрытие показывает, какая доля строк была выполнена хотя бы одним тестом. Полезная метрика, но обманчивая: сто процентов покрытия не означают, что код правильный — только что он был выполнен. Тест без единого <code>assert</code> тоже даёт покрытие. Требование «не ниже 80%» встречается в командах как порог в пайплайне, но гнаться за цифрой ради цифры бессмысленно; важнее покрыть тестами то, что ломается.</p>
+</div></details>
+<p><strong>Детерминированность.</strong> Код, который зависит от времени, сети или случайности, плохо тестируется, пока эта зависимость неуправляема. Решение — подставлять её снаружи: фиктивный клиент вместо сети (§8), фиксированное время вместо <code>datetime.now()</code>, <code>random.seed(42)</code> вместо настоящей случайности. Тест, который иногда падает без изменений в коде (flaky test), хуже отсутствующего: ему перестают верить и в итоге отключают.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Единый стиль в команде</h2><div class="prose"><p><em>Аналогия:</em> спорить о том, ставить ли пробел перед скобкой, — как спорить о шрифте служебной записки. Правильный ответ: договориться один раз и поручить машине.</p>
+<pre><code class="language-bash">pip install ruff
+ruff check .          # найти проблемы
+ruff check --fix .     # починить то, что чинится автоматически
+ruff format .           # привести к единому стилю
+</code></pre>
+<p><code>ruff</code> — линтер и форматтер в одном инструменте, к 2026 году фактически вытеснивший связку <code>flake8</code> + <code>black</code> + <code>isort</code> за счёт скорости. Он ловит неиспользованные импорты, затенённые переменные, подозрительные конструкции — и заодно переформатирует код так, что вопрос стиля просто перестаёт обсуждаться на ревью.</p>
+<p>Настройка живёт в <code>pyproject.toml</code> рядом с описанием проекта:</p>
+<pre><code class="language-toml">[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [&quot;E&quot;, &quot;F&quot;, &quot;I&quot;, &quot;UP&quot;, &quot;B&quot;]   # ошибки, импорты, устаревшие конструкции, баги
+</code></pre>
+<p><strong>Pre-commit</strong> запускает эти проверки автоматически перед каждым коммитом, чтобы в репозиторий не попадал неотформатированный код:</p>
+<pre><code class="language-yaml"># .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+</code></pre>
+<pre><code class="language-bash">pip install pre-commit &amp;&amp; pre-commit install
+</code></pre>
+<p>Это тот же принцип, что <code>shellcheck</code> для bash (<a href="../lessons/1-3.html#s-13">1.3 Bash</a>, §13), и та же проверка потом дублируется в пайплайне (<a href="../lessons/3-2.html">3.2 CI-CD</a>): локальный хук даёт быструю обратную связь, а проверка в CI гарантирует, что её нельзя обойти.</p>
+<p><strong>Аннотации типов и mypy.</strong> Типы из <a href="../lessons/2-1.html">2.1 Python</a> можно проверять статически:</p>
+<pre><code class="language-bash">mypy src/
+</code></pre>
+<p><code>mypy</code> найдёт места, где функция, объявленная возвращающей <code>int</code>, возвращает <code>None</code> — до запуска кода. В командном проекте это заметно снижает количество глупых ошибок на стыках между чужими модулями.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Терминальный интерфейс</h2><div class="prose"><p>Утилите вроде <code>uptime-checker</code> нужен интерфейс, и чаще всего это терминал. Большая часть инструментов, которыми пользуется DevOps, устроена именно так: <strong>htop</strong> (<a href="../lessons/1-1.html">1.1 Linux</a>), <strong>ncdu</strong>, <strong>k9s</strong> для Kubernetes, <strong>lazydocker</strong> и <strong>lazygit</strong> — всё это терминальные интерфейсы с одним и тем же циклом «прочитать состояние → отрисовать → дождаться клавиши».</p>
+<p>Причина их популярности практическая: на сервере, куда ты попал по SSH, графического интерфейса нет и не будет, а смотреть на постоянно меняющиеся данные через <code>watch</code> неудобно.</p>
+<p>Стандартная библиотека Python умеет это через модуль <code>curses</code>, но писать на нём многословно. Из современных библиотек стоит знать <strong>rich</strong> (цветной вывод, таблицы, прогресс-бары — минимальными усилиями) и <strong>textual</strong> (полноценные интерфейсы поверх того же движка):</p>
+<pre><code class="language-python"># cli.py
+from rich.console import Console
+from rich.table import Table
+
+def show(results):
+    table = Table(title=&quot;uptime-checker&quot;)
+    for col in (&quot;Цель&quot;, &quot;Состояние&quot;, &quot;Задержка&quot;):
+        table.add_column(col)
+    for r in results:
+        state = &quot;[green]работает[/]&quot; if r.ok else &quot;[red]недоступен[/]&quot;
+        table.add_row(r.target.name, state, f&quot;{r.latency_ms:.0f} мс&quot;)
+    Console().print(table)
+</code></pre>
+<p>Обрати внимание, где этот код живёт: в интерфейсном слое. Захочешь вместо таблицы в терминале веб-страницу — домен и правила алертов об этом не узнают.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>14</b>/18 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Слоистая архитектура: интерфейс и инфраструктура зависят от домена, домен не знает ни про HTTP, ни про терминал, ни про Telegram.</li>
+<li>Понятия домена — dataclass'ы и перечисления; разные варианты одного действия — наследники одного абстрактного класса (полиморфизм).</li>
+<li>Бизнес-правила вроде «алерт после трёх неудач, без повторов» живут в домене и проверяются тестами без сети.</li>
+<li>Зависимости передают снаружи (dependency injection) — тогда в тесте их можно подменить двойником.</li>
+<li>Состояние в файле — с версией формата и записью через временный файл.</li>
+<li>Направление зависимостей важнее числа слоёв: стрелки смотрят внутрь. Циклический импорт — сигнал, что границу нарушили.</li>
+<li><code>pytest</code>: автопоиск тестов, <code>parametrize</code> вместо копипасты, фикстуры для общего состояния. Время, сеть и случайность — под контролем теста, иначе тесты станут плавающими.</li>
+<li>Покрытие показывает, что строка выполнялась, а не что она верна — не гонись за цифрой.</li>
+<li><code>ruff</code> заменяет связку линтера и форматтера; <code>pre-commit</code> не пускает неформатированный код в репозиторий, а CI не даёт обойти проверку.</li>
+<li>Терминальные интерфейсы — норма для инструментов DevOps: htop, k9s, lazydocker. Для своих утилит бери <code>rich</code> или <code>textual</code>.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>15</b>/18 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Структура проекта, тесты без сети и ruff в CI из заданий 1–4 — ровно то, как устроен код <a href="../projects/m2.html">M2</a>.</li>
+<li>Сама утилита <code>uptime-checker</code> из урока тоже годится в портфолио как отдельный маленький проект, если довести её до README и зелёного пайплайна.</li>
+</ul>
+</div></details><article class="task" data-task="5a06f963ef"><h3>Задание 1 — каркас uptime-checker</h3><p>Создай проект со структурой из §9, модели из §2, проверки <code>HttpCheck</code> и <code>TcpCheck</code> из §3 и правило алертов из §4. Домен не импортирует ничего из <code>infra</code> и <code>cli</code>.<br />
+<strong>Проверка:</strong> <code>grep -rE &quot;import (requests|rich)|print\(&quot; src/uptime_checker/domain/</code> пуст; утилита проверяет два-три настоящих сайта и печатает таблицу.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5a06f963ef"> Сделала руками и проверила</label></article><article class="task" data-task="03706b405e"><h3>Задание 2 — тесты без сети</h3><p>Напиши не меньше 10 тестов на домен: проверки с двойником клиента, порог алерта, отсутствие повторных алертов, <code>resolved</code> после восстановления, сохранение и загрузку состояния. Используй фикстуры и <code>parametrize</code>.<br />
+<strong>Проверка:</strong> <code>pytest -q</code> зелёный при выключенном интернете; <code>pytest --cov</code> показывает покрытие домена выше 80%.</p>
+<label class="task-done"><input type="checkbox" data-task-check="03706b405e"> Сделала руками и проверила</label></article><article class="task" data-task="ede297b87b"><h3>Задание 3 — состояние переживает перезапуск</h3><p>Сохраняй состояние политики алертов в JSON с версией формата. Загрузка файла другой версии даёт понятную ошибку, битый JSON не роняет программу молча.<br />
+<strong>Проверка:</strong> останови утилиту во время «аварии» и запусти снова — повторный алерт не приходит, а <code>resolved</code> после восстановления приходит.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ede297b87b"> Сделала руками и проверила</label></article><article class="task" data-task="3b0c3fc554"><h3>Задание 4 — единый стиль</h3><p>Подключи <code>ruff</code> (линтер и форматтер) и <code>pre-commit</code>. Добавь проверку и тесты в CI.<br />
+<strong>Проверка:</strong> коммит с неотформатированным кодом отклоняется хуком; пайплайн падает на нарушении стиля и на упавшем тесте.</p>
+<label class="task-done"><input type="checkbox" data-task-check="3b0c3fc554"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>16</b>/18 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>17</b>/18 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>18</b>/18 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-3.html">2.3 Параллельность</a> — параллелизм</li>
+<li><a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a> — те же слои, но в вебе</li>
+<li><a href="../lessons/1-3.html">1.3 Bash</a> — shellcheck как аналог линтера для bash</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — где эти проверки становятся обязательными</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>pytest: https://docs.pytest.org/</li>
+<li>Документация pytest: https://docs.pytest.org/</li>
+<li>Ruff: https://docs.astral.sh/ruff/</li>
+<li>pre-commit: https://pre-commit.com/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-3.html">← 2.3 Параллельность и асинхронность в Python</a><a class="lesson-jump" href="2-5.html">2.5 Бэкенд-сервис на Python →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-4", "number": "2.4", "title": "Архитектура приложения и тесты", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["5a06f963ef", "03706b405e", "ede297b87b", "3b0c3fc554"], "quiz": [{"id": "a194d370c9", "q": "Что из перечисленного НЕ должно встречаться в доменном слое?", "options": ["Dataclass с понятиями предметной области", "Правило «алерт после трёх неудач»", "<code>import requests<\/code> и <code>print()<\/code>", "Перечисление состояний"], "answer": [2], "why": "<p>домен не знает про сеть и терминал. Внешний мир — в инфраструктурном и интерфейсном слоях.<\/p>\n"}, {"id": "a33fde026b", "q": "Зачем <code>HttpCheck<\/code> получает HTTP-клиент в конструкторе, а не создаёт его сам?", "options": ["Так меньше кода", "Чтобы в тестах подставить двойник и не ходить в сеть, а в продакшене легко сменить библиотеку", "Чтобы клиент создавался быстрее", "Python не разрешает создавать объекты внутри классов"], "answer": [1], "why": "<p>это внедрение зависимостей. Оно делает код тестируемым и заменяемым по частям.<\/p>\n"}, {"id": "0787995146", "q": "Что делает <code>@abstractmethod<\/code> в базовом классе?", "options": ["Делает метод быстрее", "Не даёт создать объект подкласса, в котором этот метод не реализован", "Вызывает метод автоматически", "Скрывает метод от других модулей"], "answer": [1], "why": "<p>ошибка «забыла реализовать run» вылезет сразу при создании объекта, а не в продакшене.<\/p>\n"}, {"id": "d658198674", "q": "Зачем сохранять состояние через временный файл и <code>replace()<\/code>?", "options": ["Так файл получается меньше", "Если процесс убьют во время записи, основной файл не окажется испорченным", "Чтобы файл нельзя было прочитать", "Это требование JSON"], "answer": [1], "why": "<p><code>replace<\/code> подменяет файл одной операцией: на диске всегда либо старая, либо новая полная версия.<\/p>\n"}, {"id": "1f4f8ce026", "q": "Что делает фикстура pytest?", "options": ["Исправляет упавшие тесты", "Готовит данные или окружение для теста и при необходимости убирает за собой", "Запускает тесты параллельно", "Считает покрытие кода"], "answer": [1], "why": "<p>фикстура подключается по имени аргумента и создаётся заново для каждого теста.<\/p>\n"}, {"id": "5c989dec15", "q": "Тест иногда падает без изменений в коде. Что скорее всего не так?", "options": ["Мало памяти", "Тест зависит от неконтролируемых вещей: сети, текущего времени, случайности или общего состояния", "Слишком много assert", "Неправильная версия pytest"], "answer": [1], "why": "<p>такой тест называют flaky. Лечится подстановкой зависимостей, фиксированным временем и seed.<\/p>\n"}, {"id": "c7513ece28", "q": "Что гарантирует покрытие кода тестами 100%?", "options": ["Что в коде нет ошибок", "Только то, что каждая строка хотя бы раз выполнилась во время тестов", "Что все граничные случаи проверены", "Что код быстрый"], "answer": [1], "why": "<p>тест без единого <code>assert<\/code> тоже даёт покрытие. Метрика полезна, но не доказывает правильность.<\/p>\n"}], "cards": [{"id": "291ff85767", "q": "Зачем делить код на слои?", "a": "<p>Логику можно тестировать без интерфейса, сети и базы, менять интерфейс (консоль, веб) или библиотеку без переписывания логики, а изменения в одном слое реже ломают другие.<\/p>\n"}, {"id": "87da8a5042", "q": "Что такое полиморфизм?", "a": "<p>Объекты разных классов обрабатываются через общий интерфейс: у всех проверок есть метод <code>run()<\/code>, и главный цикл не знает, какая именно проверка перед ним — HTTP, TCP или DNS.<\/p>\n"}, {"id": "19abf16263", "q": "Что такое dependency injection и зачем он нужен?", "a": "<p>Объект получает свои зависимости (клиент HTTP, хранилище, отправителя уведомлений) снаружи, а не создаёт их сам. Это позволяет подменять их в тестах двойниками и менять реализацию, не трогая логику.<\/p>\n"}, {"id": "acdea93b19", "q": "Чем mock отличается от fake?", "a": "<p>Fake — упрощённая рабочая реализация (словарь вместо базы, клиент с заранее заданным ответом). Mock — объект, который ещё и запоминает, как его вызывали, чтобы тест мог это проверить (<code>unittest.mock<\/code>). Оба — разновидности тестовых двойников.<\/p>\n"}, {"id": "1838c93609", "q": "Что такое фикстура в pytest?", "a": "<p>Функция, которая готовит данные или окружение для теста и при необходимости убирает за собой. Подключается по имени аргумента теста.<\/p>\n"}, {"id": "e70ebada6e", "q": "Чем unit-тест отличается от интеграционного?", "a": "<p>Unit проверяет одну функцию или класс в изоляции, быстро. Интеграционный — взаимодействие компонентов: с базой, сетью, файлами. Пирамида тестов: много unit, меньше интеграционных, ещё меньше end-to-end.<\/p>\n"}, {"id": "1662ffe6c4", "q": "Почему тест может быть плавающим (flaky) и что с этим делать?", "a": "<p>Он зависит от того, что тест не контролирует: сети, времени, случайности, порядка выполнения, общего состояния. Лечится подстановкой зависимостей, фиксированным временем и seed, изоляцией состояния через фикстуры.<\/p>\n"}, {"id": "e28b910135", "q": "Зачем линтер и форматтер в CI?", "a": "<p>Чтобы стиль не обсуждался на ревью и проверялся автоматически, а типичные ошибки (неиспользуемые импорты, необъявленные переменные) ловились до слияния.<\/p>\n"}], "next": "2-5"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

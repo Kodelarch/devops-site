@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python-песочница — DevOps-маршрут</title>
+<meta name="description" content="Python в браузере с задачами на автопроверку">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="static/style.css?v=5261b884a0">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="python">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="index.html" data-nav="index lesson">курс</a>
+    <a href="roadmap.html" data-nav="roadmap">карта</a>
+    <a href="cards.html" data-nav="cards">карточки</a>
+    <a href="lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<main class="narrow">
+  <div class="page-kicker">python3 -i</div>
+  <h1>Python-песочница</h1>
+  <p class="lead">Настоящий Python 3.12 прямо в браузере: вся стандартная библиотека, f-строки, json, re, dataclasses, asyncio. Код работает в отдельном потоке, так что даже бесконечный цикл не повесит страницу — через 15 секунд он остановится сам.</p>
+  <h2>Задачи с автопроверкой <span class="h-note" id="py-score"></span></h2>
+  <p>Маленькие функции из жизни DevOps-инженера: разобрать лог, конфиг, вывод <code>df</code>. Напиши функцию и нажми «Проверить» — тесты покажут, где расхождение. За каждую решённую задачу +25 XP. Код сохраняется сам.</p>
+  <section class="py-tasks" id="py-tasks"></section>
+  <h2>Свободный редактор</h2>
+  <div class="sql-examples"><button type="button" class="chip" data-example="name = &quot;DevOps&quot;
+for i in range(3):
+    print(f&quot;{i + 1}. Привет, {name}!&quot;)">Привет, f-строки</button><button type="button" class="chip" data-example="ports = {&quot;nginx&quot;: 80, &quot;postgres&quot;: 5432, &quot;redis&quot;: 6379}
+for name, port in sorted(ports.items(), key=lambda kv: kv[1]):
+    print(f&quot;{name:10} {port}&quot;)">Словарь и сортировка</button><button type="button" class="chip" data-example="import json
+
+cfg = {&quot;replicas&quot;: 3, &quot;image&quot;: &quot;shop:1.4.2&quot;}
+text = json.dumps(cfg, indent=2)
+print(text)
+print(json.loads(text)[&quot;replicas&quot;] * 2)">JSON туда и обратно</button><button type="button" class="chip" data-example="import re
+
+line = &#x27;10.0.0.5 - - [28/Oct/2026] &quot;GET /api HTTP/1.1&quot; 500 32&#x27;
+m = re.search(r&#x27;&quot;(\w+) (\S+) .*&quot; (\d{3})&#x27;, line)
+print(m.groups())">Регулярки по логу</button><button type="button" class="chip" data-example="from dataclasses import dataclass
+
+@dataclass
+class Service:
+    name: str
+    port: int
+    healthy: bool = True
+
+print(Service(&quot;api&quot;, 8000))">Датакласс</button><button type="button" class="chip" data-example="import asyncio
+
+async def check(host, delay):
+    await asyncio.sleep(delay)
+    return f&quot;{host}: ok за {delay} с&quot;
+
+async def main():
+    for r in await asyncio.gather(check(&quot;db&quot;, 0.3), check(&quot;api&quot;, 0.1), check(&quot;cache&quot;, 0.2)):
+        print(r)
+
+asyncio.run(main())">asyncio: параллельные проверки</button></div>
+  <section id="py-playground" style="margin-top:14px"></section>
+  <p class="lead" style="font-size:14px">При первом запуске браузер скачает Python (~10 МБ), дальше он берётся из кеша. Сторонние пакеты (requests, fastapi), сеть, потоки и <code>input()</code> здесь недоступны — такие примеры запускай у себя. В уроках 2.1–2.5 у примеров есть кнопка «▶ выполнить».</p>
+</main>
+<nav class="bottomnav" aria-label="Разделы"><a href="index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"tasks": [{"id": "status-codes", "title": "Коды ответов из лога nginx", "topic": "2.2 · строки и словари", "desc": "Функция <code>count_status(lines)<\/code> получает строки access-лога nginx и возвращает словарь «код ответа → сколько раз встретился». Код — предпоследнее поле строки, верни его числом.", "starter": "def count_status(lines):\n    counts = {}\n    # твой код\n    return counts\n", "setup": "LOG = ['10.0.0.5 - - [28/Oct/2026:10:00:01 +0300] \"GET / HTTP/1.1\" 200 512', '10.0.0.7 - - [28/Oct/2026:10:00:02 +0300] \"GET /api/items HTTP/1.1\" 200 1290', '10.0.0.5 - - [28/Oct/2026:10:00:03 +0300] \"POST /api/login HTTP/1.1\" 401 64', '10.0.0.9 - - [28/Oct/2026:10:00:04 +0300] \"GET /missing HTTP/1.1\" 404 0', '10.0.0.5 - - [28/Oct/2026:10:00:05 +0300] \"GET /api/items HTTP/1.1\" 500 32', '10.0.0.7 - - [28/Oct/2026:10:00:06 +0300] \"GET /health HTTP/1.1\" 200 2']", "cases": [["count_status(LOG)", "{200: 3, 401: 1, 404: 1, 500: 1}"], ["count_status([])", "{}"], ["count_status(LOG[:2])", "{200: 2}"]]}, {"id": "top-ips", "title": "Самые активные IP", "topic": "2.2 · сортировка", "desc": "<code>top_ips(lines, n)<\/code> возвращает список пар <code>(ip, запросов)<\/code> для n самых активных адресов: сначала по убыванию числа запросов, при равенстве — по IP в алфавитном порядке. IP — первое поле строки.", "starter": "def top_ips(lines, n):\n    pass\n", "setup": "LOG = ['10.0.0.5 - - [28/Oct/2026:10:00:01 +0300] \"GET / HTTP/1.1\" 200 512', '10.0.0.7 - - [28/Oct/2026:10:00:02 +0300] \"GET /api/items HTTP/1.1\" 200 1290', '10.0.0.5 - - [28/Oct/2026:10:00:03 +0300] \"POST /api/login HTTP/1.1\" 401 64', '10.0.0.9 - - [28/Oct/2026:10:00:04 +0300] \"GET /missing HTTP/1.1\" 404 0', '10.0.0.5 - - [28/Oct/2026:10:00:05 +0300] \"GET /api/items HTTP/1.1\" 500 32', '10.0.0.7 - - [28/Oct/2026:10:00:06 +0300] \"GET /health HTTP/1.1\" 200 2']", "cases": [["top_ips(LOG, 2)", "[('10.0.0.5', 3), ('10.0.0.7', 2)]"], ["top_ips(LOG, 10)", "[('10.0.0.5', 3), ('10.0.0.7', 2), ('10.0.0.9', 1)]"], ["top_ips([], 3)", "[]"]]}, {"id": "parse-env", "title": "Разбор .env-файла", "topic": "2.1 · строки", "desc": "<code>parse_env(text)<\/code> превращает текст .env в словарь. Пустые строки и строки с <code>#<\/code> в начале пропусти, пробелы вокруг ключа и значения убери, а кавычки вокруг значения (одинарные или двойные) сними. Знак <code>=<\/code> внутри значения — часть значения.", "starter": "def parse_env(text):\n    env = {}\n    for line in text.splitlines():\n        pass\n    return env\n", "setup": "ENV = '# база\\nDB_HOST=db\\n\\nDB_PORT = 5432\\nDB_PASS=\"s3cr=t\"\\nAPP_NAME=\\'shop api\\'\\n'", "cases": [["parse_env(ENV)", "{'DB_HOST': 'db', 'DB_PORT': '5432', 'DB_PASS': 's3cr=t', 'APP_NAME': 'shop api'}"], ["parse_env('')", "{}"], ["parse_env('  # только комментарий')", "{}"]]}, {"id": "disk-alerts", "title": "Алерт по заполненности дисков", "topic": "1.4 · мониторинг", "desc": "<code>disk_alerts(df_output, threshold)<\/code> получает вывод <code>df -h<\/code> и возвращает список точек монтирования, где <code>Use%<\/code> не меньше порога, в порядке появления. Первая строка — заголовок.", "starter": "def disk_alerts(df_output, threshold):\n    pass\n", "setup": "DF = 'Filesystem      Size  Used Avail Use% Mounted on\\n/dev/sda1        50G   41G  9.0G  82% /\\ntmpfs           3.9G     0  3.9G   0% /dev/shm\\n/dev/sdb1       200G  190G   10G  95% /var/lib/docker\\n/dev/sdc1       100G   12G   88G  12% /data'", "cases": [["disk_alerts(DF, 80)", "['/', '/var/lib/docker']"], ["disk_alerts(DF, 90)", "['/var/lib/docker']"], ["disk_alerts(DF, 0)", "['/', '/dev/shm', '/var/lib/docker', '/data']"]]}, {"id": "semver", "title": "Повысить версию релиза", "topic": "3.2 · релизы", "desc": "<code>bump(version, part)<\/code> повышает семантическую версию <code>MAJOR.MINOR.PATCH<\/code>. <code>part<\/code> — <code>\"major\"<\/code>, <code>\"minor\"<\/code> или <code>\"patch\"<\/code>; младшие части обнуляются. Версия может начинаться с <code>v<\/code> — тогда и результат с <code>v<\/code>.", "starter": "def bump(version, part):\n    pass\n", "setup": "", "cases": [["bump('1.4.2', 'patch')", "'1.4.3'"], ["bump('1.4.2', 'minor')", "'1.5.0'"], ["bump('1.4.2', 'major')", "'2.0.0'"], ["bump('v0.9.9', 'minor')", "'v0.10.0'"]]}, {"id": "duration", "title": "Длительность как в Prometheus", "topic": "1.4 · метрики", "desc": "<code>to_seconds(text)<\/code> переводит длительность вида <code>1h30m<\/code>, <code>90s<\/code>, <code>2d<\/code>, <code>1h5m10s<\/code> в секунды. Единицы: <code>d<\/code>, <code>h<\/code>, <code>m<\/code>, <code>s<\/code>. Подсказка: пригодится модуль <code>re<\/code>.", "starter": "import re\n\ndef to_seconds(text):\n    pass\n", "setup": "", "cases": [["to_seconds('90s')", "90"], ["to_seconds('1h30m')", "5400"], ["to_seconds('2d')", "172800"], ["to_seconds('1h5m10s')", "3910"]]}, {"id": "deep-merge", "title": "Слияние конфигов как в Helm", "topic": "5.3 · values.yaml", "desc": "<code>merge(base, override)<\/code> возвращает новый словарь: значения из <code>override<\/code> заменяют значения из <code>base<\/code>, а вложенные словари сливаются рекурсивно — так Helm накладывает <code>-f prod.yaml<\/code> на <code>values.yaml<\/code>. Исходные словари менять нельзя.", "starter": "def merge(base, override):\n    pass\n", "setup": "BASE = {'replicas': 1, 'image': {'repo': 'shop', 'tag': 'latest'}, 'env': {'DEBUG': '1'}}\nPROD = {'replicas': 3, 'image': {'tag': '1.4.2'}, 'env': {'DEBUG': '0', 'LOG': 'json'}}", "cases": [["merge(BASE, PROD)", "{'replicas': 3, 'image': {'repo': 'shop', 'tag': '1.4.2'}, 'env': {'DEBUG': '0', 'LOG': 'json'}}"], ["(merge(BASE, PROD), BASE['image']['tag'])[1]", "'latest'"], ["merge(BASE, {})", "{'replicas': 1, 'image': {'repo': 'shop', 'tag': 'latest'}, 'env': {'DEBUG': '1'}}"]]}]}</script>
+<script defer src="course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="static/fx.js?v=5261b884a0"></script>
+<script defer src="static/explain.js?v=5261b884a0"></script>
+<script defer src="static/app.js?v=5261b884a0"></script>
+<script defer src="static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="static/pybox.js?v=5261b884a0"></script>
+<script defer src="static/roadmap.js?v=5261b884a0"></script>
+<script defer src="static/games.js?v=5261b884a0"></script>
+<script defer src="static/search.js?v=5261b884a0"></script>
+<script defer src="static/term.js?v=5261b884a0"></script>
+<script defer src="static/cluster.js?v=5261b884a0"></script>
+<script defer src="static/incident.js?v=5261b884a0"></script>
+<script defer src="static/interview.js?v=5261b884a0"></script>
+<script defer src="static/lint.js?v=5261b884a0"></script>
+<script defer src="static/resume.js?v=5261b884a0"></script>
+<script defer src="static/reader.js?v=5261b884a0"></script>
+<script defer src="static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6.2 DevSecOps: безопасность в конвейере — DevOps-маршрут</title>
+<meta name="description" content="Урок 6.2: DevSecOps: безопасность в конвейере">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c6)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-6">← 6. Продвинутый CI/CD</a>
+    <div class="sidebar-art"><svg class="art art-ship" viewBox="0 0 240 140" role="img" aria-label="Безопасная поставка" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path class="flow" d="M14 70 H78"/>
+<path class="flow" d="M162 70 H226"/>
+<rect class="dim" x="14" y="58" width="14" height="24" rx="3"/>
+<rect class="dim" x="212" y="58" width="14" height="24" rx="3"/>
+<path class="shield" d="M120 18 L158 32 V66 C158 94 140 110 120 120 C100 110 82 94 82 66 V32 Z"/>
+<path class="check" d="M103 68 L116 81 L139 56"/>
+<rect class="dim" x="186" y="28" width="22" height="16" rx="3"/><path class="dim" d="M191 28 V22 A6 6 0 0 1 203 22 V28"/>
+<text class="lbl" x="18" y="134">trivy · sign · argocd sync</text>
+</svg></div>
+    <div class="lesson-number">lesson 6.2 · ship</div>
+    <h1 class="lesson-title">DevSecOps: безопасность в конвейере</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Shift left: почему проверки идут в конвейер</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Секреты в коде: найти до коммита</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Хранилища секретов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">OIDC: CI без статических ключей</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Сканирование зависимостей (SCA)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Безопасность образов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Статический анализ кода (SAST)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Проверка инфраструктурного кода</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Цепочка поставок: SBOM и подпись</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Безопасность самого пайплайна</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Как не утонуть в отчётах</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Пайплайн с проверками целиком</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Во всех предыдущих уроках безопасность всплывала кусками: SSH только по ключу (<a href="../lessons/1-1.html">1.1 Linux</a>), файрвол (<a href="../lessons/1-2.html">1.2 Сети</a>), секреты в защищённых переменных (<a href="../lessons/3-2.html">3.2 CI-CD</a>), группы безопасности и IAM (<a href="../lessons/4-2.html">4.2 Облако</a>), RBAC в кластере (<a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>). DevSecOps собирает это в систему: проверки безопасности встраиваются в каждый этап конвейера и запускаются автоматически, а не раз в год аудитором.</p>
+<p>Для junior DevOps это не отдельная профессия, а набор привычек и инструментов, которые ожидают увидеть в пайплайне: сканирование образов, поиск секретов в коде, проверка зависимостей, минимальные права. На собеседовании вопрос «как вы обеспечиваете безопасность пайплайна» звучит всё чаще — после громких атак через цепочку поставок это стало темой для любого работодателя.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Shift left</strong> — переносить проверки как можно раньше: в редактор и пайплайн, а не на продакшен.</li>
+<li><strong>SAST</strong> — статический анализ исходного кода на уязвимости.</li>
+<li><strong>SCA</strong> — анализ сторонних зависимостей на известные уязвимости.</li>
+<li><strong>DAST</strong> — проверка работающего приложения снаружи, как это сделал бы атакующий.</li>
+<li><strong>CVE</strong> — публичный идентификатор известной уязвимости, например <code>CVE-2024-3094</code>.</li>
+<li><strong>CVSS</strong> — оценка критичности уязвимости от 0 до 10.</li>
+<li><strong>SBOM</strong> — список всех компонентов, из которых собран артефакт.</li>
+<li><strong>Цепочка поставок (supply chain)</strong> — всё, через что проходит код до продакшена: зависимости, базовые образы, CI, реестр.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Shift left: почему проверки идут в конвейер</h2><div class="prose"><p><em>Аналогия:</em> опечатку в договоре дешевле поймать в черновике, чем после подписания у нотариуса.</p>
+<p>Классическая схема: разработка → релиз → раз в квартал аудит безопасности → список из двухсот уязвимостей → полгода на исправления. Чем позже найдена проблема, тем дороже её исправить: к моменту аудита уязвимый код уже в продакшене, на нём построены другие функции, а автор давно забыл контекст.</p>
+<p><strong>Shift left</strong> переносит проверки влево по оси времени:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Где</th>
+<th>Что проверяется</th>
+<th>Чем</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Редактор, pre-commit</td>
+<td>Секреты, стиль, простые ошибки</td>
+<td>gitleaks, линтеры</td>
+</tr>
+<tr>
+<td>Merge request</td>
+<td>Код, зависимости, IaC, Dockerfile</td>
+<td>Semgrep, Trivy, Checkov, hadolint</td>
+</tr>
+<tr>
+<td>Сборка образа</td>
+<td>Уязвимости в образе, SBOM</td>
+<td>Trivy, Grype, Syft</td>
+</tr>
+<tr>
+<td>Перед деплоем</td>
+<td>Подпись, политики</td>
+<td>cosign, Kyverno</td>
+</tr>
+<tr>
+<td>Работающее приложение</td>
+<td>Поведение снаружи и в рантайме</td>
+<td>OWASP ZAP, Falco</td>
+</tr>
+</tbody>
+</table></div>
+<p>Цель — чтобы разработчик узнавал о проблеме в своём merge request через пять минут после пуша, когда исправление занимает минуту.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Секреты в коде: найти до коммита</h2><div class="prose"><p><em>Аналогия:</em> ключ от квартиры, приклеенный скотчем к двери с надписью «запасной». Дверь вроде закрыта.</p>
+<p>Утечка секретов через репозиторий — самая частая и самая дешёвая для атакующего уязвимость. Боты сканируют публичные репозитории непрерывно, и облачный ключ находят за минуты (<a href="../lessons/4-2.html#s-5">4.2 Облако</a>, §5). Приватный репозиторий не спасает: его клонируют на ноутбуки, он попадает в бэкапы и к подрядчикам.</p>
+<p><strong>gitleaks</strong> ищет секреты по сотням шаблонов: ключи облаков, токены GitLab и GitHub, приватные ключи, пароли в строках подключения.</p>
+<pre><code class="language-bash">gitleaks detect --source . --verbose        # весь репозиторий с историей
+gitleaks protect --staged                   # только то, что сейчас в индексе
+</code></pre>
+<p>Лучше всего — <strong>pre-commit хук</strong>, который не даст закоммитить секрет вообще:</p>
+<pre><code class="language-yaml"># .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.28.0
+    hooks:
+      - id: gitleaks
+</code></pre>
+<pre><code class="language-bash">pip install pre-commit &amp;&amp; pre-commit install
+</code></pre>
+<p>И обязательно — та же проверка в CI, потому что локальные хуки можно отключить или не поставить.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Секрет попал в git — что делать</summary><div class="callout-body"><p>Удалить коммит недостаточно: секрет остаётся в истории, в форках, в кэше CI и у всех, кто успел сделать pull. Правильный порядок: <strong>1)</strong> немедленно отозвать и перевыпустить секрет — это главное; <strong>2)</strong> проверить журналы доступа, не использовался ли он; <strong>3)</strong> только потом чистить историю (<code>git filter-repo</code>) и принудительно пушить (<a href="../lessons/0-1.html#s-12">0.1 Git</a>, §12). Считать утёкший секрет скомпрометированным нужно в любом случае, даже если репозиторий приватный.</p>
+</div></details></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Хранилища секретов</h2><div class="prose"><p><em>Аналогия:</em> банковская ячейка вместо конверта под матрасом: выдача по документам, журнал посещений, ключ можно сменить.</p>
+<p>Защищённые переменные CI (<a href="../lessons/3-2.html#s-11">3.2 CI-CD</a>, §11) и Ansible Vault (<a href="../lessons/4-3.html#s-12">4.3 Ansible</a>, §12) — хорошее начало. В больших системах их недостаточно: секреты размазаны по десятку мест, их никто не ротирует, неизвестно, кто и когда их читал.</p>
+<p><strong>HashiCorp Vault</strong> (и открытый форк <strong>OpenBao</strong>) — централизованное хранилище секретов:</p>
+<pre><code class="language-bash">vault kv put secret/shop/prod db_password='s3cr3t'
+vault kv get -field=db_password secret/shop/prod
+</code></pre>
+<p>Что он даёт сверх хранения:</p>
+<ul>
+<li><strong>Журнал аудита</strong> — кто, когда и какой секрет прочитал.</li>
+<li><strong>Политики доступа</strong> — сервис заказов читает только <code>secret/shop/orders/*</code>.</li>
+<li><strong>Динамические секреты</strong> — Vault создаёт пользователя в PostgreSQL на час под конкретный запрос и сам удаляет его после. Постоянного пароля, который может утечь, не существует.</li>
+<li><strong>Аутентификация без пароля</strong> — под в Kubernetes или задача CI подтверждает свою личность токеном сервисного аккаунта или JWT, и Vault выдаёт секрет.</li>
+</ul>
+<p>Облачные аналоги — Yandex Lockbox, AWS Secrets Manager. В Kubernetes секреты из хранилища доставляет <strong>External Secrets Operator</strong> (<a href="../lessons/5-4.html#s-10">5.4 GitOps и Argo CD</a>, §10).</p>
+<p><strong>Ротация.</strong> Секрет, который не менялся три года, известен всем, кто за эти годы уходил из команды. Пароли и ключи меняют по расписанию, и это должно делаться автоматически — иначе не делается никогда.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>OIDC: CI без статических ключей</h2><div class="prose"><p><em>Аналогия:</em> вместо постоянного пропуска сотрудник каждое утро получает на проходной одноразовый, действующий до вечера.</p>
+<p>Пайплайну, который деплоит в облако или читает секреты, нужны учётные данные. Классический вариант — ключ сервисного аккаунта в защищённой переменной CI. Он не истекает, его можно вытащить через <code>echo</code> в скрипте или через скомпрометированную зависимость.</p>
+<p>Современный вариант — <strong>OIDC</strong>: GitLab и GitHub выдают каждой задаче подписанный JWT-токен со сведениями «репозиторий такой-то, ветка main, задача deploy». Облако или Vault проверяет подпись и выдаёт <strong>временные</strong> учётные данные на несколько минут.</p>
+<pre><code class="language-yaml">deploy:
+  id_tokens:
+    VAULT_ID_TOKEN:
+      aud: https://vault.example.com
+  script:
+    - export VAULT_TOKEN=$(vault write -field=token auth/jwt/login role=shop-deploy jwt=$VAULT_ID_TOKEN)
+    - export DB_PASSWORD=$(vault kv get -field=db_password secret/shop/prod)
+</code></pre>
+<p>Политика на стороне Vault разрешает роль <code>shop-deploy</code> только для задач из ветки <code>main</code> конкретного проекта. Даже если кто-то создаст ветку с изменённым пайплайном, секретов продакшена он не получит. Это продолжение идеи «роли вместо ключей» из <a href="../lessons/4-2.html#s-5">4.2 Облако</a>, §5.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Сканирование зависимостей (SCA)</h2><div class="prose"><p><em>Аналогия:</em> проверка поставщиков. Сам ты всё делаешь правильно, но если в муке, которую ты закупаешь, нашли примесь — испечённый хлеб тоже с примесью.</p>
+<p>Современное приложение на 80–90% состоит из чужого кода: библиотеки, их зависимости, зависимости зависимостей. Уязвимость в любой из них — уязвимость приложения. Самые известные примеры — Log4Shell (2021) в библиотеке логирования Java и бэкдор в xz-utils (2024), внедрённый в сжатие данных, которое используется почти везде.</p>
+<p>Сканеры зависимостей сверяют список пакетов с базами известных уязвимостей:</p>
+<pre><code class="language-bash">pip-audit -r requirements.txt               # Python
+npm audit                                   # Node.js
+trivy fs --scanners vuln .                  # универсально, по lock-файлам
+</code></pre>
+<p>Что делать с результатами:</p>
+<ul>
+<li><strong>Обновить зависимость</strong> до версии с исправлением — в большинстве случаев.</li>
+<li><strong>Проверить применимость.</strong> Уязвимость в функции, которую приложение не вызывает, менее срочна. Но решение «не применимо» фиксируется письменно с причиной.</li>
+<li><strong>Автоматизировать обновления.</strong> Renovate или Dependabot сами создают merge request с обновлением зависимостей; тесты из <a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a> проверяют, что ничего не сломалось.</li>
+</ul>
+<p>Обязательное условие для всего этого — <strong>зафиксированные версии</strong> (lock-файлы). Без них сканер не знает, что именно ставится, а сборка сегодня и завтра даёт разный результат.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Безопасность образов</h2><div class="prose"><p><em>Аналогия:</em> в арендованную квартиру не стоит заезжать, не проверив, что предыдущие жильцы оставили в шкафах.</p>
+<p>Образ контейнера включает не только приложение, но и базовую систему со всеми её пакетами. Образ на <code>ubuntu:22.04</code> двухлетней давности содержит десятки известных уязвимостей, о которых приложение ничего не знает.</p>
+<p><strong>Сканирование образа</strong> — Trivy (самый популярный), Grype:</p>
+<pre><code class="language-bash">trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed registry/shop:3f9ab1e
+</code></pre>
+<ul>
+<li><code>--exit-code 1</code> — упасть, если найдены уязвимости; пайплайн остановится.</li>
+<li><code>--ignore-unfixed</code> — не ругаться на то, для чего ещё нет исправления (иначе пайплайн будет красным постоянно, и его начнут игнорировать).</li>
+</ul>
+<p><strong>Как сделать образ безопаснее</strong> — продолжение <a href="../lessons/3-1.html">3.1 Docker</a>:</p>
+<pre><code class="language-dockerfile"># сборка — в полном образе
+FROM python:3.13-slim AS build
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# запуск — в минимальном
+FROM python:3.13-slim
+RUN useradd --uid 10001 --no-create-home app
+COPY --from=build /install /usr/local
+COPY --chown=app:app src/ /app/
+USER 10001
+WORKDIR /app
+ENTRYPOINT [&quot;python&quot;, &quot;main.py&quot;]
+</code></pre>
+<ul>
+<li><strong>Минимальный базовый образ</strong> (<code>slim</code>, <code>alpine</code>, distroless) — меньше пакетов, меньше уязвимостей и меньше инструментов для атакующего внутри.</li>
+<li><strong>Многоэтапная сборка</strong> — компиляторы и инструменты сборки не попадают в итоговый образ.</li>
+<li><strong>Не root</strong> — <code>USER</code> с числовым UID. Взлом приложения не даёт root внутри контейнера.</li>
+<li><strong>Фиксированные версии</strong> базовых образов, а для продакшена — по дайджесту <code>@sha256:...</code>.</li>
+<li><strong>Регулярная пересборка.</strong> Образ, собранный полгода назад, устарел, даже если код не менялся. Еженедельная пересборка по расписанию подтягивает исправления базового образа.</li>
+</ul>
+<p><strong>hadolint</strong> проверяет сам Dockerfile: <code>latest</code> в <code>FROM</code>, отсутствие <code>USER</code>, <code>apt-get install</code> без фиксации версий и очистки кэша.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Статический анализ кода (SAST)</h2><div class="prose"><p><em>Аналогия:</em> корректор, который читает текст до публикации и подчёркивает типичные ошибки.</p>
+<p>SAST ищет в исходном коде шаблоны уязвимостей: SQL-инъекции через склейку строк (<a href="../lessons/2-6.html">2.6 SQL-запросы</a>), вызов <code>eval</code> с пользовательскими данными, отключённую проверку сертификатов, захардкоженные пароли.</p>
+<pre><code class="language-bash">semgrep scan --config auto .        # универсальный, много правил для разных языков
+bandit -r src/                      # специализированный для Python
+</code></pre>
+<pre><code class="language-python"># найдёт любой SAST
+cursor.execute(f&quot;SELECT * FROM users WHERE name = '{name}'&quot;)      # SQL-инъекция
+requests.get(url, verify=False)                                   # без проверки TLS
+
+# правильно
+cursor.execute(&quot;SELECT * FROM users WHERE name = %s&quot;, (name,))
+</code></pre>
+<p>В GitLab есть встроенные шаблоны: подключение <code>include: - template: Jobs/SAST.gitlab-ci.yml</code> добавляет анализ без ручной настройки, а результаты показываются прямо в merge request.</p>
+<p>Главная проблема SAST — <strong>ложные срабатывания</strong>. Если отчёт из 300 пунктов, из которых 280 не относятся к делу, его перестают читать. Поэтому начинают с небольшого набора правил высокой точности и расширяют постепенно; явно проверенные ложные срабатывания помечают в коде комментарием с объяснением.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Проверка инфраструктурного кода</h2><div class="prose"><p><em>Аналогия:</em> проверка проекта здания до начала стройки: аварийный выход нарисовать в чертеже проще, чем пробить в готовой стене.</p>
+<p>Ошибки конфигурации облака и Kubernetes — главная причина утечек в облаке (<a href="../lessons/4-2.html#s-9">4.2 Облако</a>, §9). Их тоже ловят до применения:</p>
+<pre><code class="language-bash">checkov -d infra/                       # Terraform, Kubernetes, Dockerfile, Helm
+trivy config infra/                     # то же через Trivy
+kube-linter lint charts/shop/           # манифесты Kubernetes
+</code></pre>
+<p>Что находят:</p>
+<ul>
+<li>Группа безопасности открыта <code>0.0.0.0/0</code> на порт базы или SSH.</li>
+<li>Публичный бакет, диск без шифрования.</li>
+<li>Контейнер с <code>privileged: true</code>, без <code>runAsNonRoot</code>, без лимитов ресурсов (<a href="../lessons/5-1.html#s-12">5.1 Kubernetes</a>, §12).</li>
+<li>Секрет в переменной окружения манифеста открытым текстом.</li>
+</ul>
+<p>Для Kubernetes есть ещё и <strong>контроль на входе в кластер</strong>: Kyverno или OPA Gatekeeper проверяют каждый создаваемый ресурс по политикам и отклоняют нарушающие. Например, «запретить образы не из нашего реестра» или «запретить поды без лимитов». Это последний рубеж — даже если что-то прошло мимо CI, кластер его не примет. Встроенный механизм <strong>Pod Security Admission</strong> с уровнем <code>restricted</code> на namespace закрывает самые опасные настройки подов без отдельных инструментов.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Цепочка поставок: SBOM и подпись</h2><div class="prose"><p><em>Аналогия:</em> сертификат происхождения продуктов: из чего сделано, кто произвёл, и пломба, что по дороге не подменили.</p>
+<p>Атака на цепочку поставок — внедрение вредоносного кода не в приложение, а в то, из чего и чем оно собирается: зависимость, базовый образ, систему сборки. Самые известные случаи — SolarWinds (2020), бэкдор в xz-utils (2024), регулярные подмены пакетов в npm и PyPI.</p>
+<p>Три практики защиты:</p>
+<p><strong>SBOM</strong> — полный список компонентов образа. Когда выходит новая критичная уязвимость, по SBOM за минуту понятно, какие из сотни сервисов затронуты.</p>
+<pre><code class="language-bash">syft registry/shop:3f9ab1e -o cyclonedx-json &gt; sbom.json
+trivy sbom sbom.json                         # проверить SBOM на уязвимости
+</code></pre>
+<p><strong>Подпись образов</strong> — cosign из проекта Sigstore подписывает образ после сборки, а кластер при запуске проверяет подпись. Образ, собранный не нашим CI или подменённый в реестре, не запустится.</p>
+<pre><code class="language-bash">cosign sign --yes registry/shop@sha256:abc...
+cosign verify registry/shop@sha256:abc... --certificate-identity-regexp '.*' --certificate-oidc-issuer https://gitlab.com
+</code></pre>
+<p><strong>Защита зависимостей</strong> — свой прокси-реестр пакетов (Nexus, Artifactory), фиксация версий с хешами, осторожность с опечатками в именах пакетов: <code>reqeusts</code> вместо <code>requests</code> — классический способ доставить вредоносный пакет.</p>
+<p>Фреймворк <strong>SLSA</strong> описывает уровни зрелости защиты цепочки поставок. Для junior достаточно знать, что он существует, и понимать идею: каждый артефакт должен быть прослеживаем до исходного коммита и собран доверенной системой.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Безопасность самого пайплайна</h2><div class="prose"><p><em>Аналогия:</em> охрана склада бессмысленна, если у грузчиков ключи от всех дверей и никто не смотрит, кто что выносит.</p>
+<p>CI/CD — привлекательная цель: у него есть доступ к коду, секретам, реестру и продакшену. Темы из <a href="../lessons/6-1.html#s-16">6.1 CI-CD в Kubernetes</a>, §16, собранные в чек-лист:</p>
+<ul>
+<li><strong>Защищённые ветки.</strong> В <code>main</code> нельзя пушить напрямую, только через merge request с ревью и зелёным пайплайном.</li>
+<li><strong>Защищённые переменные.</strong> Секреты продакшена доступны только задачам на защищённых ветках и тегах. Ветка из форка их не получит.</li>
+<li><strong>Изоляция раннеров.</strong> Раннер, который деплоит в продакшен, не выполняет задачи из произвольных веток. Общие раннеры не используют для задач с доступом к продакшену.</li>
+<li><strong>Фиксированные версии образов задач и внешних шаблонов.</strong> <code>include</code> чужого шаблона из <code>main</code> — это выполнение чужого кода с твоими секретами.</li>
+<li><strong>Минимальные права токенов.</strong> Токен деплоя может только деплоить, токен чтения реестра — только читать.</li>
+<li><strong>Маскирование.</strong> Секреты помечены masked и не появляются в логах, а задачи не печатают окружение целиком (<code>env</code>, <code>set -x</code>).</li>
+<li><strong>Аудит.</strong> Изменения в настройках CI и правах доступа видны в журнале проекта и регулярно просматриваются.</li>
+</ul>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Как не утонуть в отчётах</h2><div class="prose"><p><em>Аналогия:</em> дежурный, которому приходит сто вызовов в час, не отличит пожар от кошки на дереве.</p>
+<p>Подключить все сканеры за день просто. Через неделю пайплайн красный постоянно, отчёты на тысячи строк, и команда добавляет <code>allow_failure: true</code> ко всему. Безопасности стало не больше, а меньше — теперь есть иллюзия контроля.</p>
+<p>Работающий подход:</p>
+<ol>
+<li><strong>Начать с критичного.</strong> Блокировать сборку только на <code>CRITICAL</code> и <code>HIGH</code> с доступным исправлением. Остальное — отчётом, без блокировки.</li>
+<li><strong>Не блокировать на старом.</strong> Сначала зафиксировать текущий уровень, требовать только чтобы новые изменения не добавляли проблем.</li>
+<li><strong>Явные исключения.</strong> Принятые риски записываются в файл исключений (<code>.trivyignore</code>, конфиг сканера) с причиной и сроком пересмотра, а не прячутся отключением проверки.</li>
+<li><strong>Владельцы.</strong> У каждой найденной проблемы есть ответственный и срок, иначе отчёт — просто текст.</li>
+<li><strong>Метрики.</strong> Сколько критичных уязвимостей открыто и как долго в среднем они живут — это видно на дашборде (<a href="../lessons/4-5.html">4.5 Наблюдаемость</a>).</li>
+</ol>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/18 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Пайплайн с проверками целиком</h2><div class="prose"><p><em>Аналогия:</em> сборочная линия, где контроль качества встроен в каждый участок, а не стоит один на выходе.</p>
+<pre><code class="language-yaml">stages: [lint, test, build, scan, deploy]
+
+secrets:
+  stage: lint
+  image: zricethezav/gitleaks:v8.28.0
+  script: [gitleaks detect --source . --no-banner]
+
+sast:
+  stage: lint
+  image: semgrep/semgrep:1.130.0
+  script: [semgrep scan --config auto --error .]
+
+iac:
+  stage: lint
+  image: bridgecrew/checkov:3.2.450
+  script: [checkov -d infra/ -d charts/ --compact --quiet]
+
+dockerfile:
+  stage: lint
+  image: hadolint/hadolint:v2.12.0-alpine
+  script: [hadolint Dockerfile]
+
+deps:
+  stage: test
+  image: aquasec/trivy:0.64.1
+  script: [trivy fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed .]
+
+build:
+  stage: build
+  script: [docker build -t $IMAGE . , docker push $IMAGE]
+
+image-scan:
+  stage: scan
+  image: aquasec/trivy:0.64.1
+  script:
+    - trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed $IMAGE
+    - trivy image --format cyclonedx --output sbom.json $IMAGE
+  artifacts:
+    paths: [sbom.json]
+</code></pre>
+<p>Все линтеры безопасности идут параллельно в самой ранней стадии — разработчик узнаёт о проблеме через пару минут. Сканирование образа — сразу после сборки и до деплоя. SBOM сохраняется артефактом каждой сборки.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>14</b>/18 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li><strong>Shift left:</strong> проверки безопасности — в pre-commit и пайплайн, а не в ежеквартальный аудит.</li>
+<li>Секреты ловят <strong>gitleaks</strong> до коммита и в CI. Утёкший секрет <strong>сначала отзывают</strong>, потом чистят историю.</li>
+<li>Секреты хранят в <strong>Vault</strong> или облачном менеджере: аудит, политики, ротация, динамические секреты.</li>
+<li><strong>OIDC</strong> вместо статических ключей в CI: временные учётные данные на одну задачу.</li>
+<li><strong>SCA</strong> проверяет зависимости, <strong>SAST</strong> — код, <strong>Checkov/Trivy config</strong> — инфраструктурный код, <strong>DAST</strong> — работающее приложение.</li>
+<li>Образ: минимальная база, многоэтапная сборка, <code>USER</code> не root, фиксированные версии, регулярная пересборка, <strong>Trivy</strong> в пайплайне.</li>
+<li>Цепочка поставок: <strong>SBOM</strong>, <strong>подпись образов</strong> cosign, фиксация версий, свой прокси-реестр.</li>
+<li>В кластере — Pod Security Admission и политики Kyverno как последний рубеж.</li>
+<li>Пайплайн сам по себе — цель: защищённые ветки и переменные, изоляция раннеров, минимальные права токенов.</li>
+<li>Блокировать только критичное с исправлением, исключения — явно и с причиной. Иначе пайплайн всегда красный, и его перестают читать.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>15</b>/18 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–3 — раздел «Пайплайн и безопасность» в <a href="../projects/p3.html">P3</a>. Задание 1 (gitleaks в pre-commit) стоит сразу добавить во все свои репозитории, включая мини-проекты.</li>
+<li>Задание 5 (SBOM и подпись) — бонусный пункт <a href="../projects/p3.html">P3</a>.</li>
+</ul>
+</div></details><article class="task" data-task="1bce5cd29c"><h3>Задание 1 — pre-commit с gitleaks</h3><p>Поставь pre-commit и подключи gitleaks в репозиторий своего проекта. Попробуй закоммитить файл со строкой <code>aws_secret_access_key = &quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;</code>.<br />
+<strong>Проверка:</strong> коммит отклонён хуком. Добавь такую же проверку в CI и убедись, что она проходит на чистом репозитории.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1bce5cd29c"> Сделала руками и проверила</label></article><article class="task" data-task="859f1dc397"><h3>Задание 2 — сканирование образа</h3><p>Собери образ приложения из <a href="../lessons/3-1.html">3.1 Docker</a> на базе <code>python:3.9</code> (старой) и просканируй Trivy. Затем перепиши Dockerfile по §6: <code>slim</code>, многоэтапная сборка, <code>USER</code>.<br />
+<strong>Проверка:</strong> число HIGH/CRITICAL уязвимостей заметно уменьшилось, <code>docker run --rm &lt;образ&gt; id</code> показывает не root, hadolint проходит без предупреждений.</p>
+<label class="task-done"><input type="checkbox" data-task-check="859f1dc397"> Сделала руками и проверила</label></article><article class="task" data-task="ae554a2748"><h3>Задание 3 — пайплайн с проверками</h3><p>Собери пайплайн из §12 для своего проекта. Нарочно добавь в код <code>requests.get(url, verify=False)</code>, а в Terraform — группу безопасности с <code>0.0.0.0/0</code> на порт 22.<br />
+<strong>Проверка:</strong> пайплайн падает на SAST и на Checkov с понятным сообщением; после исправления — зелёный.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ae554a2748"> Сделала руками и проверила</label></article><article class="task" data-task="e5e658f851"><h3>Задание 4 — Vault на стенде</h3><p>Подними Vault в dev-режиме (<code>vault server -dev</code>), положи туда пароль базы, создай политику только на чтение этого пути и токен с этой политикой.<br />
+<strong>Проверка:</strong> токен читает свой секрет, но получает <code>permission denied</code> на соседний путь. Приложение получает пароль из Vault при старте, а не из переменной в docker-compose.</p>
+<label class="task-done"><input type="checkbox" data-task-check="e5e658f851"> Сделала руками и проверила</label></article><article class="task" data-task="1d463d2262"><h3>Задание 5 — SBOM и подпись</h3><p>Сгенерируй SBOM образа через Syft, подпиши образ cosign ключевой парой (<code>cosign generate-key-pair</code>) и проверь подпись.<br />
+<strong>Проверка:</strong> <code>cosign verify --key cosign.pub &lt;образ&gt;</code> проходит; после пересборки образа с тем же тегом без подписи — проверка падает.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1d463d2262"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>16</b>/18 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>17</b>/18 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>18</b>/18 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a> — Dockerfile, который здесь делается безопаснее</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — защищённые переменные и правила</li>
+<li><a href="../lessons/4-2.html">4.2 Облако</a> — IAM и роли вместо ключей</li>
+<li><a href="../lessons/4-3.html">4.3 Ansible</a> — Ansible Vault</li>
+<li><a href="../lessons/4-4.html">4.4 Terraform</a> — сканирование IaC</li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a> — RBAC и NetworkPolicy</li>
+<li><a href="../lessons/5-4.html">5.4 GitOps и Argo CD</a> — секреты в GitOps</li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a> — безопасность самого конвейера</li>
+<li><a href="../lessons/6-3.html">6.3 Итоговый проект</a> — чек-лист зрелости итогового проекта</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>OWASP Top 10: https://owasp.org/www-project-top-ten/</li>
+<li>OWASP DevSecOps Guideline: https://owasp.org/www-project-devsecops-guideline/</li>
+<li>Trivy: https://trivy.dev/</li>
+<li>gitleaks: https://github.com/gitleaks/gitleaks</li>
+<li>HashiCorp Vault: https://developer.hashicorp.com/vault/docs</li>
+<li>Sigstore cosign: https://docs.sigstore.dev/</li>
+<li>SLSA: https://slsa.dev/</li>
+<li>GitLab Application Security: https://docs.gitlab.com/user/application_security/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="6-1.html">← 6.1 CI/CD в Kubernetes</a><a class="lesson-jump" href="6-3.html">6.3 Итоговый проект →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "6-2", "number": "6.2", "title": "DevSecOps: безопасность в конвейере", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["1bce5cd29c", "859f1dc397", "ae554a2748", "e5e658f851", "1d463d2262"], "quiz": [{"id": "091dce2d5f", "q": "Разработчик закоммитил пароль от продакшен-базы. Что сделать первым?", "options": ["Удалить коммит через <code>git filter-repo<\/code>", "Отозвать и сменить пароль", "Сделать репозиторий приватным", "Написать в чат команды"], "answer": [1], "why": "<p>секрет нужно считать утёкшим сразу. Чистка истории — потом: копии уже могут быть у других.<\/p>\n"}, {"id": "a327560e5f", "q": "Что проверяет SCA?", "options": ["Исходный код на SQL-инъекции", "Сторонние зависимости на известные уязвимости", "Работающее приложение снаружи", "Конфигурацию Terraform"], "answer": [1], "why": "<p>код проверяет SAST, работающее приложение — DAST, инфраструктурный код — Checkov и Trivy config.<\/p>\n"}, {"id": "8ed3331263", "q": "Как CI получает доступ к облаку без статических ключей?", "options": ["Через пароль администратора", "Через OIDC: CI выдаёт задаче подписанный токен, облако или Vault меняет его на временные права", "Через SSH-ключ раннера", "Никак"], "answer": [1], "why": "<p>временные права живут минуты и ограничены политикой — например, только для задач из ветки main.<\/p>\n"}, {"id": "e17b5e44ae", "q": "Пайплайн постоянно красный из-за сканеров, и команда хочет поставить <code>allow_failure: true<\/code> везде. Что лучше?", "options": ["Так и сделать", "Блокировать только критичные уязвимости с доступным исправлением, принятые риски записывать в файл исключений с причиной", "Удалить сканеры", "Запускать сканеры раз в год"], "answer": [1], "why": "<p>отключённые проверки создают иллюзию безопасности, а шум заставляет игнорировать и настоящие проблемы.<\/p>\n"}, {"id": "4b042849b9", "q": "Зачем SBOM?", "options": ["Для ускорения сборки", "Это список всех компонентов образа: при новой уязвимости сразу видно, какие сервисы затронуты", "Для подписи образа", "Для шифрования образа"], "answer": [1], "why": "<p>без SBOM поиск затронутых сервисов превращается в ручной перебор сотни репозиториев.<\/p>\n"}, {"id": "df18ae9721", "q": "Что делает подпись образа через cosign?", "options": ["Шифрует образ", "Позволяет при запуске проверить, что образ собран твоим CI и не подменён в реестре", "Ускоряет загрузку", "Удаляет уязвимости"], "answer": [1], "why": "<p>образ без правильной подписи политика кластера просто не даст запустить.<\/p>\n"}, {"id": "9770547cd8", "q": "Какие практики защищают сам пайплайн? Выбери все.", "options": ["Защищённые ветки и переменные", "Минимальные права токенов", "Фиксированные версии образов задач и шаблонов", "Один общий токен администратора для всех задач"], "answer": [0, 1, 2], "why": "<p>CI имеет доступ к коду, секретам и продакшену — это привлекательная цель для атаки.<\/p>\n"}], "cards": [{"id": "2863055b2f", "q": "Что такое DevSecOps и shift left?", "a": "<p>Встраивание проверок безопасности в каждый этап разработки и конвейера вместо отдельного аудита в конце. Shift left — переносить проверки как можно раньше, где исправление дешевле: в редактор, pre-commit и merge request.<\/p>\n"}, {"id": "47743cfdcc", "q": "Разработчик закоммитил пароль от продакшен-базы. Ваши действия?", "a": "<p>Сразу сменить пароль и отозвать старый — это главное, потому что секрет уже нужно считать утёкшим. Проверить журналы доступа к базе. Затем удалить секрет из истории (<code>git filter-repo<\/code>), сообщить команде о необходимости перезабрать репозиторий. Добавить gitleaks в pre-commit и CI, чтобы не повторилось.<\/p>\n"}, {"id": "f257106535", "q": "Чем SAST отличается от DAST и SCA?", "a": "<p>SAST анализирует исходный код без запуска. SCA проверяет сторонние зависимости по базам известных уязвимостей. DAST атакует работающее приложение снаружи, как злоумышленник.<\/p>\n"}, {"id": "cd7dc5c805", "q": "Как сделать Docker-образ безопаснее?", "a": "<p>Минимальный базовый образ, многоэтапная сборка, запуск не от root, фиксированные версии (в идеале по дайджесту), без секретов в слоях, регулярная пересборка, сканирование Trivy в пайплайне, проверка Dockerfile hadolint.<\/p>\n"}, {"id": "86a699e964", "q": "Почему Kubernetes Secret — не шифрование?", "a": "<p>Значения хранятся в base64, который декодируется одной командой. Защита обеспечивается RBAC и шифрованием etcd на уровне кластера, но не самим форматом. Поэтому Secret нельзя класть в git, а для GitOps используют Sealed Secrets, SOPS или External Secrets.<\/p>\n"}, {"id": "2659705e2d", "q": "Что такое SBOM и зачем он нужен?", "a": "<p>Список всех компонентов и их версий в артефакте. При выходе новой уязвимости позволяет быстро найти все затронутые сервисы, а также нужен для требований регуляторов и аудита.<\/p>\n"}, {"id": "30dae6f4de", "q": "Как CI получает доступ к облаку без статических ключей?", "a": "<p>Через OIDC: CI выдаёт задаче подписанный JWT с данными о проекте и ветке, облако или Vault проверяет его и выдаёт временные учётные данные. Доступ ограничивается политикой (например, только задачи из ветки main).<\/p>\n"}, {"id": "5f9607a7ca", "q": "Пайплайн постоянно красный из-за сканеров. Что делать?", "a": "<p>Блокировать только критичное с доступным исправлением, остальное — отчётом. Зафиксировать текущий уровень и не пускать новые проблемы. Принятые риски — в файл исключений с причиной и сроком. У каждой проблемы — ответственный. Отключать проверки целиком (<code>allow_failure<\/code> на всё) — худший вариант.<\/p>\n"}, {"id": "cef4657409", "q": "Что такое атака на цепочку поставок и как от неё защищаются?", "a": "<p>Внедрение вредоносного кода через зависимости, базовые образы или систему сборки. Защита: фиксация версий и хешей, SCA, свой прокси-реестр, SBOM, подпись образов и проверка подписи при запуске, изоляция CI и минимальные права.<\/p>\n"}, {"id": "9bf6417435", "q": "Что такое принцип наименьших привилегий в контексте пайплайна?", "a": "<p>Каждая задача и каждый токен имеют только те права, что нужны для их работы: сборка не может деплоить, деплой в staging не видит секретов продакшена, раннер продакшена не выполняет задачи из произвольных веток.<\/p>\n"}], "next": "6-3"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

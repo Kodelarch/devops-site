@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P2 — Инфраструктура кодом в облаке — DevOps-маршрут</title>
+<meta name="description" content="Курс от Linux до Kubernetes: теория, практика руками, тесты и карточки к собеседованию">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="project">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+<main class="narrow project" data-project="p2"><div class="page-kicker">cd projects/p2</div><h1>P2 — Инфраструктура кодом в облаке</h1><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Что получится</summary><div class="callout-body"><p>То же приложение из <a href="../projects/p1.html">P1-Server-Basics</a>, но инфраструктура больше не настраивается руками. Terraform создаёт в облаке сеть в двух зонах, машины и хранилище, Ansible настраивает машины, а стек мониторинга с логами и алертами разворачивается вместе с приложением. Весь стенд поднимается с нуля одной последовательностью команд и одной же уничтожается.</p>
+<p>Это проект уровня «умею работать с облаком и автоматизировать инфраструктуру». Именно такой опыт чаще всего просят в вакансиях junior DevOps.</p>
+</div></details>
+<p><strong>Уроки:</strong> <a href="../lessons/4-2.html">4.2 Облако</a>, <a href="../lessons/4-4.html">4.4 Terraform</a>, <a href="../lessons/4-3.html">4.3 Ansible</a>, <a href="../lessons/4-5.html">4.5 Наблюдаемость</a>, <a href="../lessons/1-4.html">1.4 Метрики и логи</a>.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Деньги</summary><div class="callout-body"><p>Облако платное. Используй стартовый грант Yandex Cloud, прерываемые машины, бюджет с оповещением (<a href="../lessons/4-2.html#s-10">4.2 Облако</a>, §10) и <strong>всегда</strong> <code>terraform destroy</code> после работы. Стенд нужен только на время разработки и для скриншотов.</p>
+</div></details>
+<h2>Архитектура</h2>
+<pre><code>                Yandex Cloud, VPC 10.0.0.0/16
+ ┌─────────────── zone a ───────────────┬─────────── zone b ───────────┐
+ │ public:  bastion, lb (nginx)         │ public:  —                   │
+ │ private: app-1                       │ private: app-2               │
+ │ private: db-1 (PostgreSQL)           │                              │
+ │ private: monitoring (Prometheus,     │                              │
+ │          Grafana, Loki, Alertmanager)│                              │
+ └──────────────────────────────────────┴──────────────────────────────┘
+ Object Storage: состояние Terraform, бэкапы базы
+</code></pre>
+<h2>Требования</h2>
+<h3>Terraform</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Удалённое состояние в Object Storage с версионированием и блокировкой (<a href="../lessons/4-4.html#s-5">4.4 Terraform</a>, §5).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Модули <code>network</code>, <code>vm-group</code>; подсети через <code>for_each</code> в двух зонах.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Группы безопасности ссылаются друг на друга: lb → app → db; SSH только через бастион.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Метки <code>project</code>, <code>env</code>, <code>owner</code> на всех ресурсах через <code>locals</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Выходные значения передаются в инвентарь Ansible (или динамический инвентарь по меткам).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>terraform fmt -check</code>, <code>validate</code> и Checkov в CI; <code>plan</code> в merge request, <code>apply</code> вручную из main.</li>
+</ul>
+<h3>Ansible</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Роли <code>common</code> (пользователи, SSH, ufw, UTC, node_exporter), <code>docker</code>, <code>app</code>, <code>postgres</code>, <code>nginx</code>, <code>monitoring</code> (<a href="../lessons/4-3.html">4.3 Ansible</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Секреты в Ansible Vault, задачи с ними — <code>no_log: true</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Повторный прогон даёт <code>changed=0</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>ansible-lint</code> в CI.</li>
+</ul>
+<h3>Мониторинг</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Prometheus, Grafana (provisioning), Loki + Alloy, Alertmanager (<a href="../lessons/4-5.html">4.5 Наблюдаемость</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Метрики приложения: RPS, ошибки, p95; дашборд четырёх золотых сигналов.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> blackbox_exporter: доступность снаружи и срок сертификата.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Алерты <code>TargetDown</code>, <code>HighErrorRate</code>, <code>DiskWillFillIn4Hours</code> с маршрутами в Telegram и runbook для каждого.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Grafana открыта только через nginx с HTTPS и паролем, остальное — во внутренней сети.</li>
+</ul>
+<h3>Данные</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Ежедневный бэкап базы в Object Storage с правилом жизненного цикла.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Проверка восстановления описана и выполнена.</li>
+</ul>
+<h2>Структура репозитория</h2>
+<pre><code>p2-infra/
+  terraform/
+    modules/{network,vm-group}/
+    envs/dev/
+  ansible/
+    inventory/
+    group_vars/
+    roles/{common,docker,app,postgres,nginx,monitoring}/
+    site.yml
+  monitoring/
+    prometheus/  alertmanager/  grafana/  runbooks/
+  Makefile             # make up / make down
+  .gitlab-ci.yml
+  README.md
+</code></pre>
+<h2>Готово, когда</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>make up</code> (= <code>terraform apply</code> + <code>ansible-playbook</code>) с нуля поднимает рабочий стенд.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>make down</code> удаляет всё; в консоли облака ничего не осталось.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Остановка одной машины с приложением не роняет сервис — работает вторая зона.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Учебная авария (остановленный контейнер, заполненный диск) приходит алертом в Telegram, а по runbook ты находишь причину.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> В README есть скриншоты дашбордов и уведомлений.</li>
+</ul>
+<h2>Что рассказать на собеседовании</h2>
+<ul>
+<li>Как разделены зоны ответственности Terraform и Ansible и почему.</li>
+<li>Где хранится состояние и что будет при одновременном <code>apply</code>.</li>
+<li>Почему приложение в двух зонах и что произойдёт при отказе одной.</li>
+<li>Какие алерты ты завела, почему именно они и чем алерт на симптом лучше алерта на причину.</li>
+<li>Сколько стоил стенд и как ты контролировала расходы.</li>
+</ul>
+
+<details class="callout callout-tip"><summary><span class="callout-icon">💡</span>Связано с</summary><div class="callout-body"><ul>
+<li><a href="../projects/portfolio.html">00_Portfolio</a></li>
+<li><a href="../projects/p1.html">P1-Server-Basics</a> — предыдущий шаг</li>
+<li><a href="../projects/p3.html">P3-K8s-GitOps</a> — следующий шаг</li>
+</ul>
+</div></details></div></main>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

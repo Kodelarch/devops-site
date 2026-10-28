@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5.4 GitOps и Argo CD — DevOps-маршрут</title>
+<meta name="description" content="Урок 5.4: GitOps и Argo CD">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c5)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-5">← 5. Kubernetes и GitOps</a>
+    <div class="sidebar-art"><svg class="art art-k8s" viewBox="0 0 240 140" role="img" aria-label="Кластер Kubernetes" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g class="spin"><polygon points="120.0,26.0 151.3,41.1 159.0,74.9 137.4,102.0 102.6,102.0 81.0,74.9 88.7,41.1"/><path class="dim" d="M120 66 L120.0,32.0 M120 66 L146.6,44.8 M120 66 L153.1,73.6 M120 66 L134.8,96.6 M120 66 L105.2,96.6 M120 66 L86.9,73.6 M120 66 L93.4,44.8"/></g>
+<circle cx="120" cy="66" r="9"/>
+<rect class="pod d0" x="149.3" y="11.5" width="12" height="12" rx="3"/><rect class="pod d1" x="171.1" y="78.5" width="12" height="12" rx="3"/><rect class="pod d2" x="114.0" y="120.0" width="12" height="12" rx="3"/><rect class="pod d3" x="56.9" y="78.5" width="12" height="12" rx="3"/><rect class="pod d4" x="78.7" y="11.5" width="12" height="12" rx="3"/>
+<text class="lbl" x="18" y="134">kubectl get pods</text>
+</svg></div>
+    <div class="lesson-number">lesson 5.4 · k8s</div>
+    <h1 class="lesson-title">GitOps и Argo CD</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Push и pull: два способа доставки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Четыре принципа GitOps</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Установка Argo CD</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Application: что и куда разворачивать</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Статусы: Sync и Health</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Ручная и автоматическая синхронизация</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Откат</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Структура репозиториев</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Связка с CI: как новый образ попадает в кластер</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Секреты в GitOps</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Порядок применения: sync waves и hooks</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Права: проекты и RBAC</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Argo CD и Flux</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В <a href="../lessons/5-3.html">5.3 Helm и Kustomize</a> релиз обновлялся командой <code>helm upgrade</code> — руками или из пайплайна. У этого подхода три слабых места: пайплайну нужны права администратора на кластер, никто не замечает, если кто-то поправил ресурс через <code>kubectl edit</code>, и на вопрос «что сейчас развёрнуто в проде» приходится лезть в кластер.</p>
+<p>GitOps переворачивает схему: желаемое состояние кластера целиком лежит в git, а внутри кластера работает агент, который постоянно сравнивает реальность с репозиторием и выравнивает расхождения. Деплой — это merge request в репозиторий конфигурации, откат — <code>git revert</code>.</p>
+<p>Argo CD — самый распространённый GitOps-инструмент для Kubernetes. В вакансиях он встречается в связке «Kubernetes, Helm, ArgoCD» настолько часто, что стал почти обязательной строкой для позиций с Kubernetes.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>GitOps</strong> — подход, где git — единственный источник правды о состоянии инфраструктуры, а изменения применяет агент в кластере.</li>
+<li><strong>Желаемое состояние (desired state)</strong> — то, что описано в git.</li>
+<li><strong>Фактическое состояние (live state)</strong> — то, что реально запущено в кластере.</li>
+<li><strong>Синхронизация (sync)</strong> — приведение кластера к описанию в git.</li>
+<li><strong>Дрейф</strong> — расхождение между git и кластером.</li>
+<li><strong>Application</strong> — объект Argo CD: «вот этот путь в этом репозитории разворачивай в этот namespace».</li>
+<li><strong>ApplicationSet</strong> — генератор множества Application по шаблону.</li>
+<li><strong>Sync wave</strong> — порядок применения ресурсов при синхронизации.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Push и pull: два способа доставки</h2><div class="prose"><p><em>Аналогия:</em> push — курьер с ключами от всех квартир, который сам заносит посылки. Pull — у каждой квартиры свой консьерж, который сам забирает посылки из пункта выдачи и знает, что должно лежать в квартире.</p>
+<p><strong>Push-модель</strong> — то, что делалось до сих пор (<a href="../lessons/3-2.html">3.2 CI-CD</a>, <a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a>): пайплайн собирает образ и сам выполняет <code>helm upgrade</code> или <code>kubectl apply</code> в кластере.</p>
+<p>Проблемы push:</p>
+<ul>
+<li><strong>Пайплайну нужен доступ к кластеру</strong>, обычно широкий. Скомпрометированный раннер или утёкшая переменная CI — это доступ ко всему продакшену.</li>
+<li><strong>Изменения в обход пайплайна никто не видит.</strong> Кто-то сделал <code>kubectl scale</code> в аварии и забыл вернуть — git говорит одно, кластер живёт другим.</li>
+<li><strong>Нет постоянной сверки.</strong> Пайплайн применил изменения один раз и забыл про них.</li>
+</ul>
+<p><strong>Pull-модель (GitOps):</strong> агент живёт внутри кластера, сам ходит в git и применяет изменения.</p>
+<ul>
+<li><strong>Кластеру не нужно открывать доступ наружу.</strong> Агент сам ходит в git, а пайплайн вообще не трогает кластер — он только коммитит новый тег образа в репозиторий.</li>
+<li><strong>Постоянная сверка.</strong> Агент каждые несколько минут сравнивает git с кластером и показывает дрейф, а при включённой самоисправке — откатывает ручные правки.</li>
+<li><strong>История и аудит бесплатно.</strong> Каждое изменение продакшена — коммит с автором, ревью и временем (<a href="../lessons/0-1.html#s-16">0.1 Git</a>, §16).</li>
+</ul>
+
+<figure class="explain" data-anim="gitops-loop"><figcaption><span class="explain-tag">▶ схема</span>Как Argo CD вытягивает изменения и откатывает ручные правки</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Четыре принципа GitOps</h2><div class="prose"><p><em>Аналогия:</em> правила бухгалтерии: каждая операция — проводка в книге, книгу не правят задним числом, остатки на счетах сверяются с книгой.</p>
+<p>Проект OpenGitOps сформулировал четыре принципа:</p>
+<ol>
+<li><strong>Декларативность.</strong> Желаемое состояние описано декларативно — манифестами, Helm-чартами, Kustomize (<a href="../lessons/5-3.html">5.3 Helm и Kustomize</a>), а не скриптами с командами.</li>
+<li><strong>Версионирование и неизменяемость.</strong> Состояние хранится в git, каждая версия неизменна, есть полная история.</li>
+<li><strong>Автоматическое получение.</strong> Агенты сами забирают желаемое состояние из источника, никто его им не «вталкивает».</li>
+<li><strong>Постоянная сверка.</strong> Агенты непрерывно сравнивают фактическое состояние с желаемым и устраняют расхождения.</li>
+</ol>
+<p>Из этих принципов следует практическое правило: <strong><code>kubectl apply</code> и <code>kubectl edit</code> в продакшене руками не делают.</strong> Любое изменение — коммит. Иначе агент либо откатит правку, либо будет постоянно показывать дрейф.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Установка Argo CD</h2><div class="prose"><p><em>Аналогия:</em> заселяем консьержа: выделяем ему комнату, даём ключи и список квартир.</p>
+<pre><code class="language-bash">kubectl create namespace argocd
+kubectl apply -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# пароль начального администратора
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath=&quot;{.data.password}&quot; | base64 -d
+
+# доступ к интерфейсу без Ingress — для учебного стенда
+kubectl -n argocd port-forward svc/argocd-server 8080:443
+</code></pre>
+<p>В продакшене Argo CD ставят Helm-чартом <code>argo/argo-cd</code> с параметрами в git и открывают интерфейс через Ingress с HTTPS (<a href="../lessons/5-2.html#s-7">5.2 Kubernetes в работе</a>, §7). После первого входа начальный пароль меняют, а секрет <code>argocd-initial-admin-secret</code> удаляют.</p>
+<p>Основные компоненты:</p>
+<ul>
+<li><strong>argocd-server</strong> — API и веб-интерфейс.</li>
+<li><strong>repo-server</strong> — клонирует репозитории и рендерит манифесты (выполняет <code>helm template</code> и <code>kustomize build</code>).</li>
+<li><strong>application-controller</strong> — сравнивает отрендеренные манифесты с кластером и синхронизирует.</li>
+</ul>
+<p>Консольная утилита <code>argocd</code> удобна для скриптов и отладки:</p>
+<pre><code class="language-bash">argocd login localhost:8080
+argocd app list
+argocd app get shop
+argocd app diff shop       # что изменится
+argocd app sync shop       # синхронизировать вручную
+argocd app history shop
+</code></pre>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Application: что и куда разворачивать</h2><div class="prose"><p><em>Аналогия:</em> карточка в картотеке консьержа: «квартира 12, содержимое — по описи из папки №5».</p>
+<p>Главный объект Argo CD — <strong>Application</strong>. Он связывает источник в git с местом в кластере:</p>
+<pre><code class="language-yaml">apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shop-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.com/my-team/shop-deploy.git
+    targetRevision: main
+    path: charts/shop
+    helm:
+      valueFiles:
+        - values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shop-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+</code></pre>
+<p>Разбор:</p>
+<ul>
+<li><strong>source</strong> — откуда: репозиторий, ветка или тег, путь. Источник может быть каталогом с манифестами, Kustomize-оверлеем или Helm-чартом — Argo CD определяет тип сам.</li>
+<li><strong>destination</strong> — куда: кластер и namespace. <code>kubernetes.default.svc</code> — тот кластер, где установлен сам Argo CD.</li>
+<li><strong>syncPolicy.automated</strong> — синхронизировать автоматически при изменениях в git.</li>
+<li><strong>prune</strong> — удалять из кластера ресурсы, которые удалили из git. Без этого флага удалённый из репозитория Deployment продолжит работать.</li>
+<li><strong>selfHeal</strong> — откатывать ручные изменения в кластере к состоянию из git.</li>
+</ul>
+<p>Сам Application — тоже манифест, и его тоже хранят в git. Как это организовать, разбирается в §8.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Статусы: Sync и Health</h2><div class="prose"><p><em>Аналогия:</em> два разных вопроса про посылку: «доставили ли то, что заказывали?» и «работает ли то, что доставили?».</p>
+<p>У каждого Application два независимых статуса:</p>
+<p><strong>Sync status</strong> — совпадает ли кластер с git:</p>
+<ul>
+<li><code>Synced</code> — совпадает.</li>
+<li><code>OutOfSync</code> — есть разница: в git появились изменения или в кластере кто-то поправил ресурс руками.</li>
+</ul>
+<p><strong>Health status</strong> — работает ли то, что развёрнуто:</p>
+<ul>
+<li><code>Healthy</code> — все ресурсы в порядке: у Deployment готовы все реплики, у Ingress есть адрес.</li>
+<li><code>Progressing</code> — идёт выкатка.</li>
+<li><code>Degraded</code> — что-то сломано: поды в <code>CrashLoopBackOff</code>, выкатка не завершилась.</li>
+<li><code>Missing</code> — ресурса нет в кластере.</li>
+</ul>
+<p>Комбинация <code>Synced</code> + <code>Degraded</code> — частая ситуация: git применён полностью, но новая версия не стартует. Argo CD свою работу сделал, проблема в приложении или конфиге. Дальше — порядок разбора пода из <a href="../lessons/5-1.html#s-15">5.1 Kubernetes</a>, §15.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Интерфейс Argo CD как карта приложения</summary><div class="callout-body"><p>Веб-интерфейс показывает дерево ресурсов: Application → Deployment → ReplicaSet → Pod, рядом Service, Ingress, ConfigMap. По цвету значков сразу видно, где проблема, а по клику — события и логи пода. Для новичка это лучший способ увидеть, как ресурсы Kubernetes связаны между собой.</p>
+</div></details></div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ручная и автоматическая синхронизация</h2><div class="prose"><p><em>Аналогия:</em> автоплатёж или подтверждение каждого платежа вручную.</p>
+<p><strong>Автоматическая синхронизация</strong> — Argo CD применяет изменения сам, как только видит новый коммит (опрашивает репозиторий раз в 3 минуты или сразу по вебхуку от GitLab/GitHub). Подходит для dev и staging, а во многих командах и для продакшена — там контролем служит ревью merge request.</p>
+<p><strong>Ручная синхронизация</strong> — Argo CD показывает <code>OutOfSync</code> и дифф, а применяет человек кнопкой Sync или командой <code>argocd app sync</code>. Выбирают, когда нужен явный момент выкатки.</p>
+<p><strong>selfHeal</strong> стоит понимать отдельно: он реагирует не на изменения в git, а на изменения <strong>в кластере</strong>. Кто-то сделал <code>kubectl scale deploy shop --replicas=10</code> — через несколько секунд Argo CD вернёт число реплик из git. Для продакшена это обычно правильно, но это нужно знать заранее: в аварии ручной фикс в кластере продержится секунды. Аварийное изменение делают коммитом — или временно отключают автосинхронизацию для приложения.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>HPA и selfHeal</summary><div class="callout-body"><p>Если число реплик управляется автомасштабированием (<a href="../lessons/5-2.html#s-16">5.2 Kubernetes в работе</a>, §16), а в манифесте Deployment тоже указано <code>replicas</code>, Argo CD и HPA будут бесконечно перетягивать значение. Решение — не указывать <code>replicas</code> в манифесте при наличии HPA или добавить поле в <code>ignoreDifferences</code>.</p>
+</div></details></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Откат</h2><div class="prose"><p><em>Аналогия:</em> отмена проводки в бухгалтерии — не стирают старую запись, а делают новую, обратную.</p>
+<p>В GitOps правильный откат — <strong><code>git revert</code></strong> коммита, который принёс проблему. Argo CD увидит новый коммит и выкатит предыдущее состояние. История сохраняется, причина отката видна в git.</p>
+<p>Argo CD умеет и откат из интерфейса (<code>argocd app rollback shop &lt;id&gt;</code>) на одну из предыдущих синхронизаций. Но при включённой автосинхронизации он сразу же снова применит то, что лежит в git, — поэтому для приложений с автосинхронизацией откат делают только через git.</p>
+<p>Сравнение с <a href="../lessons/3-2.html#s-15">3.2 CI-CD</a>, §15: там откат — повторный запуск старого пайплайна или <code>helm rollback</code>. В GitOps — обычный коммит, и в любой момент git отвечает на вопрос «что сейчас в продакшене».</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Структура репозиториев</h2><div class="prose"><p><em>Аналогия:</em> разделение чертежей и складской книги: инженеры правят чертежи, а книга учёта того, что где стоит, ведётся отдельно.</p>
+<p>Принятая практика — <strong>два репозитория</strong>:</p>
+<ul>
+<li><strong>Репозиторий приложения</strong> — код, Dockerfile, тесты, пайплайн сборки.</li>
+<li><strong>Репозиторий конфигурации (deploy/gitops-репозиторий)</strong> — Helm-чарты или Kustomize, values для окружений, объекты Application.</li>
+</ul>
+<p>Почему раздельно: изменения конфигурации не должны запускать сборку приложения, у репозиториев разные права доступа (продакшен-конфиг правят не все), а история деплоев не смешивается с историей кода.</p>
+<p>Пример структуры репозитория конфигурации:</p>
+<pre><code>shop-deploy/
+  apps/                      # объекты Application
+    shop-dev.yaml
+    shop-staging.yaml
+    shop-prod.yaml
+    monitoring.yaml
+  charts/shop/               # чарт приложения
+    Chart.yaml
+    templates/
+    values.yaml
+    values-dev.yaml
+    values-staging.yaml
+    values-prod.yaml
+</code></pre>
+<p><strong>App of Apps.</strong> Чтобы и сами Application не создавать руками, заводят одно корневое Application, которое указывает на каталог <code>apps/</code>. Argo CD разворачивает его — и тем самым создаёт все остальные Application. Добавил файл в <code>apps/</code> — появилось новое приложение. Весь кластер описывается одним репозиторием.</p>
+<p><strong>ApplicationSet</strong> решает ту же задачу генератором: «для каждого каталога в <code>envs/*</code> создай Application» или «для каждого кластера из списка». Удобно, когда окружений или кластеров много.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Связка с CI: как новый образ попадает в кластер</h2><div class="prose"><p><em>Аналогия:</em> конвейер: цех собирает деталь и кладёт на склад, а в складскую книгу вносит новую запись. Сборку на объект консьерж забирает по книге.</p>
+<p>Полный путь изменения от коммита разработчика до продакшена:</p>
+<ol>
+<li>Разработчик пушит код в репозиторий приложения.</li>
+<li>CI собирает образ, прогоняет тесты, сканирует (<a href="../lessons/6-2.html">6.2 DevSecOps</a>) и пушит образ с тегом коммита — например <code>registry/shop:3f9ab1e</code>.</li>
+<li>CI <strong>коммитит новый тег в репозиторий конфигурации</strong>: меняет <code>image.tag</code> в <code>values-staging.yaml</code>.</li>
+<li>Argo CD видит коммит и выкатывает staging.</li>
+<li>Для продакшена — merge request с тем же изменением в <code>values-prod.yaml</code>, ревью и merge.</li>
+</ol>
+<pre><code class="language-yaml"># фрагмент .gitlab-ci.yml в репозитории приложения
+update-staging:
+  stage: deploy
+  image: alpine/git
+  script:
+    - git clone https://oauth2:${DEPLOY_REPO_TOKEN}@gitlab.com/my-team/shop-deploy.git
+    - cd shop-deploy
+    - 'sed -i &quot;s/^  tag: .*/  tag: ${CI_COMMIT_SHORT_SHA}/&quot; charts/shop/values-staging.yaml'
+    - git commit -am &quot;shop: staging -&gt; ${CI_COMMIT_SHORT_SHA}&quot;
+    - git push
+  rules:
+    - if: $CI_COMMIT_BRANCH == &quot;main&quot;
+</code></pre>
+<p>Ключевое отличие от push-модели: <strong>у пайплайна нет доступа к кластеру вообще</strong>. Только токен на запись в репозиторий конфигурации.</p>
+<p>Альтернатива шагу 3 — <strong>Argo CD Image Updater</strong>: отдельный компонент сам следит за реестром образов и обновляет тег. Удобно, но изменения появляются в git от имени робота, и команды часто предпочитают явный коммит из CI.</p>
+<p>Почему тег коммита, а не <code>latest</code>: с <code>latest</code> манифест не меняется, Argo CD не видит изменений и ничего не выкатывает, а откатиться на «предыдущий latest» невозможно. Неизменяемые теги — обязательное условие GitOps.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Секреты в GitOps</h2><div class="prose"><p><em>Аналогия:</em> в общую книгу учёта нельзя вписать код от сейфа, но можно вписать запечатанный конверт, который откроет только сейф.</p>
+<p>Если всё состояние в git, возникает очевидный вопрос: а пароли? Kubernetes Secret в base64 — это не шифрование (<a href="../lessons/5-1.html#s-7">5.1 Kubernetes</a>, §7), класть его в репозиторий нельзя.</p>
+<p>Распространённые решения:</p>
+<ul>
+<li><strong>Sealed Secrets</strong> — секрет шифруется публичным ключом контроллера в кластере (<code>kubeseal</code>), в git лежит зашифрованный <code>SealedSecret</code>, расшифровать может только контроллер.</li>
+<li><strong>SOPS</strong> — шифрует значения в YAML-файлах ключом из облачного KMS или age; Argo CD расшифровывает через плагин.</li>
+<li><strong>External Secrets Operator</strong> — в git лежит только ссылка «возьми пароль <code>db/prod</code> из хранилища», а сам секрет оператор забирает из HashiCorp Vault или облачного менеджера секретов и создаёт обычный Secret в кластере.</li>
+</ul>
+<p>Для учебного проекта проще всего Sealed Secrets. В компаниях чаще встречается External Secrets с Vault — подробнее в <a href="../lessons/6-2.html">6.2 DevSecOps</a>.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Порядок применения: sync waves и hooks</h2><div class="prose"><p><em>Аналогия:</em> в ремонте сначала проводка, потом штукатурка, потом обои. Перепутать порядок — переделывать.</p>
+<p>По умолчанию Argo CD применяет ресурсы в разумном порядке по типам (сначала Namespace и CRD, потом ConfigMap и Secret, потом Deployment). Когда нужно тоньше — например, миграция базы до запуска новой версии приложения (<a href="../lessons/6-3.html#s-6">6.3 Итоговый проект</a>, §6), — используют аннотации:</p>
+<pre><code class="language-yaml"># миграция выполнится до основной синхронизации
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: registry/shop:3f9ab1e
+          command: [&quot;python&quot;, &quot;manage.py&quot;, &quot;migrate&quot;]
+</code></pre>
+<pre><code class="language-yaml"># волны: меньший номер применяется раньше
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: &quot;-1&quot;
+</code></pre>
+<p>Если хук <code>PreSync</code> упал, синхронизация остановится и новая версия не будет выкачена — это ровно то поведение, которое нужно для миграций.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Права: проекты и RBAC</h2><div class="prose"><p><em>Аналогия:</em> у консьержа список: какие квартиры обслуживать, из каких пунктов выдачи принимать посылки и кто из жильцов может давать ему указания.</p>
+<p><strong>AppProject</strong> ограничивает, что может делать группа приложений:</p>
+<pre><code class="language-yaml">apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: shop
+  namespace: argocd
+spec:
+  sourceRepos:
+    - https://gitlab.com/my-team/shop-deploy.git
+  destinations:
+    - namespace: &quot;shop-*&quot;
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []      # запретить кластерные ресурсы
+</code></pre>
+<p>Приложения проекта <code>shop</code> могут брать манифесты только из своего репозитория и разворачивать только в namespace <code>shop-*</code>. Даже если в репозиторий попадёт ClusterRole с правами администратора, Argo CD откажется её применять.</p>
+<p>Пользователей Argo CD подключают через SSO (GitLab, корпоративный каталог) и раздают роли: разработчики видят приложения и могут синхронизировать staging, а продакшен — только чтение. Это продолжение идей RBAC из <a href="../lessons/5-2.html#s-14">5.2 Kubernetes в работе</a>, §14.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Argo CD и Flux</h2><div class="prose"><p><em>Аналогия:</em> два производителя одного типа устройства: делают одно и то же, отличаются удобством и подходом.</p>
+<p><strong>Flux</strong> — второй крупный GitOps-инструмент, тоже проект CNCF. Отличия:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Argo CD</th>
+<th>Flux</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Интерфейс</td>
+<td>Развитый веб-интерфейс с картой ресурсов</td>
+<td>Нет встроенного, управляется CLI и CRD</td>
+</tr>
+<tr>
+<td>Модель</td>
+<td>Центральный сервер, может управлять многими кластерами</td>
+<td>Набор контроллеров в каждом кластере</td>
+</tr>
+<tr>
+<td>Порог входа</td>
+<td>Ниже за счёт интерфейса</td>
+<td>Выше, но проще встраивается в автоматизацию</td>
+</tr>
+</tbody>
+</table></div>
+<p>В российских вакансиях Argo CD встречается заметно чаще. Принципы одинаковые, и освоив один, второй понимаешь за день.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>15</b>/19 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li><strong>GitOps:</strong> git — единственный источник правды, агент в кластере сам забирает изменения (pull) и постоянно сверяет состояние.</li>
+<li>Pull-модель убирает доступ пайплайна к кластеру и делает видимым любой дрейф.</li>
+<li><strong>Application</strong> связывает путь в git с namespace в кластере. <code>prune</code> удаляет лишнее, <code>selfHeal</code> откатывает ручные правки.</li>
+<li>Два статуса: <strong>Sync</strong> (совпадает ли с git) и <strong>Health</strong> (работает ли). <code>Synced</code> + <code>Degraded</code> — проблема в приложении, а не в Argo CD.</li>
+<li>Откат — <strong><code>git revert</code></strong>, а не кнопка в интерфейсе.</li>
+<li>Код приложения и конфигурация — <strong>в разных репозиториях</strong>. Все Application — тоже в git (<strong>App of Apps</strong>, <strong>ApplicationSet</strong>).</li>
+<li>CI собирает образ и <strong>коммитит новый тег</strong> в репозиторий конфигурации. Теги неизменяемые, никакого <code>latest</code>.</li>
+<li>Секреты — Sealed Secrets, SOPS или External Secrets, но не Secret в base64.</li>
+<li>Миграции — через хук <code>PreSync</code>, порядок — через sync waves.</li>
+<li><strong>AppProject</strong> ограничивает источники и namespace, доступ к продакшену — только чтение для большинства.</li>
+<li>Руками в продакшен-кластер не правят: всё через коммит.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>16</b>/19 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Все задания урока — раздел «GitOps» в <a href="../projects/p3.html">P3</a>: Argo CD, репозиторий конфигурации, CI коммитит тег, откат через <code>git revert</code>, Sealed Secrets.</li>
+</ul>
+</div></details><article class="task" data-task="4a054734d5"><h3>Задание 1 — Argo CD на стенде</h3><p>Подними кластер (minikube, kind или k3s из <a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>) и установи Argo CD. Зайди в интерфейс через <code>port-forward</code>, смени пароль администратора.<br />
+<strong>Проверка:</strong> <code>argocd app list</code> выполняется без ошибок, интерфейс открывается.</p>
+<label class="task-done"><input type="checkbox" data-task-check="4a054734d5"> Сделала руками и проверила</label></article><article class="task" data-task="a82147f0d0"><h3>Задание 2 — первое приложение</h3><p>Создай репозиторий конфигурации с чартом из <a href="../lessons/5-3.html">5.3 Helm и Kustomize</a> и Application с автосинхронизацией, <code>prune</code> и <code>selfHeal</code>.<br />
+<strong>Проверка:</strong> приложение в статусе <code>Synced</code> + <code>Healthy</code>. Поменяй <code>replicaCount</code> коммитом — через несколько минут (или сразу по кнопке Refresh) число подов изменилось.</p>
+<label class="task-done"><input type="checkbox" data-task-check="a82147f0d0"> Сделала руками и проверила</label></article><article class="task" data-task="bd0c613a47"><h3>Задание 3 — дрейф и самоисправление</h3><p>Выполни <code>kubectl scale deploy &lt;имя&gt; --replicas=5</code> и <code>kubectl delete svc &lt;имя&gt;</code>.<br />
+<strong>Проверка:</strong> Argo CD возвращает число реплик и пересоздаёт Service. Затем удали Deployment из git — с <code>prune: true</code> он исчезает из кластера.</p>
+<label class="task-done"><input type="checkbox" data-task-check="bd0c613a47"> Сделала руками и проверила</label></article><article class="task" data-task="d91f0650b2"><h3>Задание 4 — CI коммитит тег</h3><p>Настрой пайплайн репозитория приложения: сборка образа с тегом <code>$CI_COMMIT_SHORT_SHA</code>, пуш в реестр и коммит нового тега в <code>values-staging.yaml</code> репозитория конфигурации.<br />
+<strong>Проверка:</strong> пуш в main приложения → через несколько минут в кластере работает новая версия, а в истории репозитория конфигурации есть коммит от CI. У пайплайна <strong>нет</strong> kubeconfig.</p>
+<label class="task-done"><input type="checkbox" data-task-check="d91f0650b2"> Сделала руками и проверила</label></article><article class="task" data-task="e8fb446542"><h3>Задание 5 — откат и секрет</h3><p>Выкати заведомо сломанную версию (образ с несуществующим тегом), увидь <code>Degraded</code>, откати через <code>git revert</code>. Затем добавь пароль базы через Sealed Secrets.<br />
+<strong>Проверка:</strong> после revert приложение снова <code>Healthy</code>; в репозитории лежит только <code>SealedSecret</code>, а <code>kubectl get secret</code> в кластере показывает расшифрованный Secret.</p>
+<label class="task-done"><input type="checkbox" data-task-check="e8fb446542"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>17</b>/19 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>18</b>/19 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>19</b>/19 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/5-3.html">5.3 Helm и Kustomize</a> — чарты и Kustomize, которые разворачивает Argo CD</li>
+<li><a href="../lessons/5-1.html">5.1 Kubernetes</a> — ресурсы и разбор неработающего пода</li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a> — Ingress, RBAC и HPA</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — push-модель и откат</li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a> — пайплайн сборки</li>
+<li><a href="../lessons/6-2.html">6.2 DevSecOps</a> — секреты и сканирование образов</li>
+<li><a href="../lessons/6-3.html">6.3 Итоговый проект</a> — итоговый проект с GitOps-деплоем</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Argo CD: https://argo-cd.readthedocs.io/en/stable/</li>
+<li>Принципы OpenGitOps: https://opengitops.dev/</li>
+<li>Best practices Argo CD: https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/</li>
+<li>Sealed Secrets: https://github.com/bitnami-labs/sealed-secrets</li>
+<li>External Secrets Operator: https://external-secrets.io/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="5-3.html">← 5.3 Helm и Kustomize</a><a class="lesson-jump" href="6-1.html">6.1 CI/CD в Kubernetes →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "5-4", "number": "5.4", "title": "GitOps и Argo CD", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["4a054734d5", "a82147f0d0", "bd0c613a47", "d91f0650b2", "e8fb446542"], "quiz": [{"id": "93edd80c69", "q": "Что такое GitOps?", "options": ["Хранение кода в GitHub", "Подход, при котором желаемое состояние описано в git, а агент в кластере сам его применяет и постоянно сверяет", "Деплой через <code>git push<\/code> на сервер", "Ручной <code>kubectl apply<\/code> из папки репозитория"], "answer": [1], "why": "<p>изменения вносятся только коммитами, а агент устраняет расхождения между git и кластером.<\/p>\n"}, {"id": "14bdca831f", "q": "Почему pull-модель безопаснее push для деплоя в Kubernetes?", "options": ["Она быстрее", "Пайплайну не нужны права на кластер: агент внутри сам забирает изменения из git", "Pull работает без интернета", "Pull не требует git"], "answer": [1], "why": "<p>скомпрометированный раннер в pull-модели не даёт доступа к продакшен-кластеру.<\/p>\n"}, {"id": "6b525acb53", "q": "Что делает <code>selfHeal: true<\/code> в Application Argo CD?", "options": ["Перезапускает упавшие поды", "Откатывает ручные изменения в кластере к состоянию из git", "Чинит ошибки в манифестах", "Удаляет лишние ресурсы"], "answer": [1], "why": "<p>удаление ресурсов, которых больше нет в git, делает отдельный флаг <code>prune<\/code>.<\/p>\n"}, {"id": "533b10baf0", "q": "Приложение в Argo CD: Synced и Degraded. Что это значит?", "options": ["Argo CD сломан", "Кластер совпадает с git, но развёрнутое приложение не работает", "Кластер расходится с git", "Идёт синхронизация"], "answer": [1], "why": "<p>проблема в приложении или конфигурации — смотреть события и логи подов.<\/p>\n"}, {"id": "d8ac128420", "q": "Как правильно откатить релиз в GitOps?", "options": ["Нажать Rollback в интерфейсе Argo CD", "<code>git revert<\/code> проблемного коммита в репозитории конфигурации", "<code>kubectl rollout undo<\/code>", "Удалить Application"], "answer": [1], "why": "<p>при автосинхронизации Argo CD сразу вернёт то, что лежит в git, и ручной откат продержится секунды.<\/p>\n"}, {"id": "5be0436e7e", "q": "Почему с Argo CD нельзя использовать тег образа <code>latest<\/code>?", "options": ["Argo CD его не поддерживает", "Манифест не меняется, поэтому Argo CD не видит новой версии, а откатиться на конкретную нельзя", "latest весит больше", "Так быстрее"], "answer": [1], "why": "<p>в GitOps теги неизменяемые — обычно это хеш коммита.<\/p>\n"}, {"id": "b46ef0cdce", "q": "Как хранить секреты, если всё состояние кластера в git? Выбери все подходящие варианты.", "options": ["Sealed Secrets — секрет зашифрован ключом контроллера в кластере", "External Secrets Operator — в git только ссылка на секрет во внешнем хранилище", "SOPS — значения зашифрованы ключом из KMS", "Обычный Secret в base64 в репозитории"], "answer": [0, 1, 2], "why": "<p>base64 — не шифрование. Открытый Secret в git равен публикации пароля.<\/p>\n"}], "cards": [{"id": "4513706338", "q": "Что такое GitOps?", "a": "<p>Подход, при котором желаемое состояние инфраструктуры и приложений декларативно описано в git, а агент в кластере сам забирает его и постоянно сверяет с фактическим состоянием, устраняя расхождения. Изменения вносятся только через git.<\/p>\n"}, {"id": "f0c70c5e5c", "q": "Чем pull-модель лучше push для деплоя в Kubernetes?", "a": "<p>Пайплайну не нужны права на кластер — меньше поверхность атаки. Постоянная сверка обнаруживает дрейф. Git отражает реальное состояние продакшена, история и откат — через коммиты.<\/p>\n"}, {"id": "1de23133ca", "q": "Что делают prune и selfHeal?", "a": "<p><code>prune<\/code> удаляет из кластера ресурсы, которых больше нет в git. <code>selfHeal<\/code> откатывает изменения, сделанные в кластере в обход git. Без них Argo CD только применяет новое, но не убирает лишнее и не борется с ручными правками.<\/p>\n"}, {"id": "5deb2ea128", "q": "Приложение Synced, но Degraded. Что это значит?", "a": "<p>Кластер соответствует git, но развёрнутое не работает: поды не стартуют, выкатка не завершилась. Проблема в приложении или конфигурации — смотреть события и логи подов.<\/p>\n"}, {"id": "95b7ec1c6d", "q": "Как откатить релиз в GitOps?", "a": "<p><code>git revert<\/code> проблемного коммита в репозитории конфигурации. Откат через интерфейс Argo CD при автосинхронизации бесполезен — он снова применит то, что в git.<\/p>\n"}, {"id": "5389c12c32", "q": "Как хранить секреты, если всё в git?", "a": "<p>Не хранить открытые Secret. Варианты: Sealed Secrets (шифрование ключом контроллера), SOPS (шифрование через KMS/age), External Secrets Operator (в git — ссылка, сам секрет во внешнем хранилище вроде Vault).<\/p>\n"}, {"id": "67d1c6f1d0", "q": "Зачем отдельный репозиторий для конфигурации?", "a": "<p>Чтобы изменения конфигурации не запускали сборку приложения, разграничить права (продакшен правят не все) и иметь чистую историю деплоев.<\/p>\n"}, {"id": "cf6950402a", "q": "Что такое App of Apps?", "a": "<p>Корневое Application, которое указывает на каталог с другими Application. Позволяет описать в git весь набор приложений кластера и не создавать их руками.<\/p>\n"}, {"id": "2bf4411951", "q": "Почему нельзя использовать тег latest с Argo CD?", "a": "<p>Манифест не меняется, поэтому Argo CD не видит изменений и не выкатывает новую версию; невозможно понять, что реально запущено, и откатиться на конкретную версию.<\/p>\n"}, {"id": "77475ef882", "q": "Чем Argo CD отличается от Flux?", "a": "<p>Оба реализуют GitOps. Argo CD имеет развитый веб-интерфейс и центральный сервер, который может управлять несколькими кластерами. Flux — набор контроллеров без встроенного интерфейса, управляется через CLI и CRD.<\/p>\n"}], "next": "6-1"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M2 — certwatch: утилита проверки сертификатов — DevOps-маршрут</title>
+<meta name="description" content="Курс от Linux до Kubernetes: теория, практика руками, тесты и карточки к собеседованию">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="project">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+<main class="narrow project" data-project="m2"><div class="page-kicker">cd projects/m2</div><h1>M2 — certwatch: утилита проверки сертификатов</h1><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Что получится</summary><div class="callout-body"><p>Консольная утилита на Python: берёт список доменов, проверяет, когда истекает TLS-сертификат каждого, и печатает таблицу или JSON. По коду выхода её удобно ставить в cron или в пайплайн: «всё хорошо», «скоро истекает», «уже истёк или недоступен». Утилита ставится через <code>pip</code> и запускается в Docker.</p>
+<p>Истёкший сертификат — самая предсказуемая авария в индустрии (<a href="../lessons/1-2.html#s-3">1.2 Сети</a>, §3), так что проект решает настоящую задачу. А по коду видно, что ты умеешь писать на Python аккуратную утилиту: со слоями, тестами без сети и нормальной упаковкой.</p>
+</div></details>
+<p><strong>Когда делать:</strong> после части 2. <strong>Время:</strong> 1–2 выходных.<br />
+<strong>Уроки:</strong> <a href="../lessons/1-2.html">1.2 Сети</a>, <a href="../lessons/2-2.html">2.2 Python для автоматизации</a>, <a href="../lessons/2-3.html">2.3 Параллельность</a>, <a href="../lessons/2-4.html">2.4 Архитектура и тесты</a>.</p>
+<h2>Требования</h2>
+<h3>Утилита</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>certwatch check example.com github.com</code> и <code>certwatch check -f domains.txt</code> — проверка списка доменов.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Проверки идут параллельно с ограничением числа одновременных соединений и таймаутом (<a href="../lessons/2-3.html#s-8">2.3 Параллельность</a>, §8 и §10).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Вывод таблицей (<code>rich</code>) или в JSON (<code>--json</code>) для других программ.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Пороги <code>--warn-days 21 --crit-days 7</code>; код выхода 0 / 1 / 2 — как у <code>healthcheck.sh</code> из <a href="../lessons/1-3.html">1.3 Bash</a>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Недоступный домен не роняет утилиту: он попадает в отчёт с понятной ошибкой.</li>
+</ul>
+<h3>Код</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Слои: домен (сертификат, статус, правило порогов) отдельно от сети и вывода (<a href="../lessons/2-4.html#s-1">2.4 Архитектура и тесты</a>, §1).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Тесты pytest без сети: двойник вместо реального TLS-соединения, <code>parametrize</code> для порогов (<a href="../lessons/2-4.html#s-8">2.4 Архитектура и тесты</a>, §8 и §10).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>ruff</code> и <code>mypy</code> без ошибок.</li>
+</ul>
+<h3>Упаковка и CI</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>pyproject.toml</code> с точкой входа: после <code>pip install .</code> команда <code>certwatch</code> доступна в терминале.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Dockerfile на <code>python:3.13-slim</code>, запуск не от root (<a href="../lessons/3-1.html">3.1 Docker</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> GitHub Actions: линтер и тесты на каждый пуш, сборка образа и публикация в GitHub Container Registry по тегу <code>v*</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> README с примером вывода и строкой для cron.</li>
+</ul>
+<h2>Готово, когда</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>docker run ghcr.io/&lt;ты&gt;/certwatch check github.com</code> работает на любой машине.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>pytest</code> проходит с выключенным интернетом.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Для домена с сертификатом, истекающим через 5 дней, код выхода 2 (проверь на тестовом двойнике).</li>
+</ul>
+<h2>Что рассказать на собеседовании</h2>
+<ul>
+<li>Почему проверки идут параллельно и как ты ограничила нагрузку.</li>
+<li>Как тесты проверяют сетевой код без сети.</li>
+<li>Как утилиту встроить в мониторинг: cron с алертом по коду выхода или экспортёр для Prometheus — и почему для серьёзного мониторинга берут <code>blackbox_exporter</code> (<a href="../lessons/4-5.html#s-4">4.5 Наблюдаемость</a>, §4).</li>
+</ul>
+
+<details class="callout callout-tip"><summary><span class="callout-icon">💡</span>Связано с</summary><div class="callout-body"><ul>
+<li><a href="../projects/portfolio.html">00_Portfolio</a></li>
+<li><a href="../projects/m3.html">M3-Alert-Bot</a> — куда отправлять уведомления</li>
+</ul>
+</div></details></div></main>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

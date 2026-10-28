@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.8 SQL: представления и индексы — DevOps-маршрут</title>
+<meta name="description" content="Урок 2.8: SQL: представления и индексы">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c2)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-2">← 2. Python и SQL</a>
+    <div class="sidebar-art"><svg class="art art-code" viewBox="0 0 240 140" role="img" aria-label="Код и база данных" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect class="dim" x="14" y="22" width="112" height="96" rx="8"/>
+<circle class="dim" cx="26" cy="32" r="2"/><circle class="dim" cx="34" cy="32" r="2"/><circle class="dim" cx="42" cy="32" r="2"/>
+<path class="type t1" d="M26 50 H86"/>
+<path class="type t2" d="M38 64 H108"/>
+<path class="type t3" d="M38 78 H96"/>
+<path class="type t4" d="M26 92 H72"/>
+<path class="type t5" d="M38 106 H90"/>
+<path class="flow" d="M128 70 H148"/>
+<ellipse cx="186" cy="34" rx="36" ry="10"/>
+<path d="M150 34 V104 C150 118 222 118 222 104 V34"/>
+<path class="dim" d="M150 58 C150 68 222 68 222 58 M150 82 C150 92 222 92 222 82"/>
+<rect class="scan" x="156" y="48" width="60" height="8" rx="2"/>
+<text class="lbl" x="152" y="134">SELECT *</text>
+</svg></div>
+    <div class="lesson-number">lesson 2.8 · code</div>
+    <h1 class="lesson-title">SQL: представления и индексы</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">VIEW — сохранённый запрос как виртуальная таблица</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Представления как строительные блоки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">VIEW с генератором данных</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Материализованное представление — VIEW, которое реально хранит данные</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">REFRESH MATERIALIZED VIEW — когда данные устаревают</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">VIEW или материализованное представление?</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Индексы: зачем они нужны</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">EXPLAIN ANALYZE — доказательство, что индекс работает</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Функциональный индекс</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Многоколоночный индекс и Index Only Scan</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Уникальный индекс — целостность плюс скорость</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Частично уникальный индекс</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Ограничения (constraints): NOT NULL, CHECK, DEFAULT</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Последовательности (SEQUENCE)</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Документирование схемы: COMMENT ON</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Порядок столбцов в составном индексе</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">Почему индекс есть, а Seq Scan остался</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-18" data-step="s-18"><span class="step-icon">§</span><span class="step-title">Цена индексов и их обслуживание</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-19" data-step="s-19"><span class="step-icon">§</span><span class="step-title">Другие типы индексов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Это урок про то, что происходит вокруг самого запроса: как сохранить часто используемый запрос под именем (VIEW), как ускорить его выполнение (индексы) и как защитить данные от ошибок ещё на уровне базы (ограничения). Именно эти три вещи чаще всего спрашивают на собеседованиях после базового SELECT/JOIN.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Представление (VIEW)</strong> — сохранённый запрос, который выглядит как таблица, но не хранит собственных данных.</li>
+<li><strong>Материализованное представление</strong> — то же самое, но с реально сохранёнными (закэшированными) результатами на момент последнего обновления.</li>
+<li><strong>Индекс</strong> — дополнительная структура данных, ускоряющая поиск нужных строк без полного перебора таблицы.</li>
+<li><strong>Ограничение (constraint)</strong> — правило на уровне базы данных, не позволяющее записать в таблицу заведомо некорректные данные.</li>
+<li><strong>Последовательность (sequence)</strong> — отдельный счётчик в базе данных, обычно используемый для автогенерации первичных ключей.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>VIEW — сохранённый запрос как виртуальная таблица</h2><div class="prose"><p><em>Аналогия:</em> VIEW — как ярлык на рабочем столе: выглядит как отдельный файл, но на самом деле просто указывает на настоящий файл (или в данном случае — на настоящий запрос к реальным таблицам).</p>
+<pre><code class="language-sql">CREATE VIEW v_premium_customers AS
+SELECT id, name, city FROM customer WHERE premium;
+</code></pre>
+<p>После создания к <code>v_premium_customers</code> можно обращаться как к обычной таблице (<code>SELECT * FROM v_premium_customers</code>), но физически никаких новых данных не появилось — при каждом обращении база заново выполняет запрос из определения VIEW к настоящей таблице <code>customer</code>.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Представления как строительные блоки</h2><div class="prose"><p><em>Аналогия:</em> если уже есть два готовых узких списка (например, «подписчики» и «покупатели из Казани»), их можно объединить в один общий список — представления так же комбинируются друг с другом, как обычные таблицы.</p>
+<pre><code class="language-sql">SELECT name FROM v_premium_customers
+UNION
+SELECT name FROM v_kazan_customers
+ORDER BY name;
+</code></pre>
+<p>Представление можно использовать в <code>FROM</code>, <code>JOIN</code>, <code>UNION</code> — везде, где допустима обычная таблица, потому что для остальной части запроса VIEW неотличим от таблицы.</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>VIEW с генератором данных</h2><div class="prose"><p><em>Аналогия:</em> если один и тот же «полный список дат» нужен в нескольких разных запросах — логичнее сохранить сам генератор один раз под именем, чем копировать <code>generate_series(...)</code> каждый раз заново.</p>
+<pre><code class="language-sql">CREATE VIEW v_generated_dates AS
+SELECT gs::date AS generated_date
+FROM generate_series('2026-03-01'::date, '2026-03-31'::date, '1 day') AS gs;
+</code></pre>
+<p>Теперь вместо повторения <code>generate_series</code> в каждом запросе на поиск пропущенных дат достаточно написать <code>FROM v_generated_dates</code> (см. урок 2.7, раздел 8).</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Материализованное представление — VIEW, которое реально хранит данные</h2><div class="prose"><p><em>Аналогия:</em> обычный VIEW — это как спросить у справочной каждый раз заново, а материализованное представление — как распечатанная копия ответа, которая лежит у тебя на столе и не меняется, пока ты сам её не обновишь.</p>
+<pre><code class="language-sql">CREATE MATERIALIZED VIEW mv_store_daily_revenue AS
+SELECT s.name AS store_name, pu.purchase_date, SUM(pr.price) AS revenue
+FROM purchase pu
+JOIN product pr ON pu.product_id = pr.id
+JOIN store s ON pr.store_id = s.id
+GROUP BY s.name, pu.purchase_date;
+</code></pre>
+<p>В отличие от обычного <code>VIEW</code>, здесь результат запроса физически сохраняется на диск в момент создания — последующие обращения читают уже готовые данные, а не пересчитывают запрос заново. Типичное применение — отчёты и дашборды: выручка по магазинам за день считается по миллионам покупок один раз, а открывается мгновенно.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>REFRESH MATERIALIZED VIEW — когда данные устаревают</h2><div class="prose"><p><em>Аналогия:</em> если исходные данные изменились, а «распечатанная копия» — нет, нужно явно попросить переиздать её заново.</p>
+<pre><code class="language-sql">REFRESH MATERIALIZED VIEW mv_store_daily_revenue;
+</code></pre>
+<p>Без явного <code>REFRESH</code> материализованное представление продолжит показывать старые данные, даже если исходные таблицы уже изменились — это и есть плата за более быструю скорость чтения.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>VIEW или материализованное представление?</h2><div class="prose"><p><em>Аналогия:</em> обычный VIEW — как живой курс валют на сайте банка (всегда свежий, но требует запроса каждый раз); материализованное представление — как курс валют, распечатанный на бумаге утром (быстро посмотреть, но к вечеру может устареть).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>VIEW</th>
+<th>Materialized VIEW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Хранит данные физически</td>
+<td>Нет</td>
+<td>Да</td>
+</tr>
+<tr>
+<td>Всегда актуален</td>
+<td>Да</td>
+<td>Нет, до следующего REFRESH</td>
+</tr>
+<tr>
+<td>Поддерживает INSERT/UPDATE/DELETE (с оговорками)</td>
+<td>Да</td>
+<td>Нет, только чтение</td>
+</tr>
+<tr>
+<td>Можно создавать индексы</td>
+<td>Нет</td>
+<td>Да</td>
+</tr>
+</tbody>
+</table></div>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Индексы: зачем они нужны</h2><div class="prose"><p><em>Аналогия:</em> искать слово в книге без оглавления — читать страницу за страницей. С алфавитным указателем в конце книги — сразу открыть нужную страницу. Индекс в базе данных — тот же алфавитный указатель, только для строк таблицы.</p>
+<pre><code class="language-sql">CREATE INDEX idx_product_store_id ON product (store_id);
+</code></pre>
+<p>Без индекса поиск по <code>store_id</code> требует последовательного просмотра всех строк таблицы (<code>Seq Scan</code>) — время растёт линейно с размером таблицы. С B-Tree индексом время поиска растёт логарифмически: для 1 000 000 строк это разница между условной 1 000 000 и примерно 20 операциями сравнения.</p>
+
+<figure class="explain" data-anim="index-scan"><figcaption><span class="explain-tag">▶ схема</span>Поиск без индекса и с индексом</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>EXPLAIN ANALYZE — доказательство, что индекс работает</h2><div class="prose"><p><em>Аналогия:</em> EXPLAIN ANALYZE — как навигатор, который не просто довозит до места, а показывает, каким маршрутом он поехал и сколько это заняло по факту.</p>
+<pre><code class="language-sql">EXPLAIN ANALYZE
+SELECT pr.title, s.name
+FROM product pr
+JOIN store s ON pr.store_id = s.id;
+</code></pre>
+<p>В выводе нужно увидеть строку вроде <code>Index Scan using idx_product_store_id on product</code> — это подтверждает, что база реально воспользовалась индексом, а не просканировала таблицу целиком (<code>Seq Scan</code>). Иногда индекс существует, но не используется — планировщик посчитал, что для маленькой таблицы последовательное чтение дешевле.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Функциональный индекс</h2><div class="prose"><p><em>Аналогия:</em> обычный индекс сортирует значения «как есть», а функциональный — заранее пересчитанный результат формулы, как оглавление, составленное не по названиям глав, а по их сокращённым кодам.</p>
+<pre><code class="language-sql">CREATE INDEX idx_customer_name_upper ON customer (UPPER(name));
+</code></pre>
+<p>Такой индекс ускоряет именно запросы, где фильтрация или сортировка идёт по <code>UPPER(name)</code>, а не по голому <code>name</code> — база использует индекс, только если запрос обращается к данным той же формулой, по которой индекс построен.</p>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Многоколоночный индекс и Index Only Scan</h2><div class="prose"><p><em>Аналогия:</em> если почти всегда ищут «по фамилии и дате рождения вместе» — логичнее сделать один составной алфавитный указатель по обоим полям сразу, а не два отдельных.</p>
+<pre><code class="language-sql">CREATE INDEX idx_purchase_multi ON purchase (customer_id, product_id, purchase_date);
+</code></pre>
+<p>Если все нужные запросу столбцы (<code>customer_id</code>, <code>product_id</code>, <code>purchase_date</code>) уже есть внутри самого индекса, база может вообще не заглядывать в саму таблицу — в плане запроса это видно как <code>Index Only Scan</code> вместо <code>Index Scan</code>, что ещё быстрее.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Уникальный индекс — целостность плюс скорость</h2><div class="prose"><p><em>Аналогия:</em> уникальный индекс — это одновременно и алфавитный указатель, и охранник на входе, не пускающий вторую запись с уже занятым значением.</p>
+<pre><code class="language-sql">CREATE UNIQUE INDEX idx_product_unique ON product (store_id, title);
+</code></pre>
+<p>Теперь база физически не позволит завести в одном магазине второй товар с тем же названием — попытка вызовет ошибку нарушения уникальности. Побочный эффект — такой индекс, как и обычный, ускоряет поиск по этим же столбцам.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Частично уникальный индекс</h2><div class="prose"><p><em>Аналогия:</em> «уникальность, но только при определённом условии» — как правило «у пользователя может быть сколько угодно отменённых заказов, но только одна активная корзина».</p>
+<pre><code class="language-sql">CREATE UNIQUE INDEX idx_one_active_cart
+ON cart (customer_id)
+WHERE status = 'active';
+</code></pre>
+<p>Уникальность здесь действует только среди строк, удовлетворяющих условию <code>WHERE</code>: у покупателя может быть только одна корзина в статусе <code>active</code>, а оплаченных и брошенных — сколько угодно. Таблицы <code>cart</code> в учебной базе нет — создай её сама в задании 4.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ограничения (constraints): NOT NULL, CHECK, DEFAULT</h2><div class="prose"><p><em>Аналогия:</em> ограничения — это правила заполнения бумажной анкеты, которые проверяют на входе, а не после: «это поле обязательно», «значение должно быть в диапазоне 0–100», «если не заполнено — подставь ноль».</p>
+<pre><code class="language-sql">ALTER TABLE promo_code
+    ALTER COLUMN discount SET NOT NULL,
+    ALTER COLUMN discount SET DEFAULT 0,
+    ADD CONSTRAINT ch_discount_range CHECK (discount BETWEEN 0 AND 100);
+</code></pre>
+<p>Здесь три вида ограничений на столбце скидки в таблице промокодов: <code>NOT NULL</code> — значение обязательно, <code>DEFAULT</code> — что подставить, если при вставке его не указали, <code>CHECK</code> — любое логическое условие, которому обязаны соответствовать значения столбца. Нарушение ограничения при <code>INSERT</code>/<code>UPDATE</code> завершается ошибкой, а не тихой записью неверных данных.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Последовательности (SEQUENCE)</h2><div class="prose"><p><em>Аналогия:</em> последовательность — отдельный автоматический нумератор в гардеробе: каждый новый посетитель получает следующий номерок, и номератор сам помнит, до какого числа уже досчитал.</p>
+<pre><code class="language-sql">CREATE SEQUENCE seq_promo_code START 1;
+
+ALTER TABLE promo_code
+    ALTER COLUMN id SET DEFAULT nextval('seq_promo_code');
+</code></pre>
+<p><code>nextval('seq_...')</code> возвращает следующее число и запоминает его как текущее состояние счётчика — при следующем вызове вернётся уже на единицу больше, даже если два запроса вызвали его почти одновременно (это безопасно для параллельных вставок, в отличие от ручного <code>MAX(id) + 1</code>). В новых таблицах обычно пишут короче — <code>id bigint GENERATED ALWAYS AS IDENTITY</code>: последовательность создаётся и привязывается к столбцу автоматически.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Документирование схемы: COMMENT ON</h2><div class="prose"><p><em>Аналогия:</em> комментарий к таблице и столбцам — как табличка с пояснением рядом с музейным экспонатом: сама таблица не изменится, но новому человеку станет понятнее, что здесь и зачем.</p>
+<pre><code class="language-sql">COMMENT ON TABLE promo_code IS 'Промокоды магазинов для покупателей';
+COMMENT ON COLUMN promo_code.discount IS 'Размер скидки в процентах, от 0 до 100';
+</code></pre>
+<p>Эти комментарии видны через <code>\d+ promo_code</code> в <code>psql</code> или в интерфейсе IDE — стандартная практика документирования схемы прямо в самой базе данных (Data Governance), а не только в отдельном текстовом файле.</p>
+</div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Порядок столбцов в составном индексе</h2><div class="prose"><p><em>Аналогия:</em> телефонный справочник отсортирован сначала по фамилии, потом по имени. Найти всех Ивановых — легко. Найти всех Петров, не зная фамилии, — придётся читать справочник целиком, хотя имена в нём тоже отсортированы.</p>
+<p>В §10 составной индекс упоминался, но не сказано главное: <strong>порядок столбцов в нём решает всё</strong>.</p>
+<pre><code class="language-sql">CREATE INDEX idx ON orders (customer_id, status, created_at);
+</code></pre>
+<p>Этот индекс годится для запросов, использующих столбцы <strong>слева направо без пропусков</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Запрос</th>
+<th>Индекс работает</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WHERE customer_id = 5</code></td>
+<td>да, первый столбец</td>
+</tr>
+<tr>
+<td><code>WHERE customer_id = 5 AND status = 'new'</code></td>
+<td>да, 1 + 2</td>
+</tr>
+<tr>
+<td><code>WHERE customer_id = 5 AND status = 'new' AND created_at &gt; ...</code></td>
+<td>да, целиком</td>
+</tr>
+<tr>
+<td><code>WHERE status = 'new'</code></td>
+<td><strong>нет</strong> — пропущен первый</td>
+</tr>
+<tr>
+<td><code>WHERE created_at &gt; '2026-01-01'</code></td>
+<td><strong>нет</strong> — пропущены первые два</td>
+</tr>
+</tbody>
+</table></div>
+<p>Это называется <strong>правилом левого префикса</strong>. Из него следуют два практических вывода. Первый: индекс <code>(a, b)</code> делает ненужным отдельный индекс по <code>a</code>, но не заменяет индекс по <code>b</code>. Второй: столбцы, по которым идёт <strong>диапазон</strong> (<code>&gt;</code>, <code>&lt;</code>, <code>BETWEEN</code>), ставят в конец — после диапазона остальные столбцы индекса уже не сужают поиск, потому что внутри диапазона порядок по следующему столбцу не гарантирован.</p>
+<p>Порядок выбирают так: первым — столбец с самым частым точным сравнением и наибольшей избирательностью (то есть тот, что отсекает больше всего строк), последним — диапазоны и сортировка.</p>
+</div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Почему индекс есть, а Seq Scan остался</h2><div class="prose"><p><em>Аналогия:</em> указатель в книге есть, но искать по нему бессмысленно, если ты ищешь не по тому признаку, по которому он составлен.</p>
+<p>Пять причин покрывают почти все случаи, и проверять их стоит именно в этом порядке.</p>
+<p><strong>1. Функция над столбцом.</strong> Самая частая:</p>
+<pre><code class="language-sql">WHERE date(created_at) = '2026-01-01'          -- ✘ индекс по created_at не сработает
+WHERE created_at &gt;= '2026-01-01'
+  AND created_at &lt;  '2026-01-02'               -- ✔ сработает
+</code></pre>
+<p>Индекс хранит значения столбца, а не результат функции над ними. Либо переписывают условие диапазоном, либо создают функциональный индекс (§9) — но диапазон почти всегда лучше.</p>
+<p><strong>2. Нет левого префикса</strong> — разобрано в §16.</p>
+<p><strong>3. Запрос выбирает слишком много строк.</strong> Если условию удовлетворяет треть таблицы, последовательное чтение действительно быстрее прыжков по индексу и обратно к строкам. Здесь планировщик прав, и это не проблема.</p>
+<p><strong>4. Устаревшая статистика.</strong> Планировщик решает на основе накопленных данных о распределении значений. Если таблица резко выросла, оценки врут. Лечится:</p>
+<pre><code class="language-sql">ANALYZE orders;
+</code></pre>
+<p>Признак: в <code>EXPLAIN ANALYZE</code> сильно расходятся <code>rows=</code> (оценка) и <code>actual rows=</code> (факт).</p>
+<p><strong>5. Таблица маленькая.</strong> На сотне строк индекс не даёт выигрыша, и база это знает. Проверять работу индексов имеет смысл только на объёмах, близких к боевым.</p>
+</div></section><section class="step" id="s-18" data-kind="theory"><div class="step-kicker">// шаг <b>19</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Цена индексов и их обслуживание</h2><div class="prose"><p><em>Аналогия:</em> каждый дополнительный указатель в книге надо обновлять при каждой правке текста. Один-два полезны, двадцать превращают редактирование в мучение.</p>
+<p>В §7 сказано, что индекс «немного замедляет запись». На практике это не мелочь: <strong>каждый индекс на таблице обновляется при каждом <code>INSERT</code>, <code>UPDATE</code> и <code>DELETE</code></strong>. Таблица с восемью индексами пишется в разы медленнее, чем с двумя, и занимает заметно больше места — индексы нередко весят больше самих данных.</p>
+<p><strong>Найти бесполезные индексы</strong> — регулярная задача эксплуатации:</p>
+<pre><code class="language-sql">SELECT schemaname, relname AS table, indexrelname AS index,
+       idx_scan AS times_used,
+       pg_size_pretty(pg_relation_size(indexrelid)) AS size
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY pg_relation_size(indexrelid) DESC;
+</code></pre>
+<p>Индексы с <code>idx_scan = 0</code> не использовались ни разу с момента сброса статистики — они только замедляют запись и занимают место. Оговорка: свежесозданный индекс и индекс, поддерживающий ограничение уникальности, удалять не надо.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>CREATE INDEX блокирует запись в таблицу</summary><div class="callout-body"><p>Обычная команда создания индекса берёт блокировку, при которой <strong>никто не может писать в таблицу, пока индекс строится</strong>. На таблице в десятки миллионов строк это десятки минут полного простоя записи — на проде выглядит как «приложение легло», и виноватым оказывается тот, кто выполнил команду.</p>
+<pre><code class="language-sql">CREATE INDEX CONCURRENTLY idx_orders_customer ON orders (customer_id);
+</code></pre>
+<p>Вариант <code>CONCURRENTLY</code> строит индекс, не блокируя запись. Он медленнее, требует двух проходов по таблице и не может выполняться внутри транзакции. Если такое построение прервётся, останется нерабочий индекс с пометкой <code>INVALID</code> — его надо удалить (тоже <code>CONCURRENTLY</code>) и повторить.</p>
+<p>Правило простое: <strong>на боевой базе — только <code>CONCURRENTLY</code></strong>. Это один из тех вопросов, по которым сразу видно, работал человек с production-базой или только с учебной.</p>
+</div></details>
+<p><strong>Раздувание (bloat).</strong> При интенсивных обновлениях индексы накапливают мёртвые записи и разрастаются. Лечится перестроением, и здесь та же оговорка:</p>
+<pre><code class="language-sql">REINDEX INDEX CONCURRENTLY idx_orders_customer;
+</code></pre>
+</div></section><section class="step" id="s-19" data-kind="theory"><div class="step-kicker">// шаг <b>20</b>/25 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Другие типы индексов</h2><div class="prose"><p>B-tree, который используется по умолчанию, покрывает подавляющее большинство случаев — сравнения, диапазоны, сортировку. Но стоит знать, что он не единственный.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Для чего</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B-tree</strong></td>
+<td>по умолчанию: <code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>, сортировка</td>
+</tr>
+<tr>
+<td><strong>GIN</strong></td>
+<td>поиск внутри составных значений: <code>JSONB</code>, массивы, полнотекстовый поиск</td>
+</tr>
+<tr>
+<td><strong>GiST</strong></td>
+<td>геоданные, диапазоны, поиск по близости</td>
+</tr>
+<tr>
+<td><strong>BRIN</strong></td>
+<td>огромные таблицы, где данные физически упорядочены — например, логи по времени</td>
+</tr>
+<tr>
+<td><strong>Hash</strong></td>
+<td>только точное равенство; на практике почти всегда проигрывает B-tree</td>
+</tr>
+</tbody>
+</table></div>
+<p>Практически чаще всего за пределами B-tree встречается <strong>GIN</strong> — он решает задачу, с которой B-tree не справляется в принципе: поиск по содержимому JSON-поля или по слову внутри текста. Это же ответ на вопрос из <a href="../lessons/2-6.html#s-12">2.6 SQL-запросы</a>, §12, почему <code>LIKE '%текст%'</code> медленный: для полноценного поиска по подстроке нужен не B-tree, а полнотекстовый индекс или расширение <code>pg_trgm</code>.</p>
+<p><strong>BRIN</strong> стоит запомнить отдельно как приём для таблиц с логами: он в сотни раз меньше B-tree и отлично работает там, где строки физически лежат в порядке возрастания времени.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>21</b>/25 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>VIEW не хранит данные — это просто сохранённый запрос; материализованное представление хранит данные до следующего REFRESH.</li>
+<li>Индекс превращает линейный поиск в логарифмический — но требует места на диске и немного замедляет запись (INSERT/UPDATE).</li>
+<li>EXPLAIN ANALYZE — единственный надёжный способ узнать, использует ли запрос индекс на самом деле.</li>
+<li>Уникальный индекс одновременно и ускоряет поиск, и защищает от дублей; частичный уникальный индекс ограничивает уникальность условием.</li>
+<li>CHECK/NOT NULL/DEFAULT — защита данных на уровне самой базы, а не только на уровне приложения.</li>
+<li>SEQUENCE — безопасный способ генерировать уникальные id при параллельных вставках, в отличие от ручного MAX(id) + 1.</li>
+<li><strong>Правило левого префикса</strong>: индекс <code>(a, b, c)</code> работает для запросов по <code>a</code>, <code>a+b</code>, <code>a+b+c</code> — но не по <code>b</code> или <code>c</code> отдельно. Диапазоны ставь последними.</li>
+<li>Индекс не используется чаще всего из-за функции над столбцом (<code>date(created_at) = ...</code>), отсутствия левого префикса или устаревшей статистики (<code>ANALYZE</code>).</li>
+<li>Каждый индекс замедляет запись и занимает место. Неиспользуемые ищут через <code>pg_stat_user_indexes</code> по <code>idx_scan = 0</code>.</li>
+<li><strong>На боевой базе индексы создают только через <code>CREATE INDEX CONCURRENTLY</code></strong> — обычная команда блокирует запись в таблицу на всё время построения.</li>
+<li>Кроме B-tree есть GIN (JSONB, полнотекст), GiST (геоданные, диапазоны) и BRIN (огромные таблицы с упорядоченными данными, например логи).</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>22</b>/25 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Индексы и <code>EXPLAIN ANALYZE</code> из заданий 1–2 — материал для раздела README «Решения» в <a href="../projects/p1.html">P1</a>: какой запрос был медленным и что помогло.</li>
+</ul>
+</div></details><article class="task" data-task="3f15a18cd1"><h3>Задание 1 — индекс и EXPLAIN</h3><p>Заполни таблицу заказов миллионом строк через <code>generate_series</code>. Выполни запрос по дате с <code>EXPLAIN ANALYZE</code>, создай индекс, повтори.<br />
+<strong>Проверка:</strong> план сменился с Seq Scan на Index Scan, время выполнения уменьшилось в разы; записаны оба плана.</p>
+<label class="task-done"><input type="checkbox" data-task-check="3f15a18cd1"> Сделала руками и проверила</label></article><article class="task" data-task="aeb32ffc9c"><h3>Задание 2 — составной индекс</h3><p>Создай индекс <code>(customer_id, purchase_date)</code>. Проверь запросы по <code>customer_id</code>, по <code>customer_id AND purchase_date</code> и только по <code>purchase_date</code>.<br />
+<strong>Проверка:</strong> объясняешь, почему третий запрос индекс не использует.</p>
+<label class="task-done"><input type="checkbox" data-task-check="aeb32ffc9c"> Сделала руками и проверила</label></article><article class="task" data-task="02a36f155a"><h3>Задание 3 — материализованное представление</h3><p>Сделай материализованное представление «выручка по магазинам за день» и обновляй его <code>REFRESH MATERIALIZED VIEW CONCURRENTLY</code>.<br />
+<strong>Проверка:</strong> во время обновления запросы к представлению не блокируются (для этого нужен уникальный индекс на нём).</p>
+<label class="task-done"><input type="checkbox" data-task-check="02a36f155a"> Сделала руками и проверила</label></article><article class="task" data-task="5582d38c58"><h3>Задание 4 — ограничения</h3><p>Создай таблицы <code>promo_code</code> (код, магазин, скидка, срок действия) и <code>cart</code> (покупатель, статус). Добавь <code>CHECK</code> на диапазон скидки, <code>NOT NULL</code> на обязательные поля, уникальный частичный индекс «одна активная корзина на покупателя».<br />
+<strong>Проверка:</strong> некорректные вставки отклоняются с понятной ошибкой.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5582d38c58"> Сделала руками и проверила</label></article><article class="task" data-task="2205d91355"><h3>Задание 5 — неиспользуемые индексы</h3><p>Найди индексы, которые ни разу не использовались, через <code>pg_stat_user_indexes</code>.<br />
+<strong>Проверка:</strong> запрос выводит имя индекса, таблицу, размер и число сканирований.</p>
+<label class="task-done"><input type="checkbox" data-task-check="2205d91355"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>23</b>/25 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>24</b>/25 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>25</b>/25 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/2-7.html">2.7 Соединения</a> — планы соединений</li>
+<li><a href="../lessons/2-9.html">2.9 Агрегация</a> — агрегация</li>
+<li><a href="../lessons/2-10.html">2.10 Транзакции</a> — блокировки, которые берёт CREATE INDEX</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — мониторинг базы в эксплуатации</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация PostgreSQL, индексы: https://www.postgresql.org/docs/current/indexes.html</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="2-7.html">← 2.7 SQL: соединения и множества</a><a class="lesson-jump" href="2-9.html">2.9 SQL: агрегация →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "2-8", "number": "2.8", "title": "SQL: представления и индексы", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "s-18", "kind": "theory"}, {"id": "s-19", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["3f15a18cd1", "aeb32ffc9c", "02a36f155a", "5582d38c58", "2205d91355"], "quiz": [{"id": "56ead6b647", "q": "Чем материализованное представление отличается от обычного VIEW?", "options": ["Его нельзя читать", "Оно хранит результат на диске и не меняется до REFRESH", "Оно всегда актуальнее", "Оно не поддерживает JOIN"], "answer": [1], "why": "<p>за быстрое чтение платят актуальностью данных.<\/p>\n"}, {"id": "1781a40dd0", "q": "Есть индекс <code>(customer_id, purchase_date)<\/code>. Для какого запроса он НЕ поможет?", "options": ["<code>WHERE customer_id = 5<\/code>", "<code>WHERE customer_id = 5 AND purchase_date &gt; '2026-03-01'<\/code>", "<code>WHERE purchase_date &gt; '2026-03-01'<\/code>", "Поможет для всех"], "answer": [2], "why": "<p>составной индекс работает слева направо, как телефонный справочник «фамилия, имя».<\/p>\n"}, {"id": "b1c3186b9e", "q": "Почему индексы не ставят на каждый столбец?", "options": ["Их число ограничено одним на таблицу", "Каждый индекс замедляет запись и занимает место", "Индексы замедляют SELECT", "Индексы нельзя удалить"], "answer": [1], "why": "<p>при каждом INSERT, UPDATE и DELETE обновляются все индексы таблицы.<\/p>\n"}, {"id": "d5544034fe", "q": "Как убедиться, что запрос использует индекс?", "options": ["Посмотреть <code>\\dt<\/code>", "Выполнить <code>EXPLAIN ANALYZE<\/code> и найти <code>Index Scan<\/code> вместо <code>Seq Scan<\/code>", "Перезапустить базу", "Посчитать строки через COUNT"], "answer": [1], "why": "<p>план выполнения показывает, каким способом база реально читала данные и сколько это заняло.<\/p>\n"}, {"id": "92b9107f60", "q": "Зачем частичный уникальный индекс <code>ON cart (customer_id) WHERE status = 'active'<\/code>?", "options": ["Ускорить поиск брошенных корзин", "Разрешить одну активную корзину на покупателя, не ограничивая оплаченные и брошенные", "Запретить покупателю иметь корзины", "Удалять старые корзины"], "answer": [1], "why": "<p>уникальность действует только для строк, которые подходят под условие индекса.<\/p>\n"}, {"id": "d341fb749e", "q": "Какие ограничения отклонят некорректную вставку? Выбери все.", "options": ["<code>NOT NULL<\/code>", "<code>CHECK (discount BETWEEN 0 AND 100)<\/code>", "<code>DEFAULT 0<\/code>", "<code>UNIQUE<\/code>"], "answer": [0, 1, 3], "why": "<p>DEFAULT ничего не запрещает — он только подставляет значение, если его не указали.<\/p>\n"}, {"id": "d92c4d2eff", "q": "Чем последовательность (SEQUENCE) лучше <code>MAX(id) + 1<\/code>?", "options": ["Она занимает меньше места", "Она безопасна при параллельных вставках: два запроса не получат один и тот же номер", "Она начинает с нуля", "Она работает без таблицы"], "answer": [1], "why": "<p>два одновременных <code>MAX(id) + 1<\/code> прочитают одно и то же значение и попытаются вставить одинаковый id.<\/p>\n"}], "cards": [{"id": "90ee5b376c", "q": "Как работает B-tree индекс и когда он не поможет?", "a": "<p>Сбалансированное дерево отсортированных значений со ссылками на строки. Не поможет при низкой селективности (запрос возвращает большую часть таблицы), функции над столбцом без функционального индекса, <code>LIKE '%...'<\/code>, несоответствии типов.<\/p>\n"}, {"id": "f689317393", "q": "Почему индексы не ставят на всё?", "a": "<p>Каждый индекс замедляет INSERT, UPDATE и DELETE, занимает место и требует обслуживания. Ставят под конкретные частые запросы.<\/p>\n"}, {"id": "6cc253b76e", "q": "Чем VIEW отличается от материализованного представления?", "a": "<p>VIEW — сохранённый запрос, выполняется при каждом обращении, данные всегда актуальные. Материализованное хранит результат на диске, читается быстро, но устаревает до REFRESH.<\/p>\n"}, {"id": "3e7965b115", "q": "Как читать EXPLAIN ANALYZE?", "a": "<p>Дерево операций снизу вверх; смотрят на тип сканирования, оценку и фактическое число строк (большое расхождение — устаревшая статистика, помогает ANALYZE), время на каждом узле и самый дорогой узел.<\/p>\n"}, {"id": "f2f977a4be", "q": "Почему важен порядок столбцов в составном индексе?", "a": "<p>Индекс работает слева направо: <code>(a, b)<\/code> помогает запросам по <code>a<\/code> и по <code>a AND b<\/code>, но не по одному <code>b<\/code>. Первым ставят столбец, по которому фильтруют чаще всего и на равенство.<\/p>\n"}, {"id": "1c38050b57", "q": "Что такое Index Only Scan?", "a": "<p>Все нужные запросу столбцы есть в индексе, и таблицу читать не нужно. Работает, если карта видимости актуальна (после VACUUM).<\/p>\n"}], "next": "2-9"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

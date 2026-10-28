@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.3 Ansible: настройка серверов кодом — DevOps-маршрут</title>
+<meta name="description" content="Урок 4.3: Ansible: настройка серверов кодом">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c4)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-4">← 4. Облако и IaC</a>
+    <div class="sidebar-art"><svg class="art art-cloud" viewBox="0 0 240 140" role="img" aria-label="Облако и серверы" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M84 58 C66 58 62 38 80 34 C82 16 108 12 118 26 C128 10 158 14 160 34 C180 34 184 58 164 58 Z"/>
+<path class="flow" d="M122 60 V76 M122 76 H58 V88 M122 76 V88 M122 76 H186 V88"/>
+<g class="srv v1"><rect x="38" y="90" width="40" height="28" rx="4"/><circle class="led l1" cx="70" cy="104" r="2.4"/><path class="dim" d="M45 104 H60"/></g>
+<g class="srv v2"><rect x="102" y="90" width="40" height="28" rx="4"/><circle class="led l2" cx="134" cy="104" r="2.4"/><path class="dim" d="M109 104 H124"/></g>
+<g class="srv v3"><rect x="166" y="90" width="40" height="28" rx="4"/><circle class="led l3" cx="198" cy="104" r="2.4"/><path class="dim" d="M173 104 H188"/></g>
+<text class="lbl" x="18" y="134">terraform apply</text>
+</svg></div>
+    <div class="lesson-number">lesson 4.3 · infra</div>
+    <h1 class="lesson-title">Ansible: настройка серверов кодом</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Зачем вообще управление конфигурацией</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Как устроен Ansible: агентов нет</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Инвентарь: кого настраиваем</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">Ad-hoc команды: разовые действия</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Плейбук: желаемое состояние</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Идемпотентность — главная идея</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Переменные и факты</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Шаблоны Jinja2</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">Хендлеры: перезапуск только при изменениях</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Роли: структура для переиспользования</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Проверка перед применением</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Секреты: Ansible Vault</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Ansible, Terraform и Docker: кто за что</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Типичные ошибки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В <a href="../lessons/1-1.html">1.1 Linux</a> и <a href="../lessons/1-2.html">1.2 Сети</a> каждый сервер настраивался руками: зашёл по SSH, поставил пакеты, поправил конфиг, перезапустил сервис. Для одной машины это нормально. Для десяти — уже неделя работы и гарантированные расхождения: на одной забыли поставить <code>ufw</code>, на другой опечатались в конфиге nginx. Для ста — невозможно.</p>
+<p>Ansible решает ровно эту задачу: желаемое состояние серверов описывается в YAML-файлах, а инструмент приводит машины к этому состоянию сам — сколько бы их ни было и сколько бы раз его ни запускали.</p>
+<p>В вакансиях junior DevOps Ansible — один из самых частых пунктов после Linux, Docker и CI/CD. Его любят за низкий порог входа: на управляемых машинах не нужно ничего ставить, достаточно SSH и Python.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Управляющая машина (control node)</strong> — откуда запускают Ansible: ноутбук или раннер CI.</li>
+<li><strong>Управляемый узел (managed node)</strong> — сервер, который настраивают. На нём нужен только SSH и Python.</li>
+<li><strong>Инвентарь (inventory)</strong> — список узлов и их групп.</li>
+<li><strong>Модуль</strong> — готовое действие: поставить пакет, скопировать файл, перезапустить сервис.</li>
+<li><strong>Задача (task)</strong> — один вызов модуля с параметрами.</li>
+<li><strong>Плейбук (playbook)</strong> — YAML-файл со списком задач для групп узлов.</li>
+<li><strong>Роль</strong> — переиспользуемый набор задач, шаблонов и переменных с фиксированной структурой папок.</li>
+<li><strong>Идемпотентность</strong> — повторный запуск не меняет то, что уже в нужном состоянии.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Зачем вообще управление конфигурацией</h2><div class="prose"><p><em>Аналогия:</em> рецепт вместо устных указаний повару. По рецепту блюдо получается одинаковым у любого повара и в любой день; «ну ты знаешь, как обычно» — каждый раз по-разному.</p>
+<p>Ручная настройка порождает три проблемы, которые рано или поздно встречает каждая команда:</p>
+<p><strong>Дрейф конфигурации.</strong> Серверы, настроенные «одинаково», со временем расходятся: кто-то поправил конфиг на одном, обновил пакет на другом. Через полгода ни один не похож на соседа, и ошибка «на этом сервере работает, на том нет» становится нормой.</p>
+<p><strong>Снежинки.</strong> Сервер, который настраивали два года вручную, невозможно воспроизвести. Когда он сломается, восстанавливать его будет нечем — никто не помнит всех правок. Это прямое противоречие принципу одноразовых машин из <a href="../lessons/4-2.html#s-3">4.2 Облако</a>, §3.</p>
+<p><strong>Нет истории.</strong> Ручные правки не проходят ревью и не попадают в git. Через месяц на вопрос «кто и зачем поменял этот параметр» ответа нет.</p>
+<p>Управление конфигурацией кодом снимает все три: конфигурация лежит в репозитории, проходит ревью как обычный код (<a href="../lessons/0-1.html">0.1 Git</a>), применяется одинаково на любом количестве машин и в любой момент возвращает их в описанное состояние.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Как устроен Ansible: агентов нет</h2><div class="prose"><p><em>Аналогия:</em> Ansible — не охранник, который круглосуточно сидит в каждом здании, а инспектор, который приезжает по вызову, проверяет всё по списку, исправляет отклонения и уезжает.</p>
+<p>Ключевое отличие от старших инструментов (Puppet, Chef, Salt): <strong>Ansible безагентный</strong>. На управляемых машинах ничего постоянно не работает. При запуске Ansible:</p>
+<ol>
+<li>Подключается к узлу по SSH — обычным ключом из <a href="../lessons/1-1.html#s-11">1.1 Linux</a>, §11.</li>
+<li>Копирует туда маленькую программу на Python — код модуля.</li>
+<li>Запускает её, получает результат в JSON и удаляет за собой.</li>
+</ol>
+<p>Отсюда практические следствия:</p>
+<ul>
+<li><strong>Для старта нужно только то, что и так есть:</strong> SSH-доступ и Python на узле. На большинстве дистрибутивов Python стоит из коробки.</li>
+<li><strong>Ansible работает по модели push:</strong> изменения применяются в момент запуска, а не когда узел сам решит проверить конфигурацию. Если на сервере что-то поменяли руками, Ansible узнает об этом только при следующем прогоне.</li>
+<li><strong>Скорость упирается в SSH.</strong> На сотнях узлов прогон заметно небыстрый; это лечится параллельностью (параметр <code>forks</code>) и SSH pipelining.</li>
+</ul>
+<pre><code class="language-bash">pip install ansible        # или apt install ansible
+ansible --version
+</code></pre>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Инвентарь: кого настраиваем</h2><div class="prose"><p><em>Аналогия:</em> список гостей с рассадкой по столам. Сначала решаешь, кто за каким столом, потом — что подавать каждому столу.</p>
+<p>Инвентарь — список узлов, разбитый на группы. Простейший формат — INI, но в реальных проектах чаще YAML:</p>
+<pre><code class="language-yaml"># inventory/hosts.yml
+all:
+  children:
+    web:
+      hosts:
+        web-1: { ansible_host: 10.0.1.11 }
+        web-2: { ansible_host: 10.0.1.12 }
+    db:
+      hosts:
+        db-1:  { ansible_host: 10.0.2.21 }
+  vars:
+    ansible_user: deploy
+    ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+</code></pre>
+<p>Группы можно вкладывать друг в друга: например, группа <code>production</code> содержит <code>web</code> и <code>db</code>. Плейбук потом применяется к группе, а не к перечню адресов.</p>
+<p>Проверка связи — первая команда в любом новом проекте:</p>
+<pre><code class="language-bash">ansible all -i inventory/hosts.yml -m ping
+# web-1 | SUCCESS =&gt; { &quot;ping&quot;: &quot;pong&quot; }
+</code></pre>
+<p>Здесь <code>ping</code> — не ICMP-пинг из <a href="../lessons/1-2.html">1.2 Сети</a>, а проверка, что Ansible может зайти по SSH и запустить Python. Если она проходит, всё остальное заработает.</p>
+<p><strong>Динамический инвентарь.</strong> В облаке машины создаются и удаляются постоянно, и вести их список руками бессмысленно. Плагины инвентаря умеют сами запрашивать у облака список машин по тегам — например, «все машины с тегом <code>role=web</code>». Теги, о которых шла речь в <a href="../lessons/4-2.html#s-10">4.2 Облако</a>, §10, тут начинают работать на автоматизацию.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ad-hoc команды: разовые действия</h2><div class="prose"><p><em>Аналогия:</em> один звонок всем сотрудникам сразу: «перезагрузите компьютеры». Удобно для разовой задачи, но регламентом это не становится.</p>
+<p>Ad-hoc команда — вызов одного модуля на группе узлов без плейбука:</p>
+<pre><code class="language-bash"># сколько места на дисках у всех веб-серверов
+ansible web -i inventory/hosts.yml -m command -a &quot;df -h /&quot;
+
+# поставить htop везде (с повышением прав через sudo)
+ansible all -i inventory/hosts.yml -m apt -a &quot;name=htop state=present&quot; --become
+
+# перезапустить nginx на веб-серверах
+ansible web -i inventory/hosts.yml -m service -a &quot;name=nginx state=restarted&quot; --become
+</code></pre>
+<p>Флаг <code>--become</code> — это <code>sudo</code> из <a href="../lessons/1-1.html#s-4">1.1 Linux</a>, §4: задача выполняется от root.</p>
+<p>Ad-hoc удобен для диагностики и разовых операций. Всё, что нужно повторять, оформляется в плейбук, иначе история изменений снова теряется.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Плейбук: желаемое состояние</h2><div class="prose"><p><em>Аналогия:</em> чек-лист открытия кафе: «свет включён, касса работает, витрина заполнена». Не «включи свет», а «свет должен быть включён» — если уже горит, ничего делать не надо.</p>
+<pre><code class="language-yaml"># playbooks/web.yml
+- name: Настройка веб-серверов
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Установить nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Положить конфиг сайта
+      ansible.builtin.template:
+        src: templates/site.conf.j2
+        dest: /etc/nginx/sites-available/site.conf
+        mode: &quot;0644&quot;
+      notify: Перезагрузить nginx
+
+    - name: Включить сайт
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/site.conf
+        dest: /etc/nginx/sites-enabled/site.conf
+        state: link
+      notify: Перезагрузить nginx
+
+    - name: Nginx запущен и включён в автозагрузку
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Перезагрузить nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+</code></pre>
+<pre><code class="language-bash">ansible-playbook -i inventory/hosts.yml playbooks/web.yml
+</code></pre>
+<p>Как читать вывод:</p>
+<ul>
+<li><strong>ok</strong> — состояние уже было нужным, ничего не делалось.</li>
+<li><strong>changed</strong> — Ansible что-то изменил.</li>
+<li><strong>failed</strong> — ошибка, на этом узле прогон остановлен.</li>
+<li><strong>skipped</strong> — задача пропущена по условию.</li>
+</ul>
+<p>В конце — сводка <code>PLAY RECAP</code> по каждому узлу. Здоровый повторный прогон выглядит как <code>changed=0</code>: всё уже в нужном состоянии.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Идемпотентность — главная идея</h2><div class="prose"><p><em>Аналогия:</em> кнопка лифта. Нажмёшь один раз или десять — лифт приедет один раз.</p>
+<p>Идемпотентность разбиралась ещё в <a href="../lessons/1-3.html">1.3 Bash</a> на примере скриптов. В Ansible это свойство обеспечивает сам инструмент: модуль <code>apt</code> с <code>state: present</code> сначала проверяет, стоит ли пакет, и ставит его только если нет. Модуль <code>template</code> сравнивает содержимое файла и пишет только при отличии.</p>
+<p>Из этого следует правило, которое проверяют на собеседованиях: <strong>по возможности используй специализированные модули, а не <code>command</code> и <code>shell</code></strong>.</p>
+<pre><code class="language-yaml"># плохо: выполняется при каждом прогоне, всегда &quot;changed&quot;
+- name: Создать каталог
+  ansible.builtin.command: mkdir -p /opt/app
+
+# хорошо: проверяет состояние, меняет только при необходимости
+- name: Создать каталог
+  ansible.builtin.file:
+    path: /opt/app
+    state: directory
+    owner: app
+    mode: &quot;0755&quot;
+</code></pre>
+<p>Если без <code>command</code> никак — его делают идемпотентным вручную: параметром <code>creates</code> (не запускать, если файл уже есть) или <code>changed_when</code>, который говорит Ansible, когда считать задачу изменившей что-то.</p>
+<pre><code class="language-yaml">- name: Инициализировать базу один раз
+  ansible.builtin.command: /opt/app/bin/init-db
+  args:
+    creates: /opt/app/.db-initialized
+</code></pre>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>«changed» при каждом прогоне — признак ошибки</summary><div class="callout-body"><p>Если повторный запуск плейбука показывает изменения там, где ничего не менялось, плейбук не идемпотентен. Это не косметика: такие задачи без нужды перезапускают сервисы через хендлеры и делают невозможным режим проверки (§11). Проверка простая — запустить плейбук дважды подряд, второй прогон обязан дать <code>changed=0</code>.</p>
+</div></details>
+<figure class="explain" data-anim="ansible-run"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: первый и повторный запуск плейбука</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Переменные и факты</h2><div class="prose"><p><em>Аналогия:</em> бланк договора с пустыми полями. Текст один, а имя, сумма и дата подставляются под конкретного клиента.</p>
+<p>Переменные позволяют одним плейбуком настраивать разные окружения. Их можно задать в нескольких местах; самые используемые:</p>
+<pre><code>inventory/
+  hosts.yml
+  group_vars/
+    all.yml         # для всех узлов
+    web.yml         # только для группы web
+  host_vars/
+    db-1.yml        # только для конкретного узла
+</code></pre>
+<pre><code class="language-yaml"># group_vars/web.yml
+app_port: 8000
+server_name: shop.example.com
+worker_processes: 4
+</code></pre>
+<p>Используются через фигурные скобки: <code>&quot;{{ app_port }}&quot;</code>. Кавычки обязательны, если значение начинается со скобки, иначе YAML воспримет его как словарь.</p>
+<p>У переменных есть <strong>приоритет</strong>: значение из <code>host_vars</code> перебивает <code>group_vars</code>, а переданное в командной строке через <code>-e</code> перебивает всё. Полная таблица приоритетов длинная, на практике достаточно помнить, что более конкретное побеждает более общее.</p>
+<p><strong>Факты</strong> — переменные, которые Ansible сам собирает с узла в начале прогона: дистрибутив, IP-адреса, объём памяти, число процессоров.</p>
+<pre><code class="language-yaml">- name: Показать, что за система
+  ansible.builtin.debug:
+    msg: &quot;{{ ansible_distribution }} {{ ansible_distribution_version }}, RAM {{ ansible_memtotal_mb }} MB&quot;
+</code></pre>
+<p>Если факты не нужны, сбор отключают (<code>gather_facts: false</code>) — это ускоряет прогон на больших инвентарях.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Шаблоны Jinja2</h2><div class="prose"><p><em>Аналогия:</em> письмо из рассылки: «Здравствуйте, {{ имя }}!» — шаблон один, писем тысячи.</p>
+<p>Конфиги почти никогда не бывают одинаковыми для всех узлов: где-то другой порт, другое число воркеров, другой домен. Для этого модуль <code>template</code> берёт файл <code>.j2</code> и подставляет в него переменные:</p>
+<pre><code class="language-nginx"># templates/site.conf.j2
+upstream app {
+{% for host in groups['app'] %}
+    server {{ hostvars[host].ansible_host }}:{{ app_port }};
+{% endfor %}
+}
+
+server {
+    listen 80;
+    server_name {{ server_name }};
+
+    location / {
+        proxy_pass http://app;
+    }
+}
+</code></pre>
+<p>Это тот же Jinja2, что используется во Flask (<a href="../lessons/2-5.html">2.5 Бэкенд-сервис</a>): подстановки <code>{{ }}</code>, условия и циклы <code>{% %}</code>. Пример выше сам собирает список серверов приложения из инвентаря — добавил машину в группу <code>app</code>, перезапустил плейбук, и балансировщик о ней узнал.</p>
+<p>Хорошая привычка — первой строкой шаблона ставить комментарий <code># Managed by Ansible, do not edit</code>. Это предупреждение коллегам: ручная правка будет перезаписана при следующем прогоне.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Хендлеры: перезапуск только при изменениях</h2><div class="prose"><p><em>Аналогия:</em> «если поменяли меню — перепечатать вывеску». Если меню не меняли, вывеску не трогают.</p>
+<p>В плейбуке из §5 задача с конфигом содержит <code>notify: Перезагрузить nginx</code>. Это значит: <strong>если задача что-то изменила</strong>, в конце прогона выполнить хендлер с таким именем. Если конфиг не менялся — nginx не трогают.</p>
+<p>Важные свойства хендлеров:</p>
+<ul>
+<li>Выполняются <strong>один раз в конце плейбука</strong>, даже если их вызвали несколько задач.</li>
+<li>Если прогон упал до конца, хендлеры не выполнятся. Принудительно запустить накопленные хендлеры можно задачей <code>meta: flush_handlers</code>.</li>
+<li>Для nginx и большинства сервисов лучше <code>reloaded</code>, а не <code>restarted</code>: перечитывание конфига не рвёт существующие соединения (<a href="../lessons/1-2.html">1.2 Сети</a> и <a href="../lessons/1-1.html#s-7">1.1 Linux</a>, §7).</li>
+</ul>
+<p>Перед перезагрузкой стоит проверять конфиг — битый конфиг nginx не даст ему перезагрузиться. Модуль <code>template</code> умеет это сам через параметр <code>validate</code>:</p>
+<pre><code class="language-yaml">- name: Положить конфиг nginx
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    validate: nginx -t -c %s
+  notify: Перезагрузить nginx
+</code></pre>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Роли: структура для переиспользования</h2><div class="prose"><p><em>Аналогия:</em> типовой проект квартиры. Один раз разработали, дальше строят по нему в любом доме, меняя только отделку.</p>
+<p>Когда плейбук разрастается до сотен строк, его раскладывают на роли. Роль — каталог с фиксированной структурой:</p>
+<pre><code>roles/
+  nginx/
+    tasks/main.yml        # задачи
+    handlers/main.yml     # хендлеры
+    templates/site.conf.j2
+    files/                # файлы без шаблонизации
+    defaults/main.yml     # значения переменных по умолчанию
+    vars/main.yml         # переменные с высоким приоритетом
+    meta/main.yml         # зависимости от других ролей
+</code></pre>
+<p>Плейбук становится коротким и читаемым:</p>
+<pre><code class="language-yaml">- hosts: web
+  become: true
+  roles:
+    - common       # пользователи, ssh, ufw, время
+    - nginx
+    - app
+</code></pre>
+<p>Каркас роли создаётся командой <code>ansible-galaxy role init roles/nginx</code>.</p>
+<p><strong>Ansible Galaxy</strong> — каталог готовых ролей и коллекций от сообщества. Например, роли для установки Docker, PostgreSQL или node_exporter. Ими пользуются, но с оглядкой: роль запускается с правами root на всех твоих серверах, поэтому стоит выбирать популярные, поддерживаемые и фиксировать версию в <code>requirements.yml</code>.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Роль <code>common</code> — первое, что пишут</summary><div class="callout-body"><p>В любом проекте есть набор, нужный каждому серверу: пользователь для деплоя с SSH-ключом, запрет входа root и по паролю (<a href="../lessons/1-1.html#s-11">1.1 Linux</a>, §11), файрвол (<a href="../lessons/1-2.html">1.2 Сети</a>), часовой пояс UTC и синхронизация времени (<a href="../lessons/1-1.html#s-14">1.1 Linux</a>, §14), базовые пакеты, node_exporter для мониторинга (<a href="../lessons/4-5.html">4.5 Наблюдаемость</a>). Это и есть роль <code>common</code>, и она отлично смотрится в портфолио.</p>
+</div></details></div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Проверка перед применением</h2><div class="prose"><p><em>Аналогия:</em> примерка перед покупкой. Посмотреть, как сидит, до того, как отрезать ярлыки.</p>
+<p>Применять плейбук сразу на продакшен — рискованно. У Ansible есть встроенные способы посмотреть, что произойдёт:</p>
+<pre><code class="language-bash"># синтаксис
+ansible-playbook playbooks/web.yml --syntax-check
+
+# сухой прогон: что изменится, без изменений
+ansible-playbook -i inventory/hosts.yml playbooks/web.yml --check --diff
+
+# только на одном узле
+ansible-playbook -i inventory/hosts.yml playbooks/web.yml --limit web-1
+
+# только задачи с определённым тегом
+ansible-playbook -i inventory/hosts.yml playbooks/web.yml --tags nginx
+</code></pre>
+<p><code>--check --diff</code> — самая полезная пара: показывает, какие файлы поменяются и как именно, построчно. Ограничение: задачи <code>command</code> и <code>shell</code> в режиме проверки не выполняются, и то, что от них зависит, может показать неверную картину — ещё одна причина избегать их.</p>
+<p><strong>ansible-lint</strong> проверяет плейбуки на типовые ошибки: устаревший синтаксис, <code>command</code> вместо модуля, отсутствие имён у задач. Его запускают в CI так же, как линтер для кода (<a href="../lessons/3-2.html">3.2 CI-CD</a>).</p>
+<p><strong>Molecule</strong> — инструмент для тестирования ролей: поднимает контейнер, применяет роль, проверяет идемпотентность повторным прогоном и запускает проверки. Для junior достаточно знать, что такое существует и зачем.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Секреты: Ansible Vault</h2><div class="prose"><p><em>Аналогия:</em> сейф внутри общей папки. Папку видят все, содержимое сейфа — только те, у кого есть ключ.</p>
+<p>Пароли от баз, токены и ключи нельзя класть в репозиторий открытым текстом — их найдут так же быстро, как облачные ключи из <a href="../lessons/4-2.html#s-5">4.2 Облако</a>, §5. Ansible Vault шифрует файлы с переменными:</p>
+<pre><code class="language-bash">ansible-vault create group_vars/db/vault.yml     # создать зашифрованный файл
+ansible-vault edit group_vars/db/vault.yml       # отредактировать
+ansible-playbook site.yml --ask-vault-pass       # запуск с вводом пароля
+ansible-playbook site.yml --vault-password-file ~/.vault_pass  # пароль из файла
+</code></pre>
+<p>Принятая конвенция: секреты хранятся в <code>vault.yml</code> с префиксом <code>vault_</code>, а в обычном <code>vars.yml</code> на них ссылаются — так из открытого файла видно, какие переменные существуют, не раскрывая значений.</p>
+<pre><code class="language-yaml"># group_vars/db/vars.yml
+db_password: &quot;{{ vault_db_password }}&quot;
+</code></pre>
+<p>В CI пароль от Vault передаётся через защищённую переменную (<a href="../lessons/3-2.html#s-11">3.2 CI-CD</a>, §11). В больших компаниях вместо Ansible Vault часто используют HashiCorp Vault или облачный менеджер секретов — об этом в <a href="../lessons/6-2.html">6.2 DevSecOps</a>.</p>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span><code>no_log</code> для задач с секретами</summary><div class="callout-body"><p>Ansible печатает параметры задач в вывод, и пароль, переданный модулю, окажется в логе пайплайна. Для таких задач ставят <code>no_log: true</code>. Забытый <code>no_log</code> — один из самых частых способов утечки секретов через CI.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ansible, Terraform и Docker: кто за что</h2><div class="prose"><p><em>Аналогия:</em> строители возводят дом (Terraform), отделочники делают ремонт внутри (Ansible), а мебель приезжает собранной в коробках (Docker).</p>
+<p>Новички часто путают зоны ответственности. Разделение, которое принято в индустрии:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Инструмент</th>
+<th>Задача</th>
+<th>Пример</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Terraform</strong> (<a href="../lessons/4-4.html">4.4 Terraform</a>)</td>
+<td>Создать инфраструктуру</td>
+<td>VPC, машины, балансировщик, база</td>
+</tr>
+<tr>
+<td><strong>Ansible</strong></td>
+<td>Настроить машины</td>
+<td>Пользователи, пакеты, конфиги, Docker</td>
+</tr>
+<tr>
+<td><strong>Docker / Kubernetes</strong></td>
+<td>Запустить приложение</td>
+<td>Контейнеры с кодом</td>
+</tr>
+</tbody>
+</table></div>
+<p>Пересечения есть: Ansible умеет создавать облачные машины, Terraform — запускать скрипты на них. Но использовать инструмент не по назначению — путь к боли: Terraform плохо справляется с настройкой внутри ОС, а Ansible плохо отслеживает состояние облачных ресурсов и их удаление.</p>
+<p>Где Ansible остаётся незаменимым даже в мире контейнеров и Kubernetes:</p>
+<ul>
+<li>Подготовка узлов кластера: ядро, sysctl, containerd, установка k3s (<a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>).</li>
+<li>Серверы, которые не живут в контейнерах: базы на выделенных машинах, балансировщики, бастионы.</li>
+<li>Регулярные операции: ротация ключей, обновление пакетов на всём парке, сбор диагностики.</li>
+</ul>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/20 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Типичные ошибки</h2><div class="prose"><p><em>Аналогия:</em> грабли, которые лежат на одном и том же месте у всех.</p>
+<ul>
+<li><strong>Задачи без имён.</strong> Вывод превращается в нечитаемую простыню. Каждая задача получает понятное имя на любом языке.</li>
+<li><strong><code>shell</code> везде.</strong> Плейбук становится набором bash-скриптов с YAML-обёрткой: не идемпотентен, не работает <code>--check</code>.</li>
+<li><strong>Пароли в открытом виде.</strong> Даже «временно» и «в приватном репозитории».</li>
+<li><strong>Ручные правки на серверах.</strong> Следующий прогон их перезапишет — или, хуже, не перезапишет, и сервер разойдётся с кодом. Правило команды: поменял руками в аварии — сразу перенёс в код.</li>
+<li><strong>Нет фиксации версий.</strong> Роли из Galaxy и коллекции без версий однажды обновятся и сломают прогон.</li>
+<li><strong>Прогон сразу на весь продакшен.</strong> Для изменений, затрагивающих работу сервиса, используют <code>serial: 1</code> или <code>serial: &quot;25%&quot;</code> — плейбук идёт по узлам порциями, и если первая порция сломалась, остальные не тронуты.</li>
+</ul>
+<pre><code class="language-yaml">- hosts: web
+  serial: 1                  # по одному узлу
+  max_fail_percentage: 0     # остановиться при первой ошибке
+</code></pre>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>16</b>/20 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Управление конфигурацией кодом убирает дрейф, снежинки и ручные правки без истории.</li>
+<li><strong>Ansible безагентный:</strong> нужен только SSH и Python на узле, модель push.</li>
+<li><strong>Инвентарь</strong> — кого настраиваем, <strong>плейбук</strong> — что должно быть, <strong>модуль</strong> — как это сделать.</li>
+<li><strong>Идемпотентность:</strong> повторный прогон даёт <code>changed=0</code>. Используй модули, а не <code>command</code>/<code>shell</code>.</li>
+<li>Переменные — в <code>group_vars</code>/<code>host_vars</code>, более конкретное побеждает общее. <strong>Факты</strong> Ansible собирает сам.</li>
+<li>Конфиги — через <strong>шаблоны Jinja2</strong>, с <code>validate</code> перед применением.</li>
+<li><strong>Хендлеры</strong> перезапускают сервис только если конфиг реально изменился, и один раз в конце.</li>
+<li>Большие плейбуки раскладывают на <strong>роли</strong>. Первая роль в любом проекте — <code>common</code>.</li>
+<li>Перед применением — <code>--check --diff</code> и <code>--limit</code>. В CI — <code>ansible-lint</code>.</li>
+<li>Секреты — в <strong>Ansible Vault</strong>, задачи с ними — с <code>no_log: true</code>.</li>
+<li>Terraform создаёт инфраструктуру, Ansible её настраивает, Docker запускает приложения.</li>
+<li>Изменения на продакшене катят порциями через <code>serial</code>.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>17</b>/20 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 2–5 — роли Ansible в <a href="../projects/p2.html">P2</a>: <code>common</code>, <code>nginx</code>, <code>postgres</code>, Vault и линтер в CI.</li>
+<li>Роль <code>common</code> — это <a href="../projects/m1.html">M1</a>, переписанный на Ansible: хорошая тема для README «было — стало».</li>
+</ul>
+</div></details><article class="task" data-task="74b335f9f9"><h3>Задание 1 — стенд из трёх машин</h3><p>Подними три виртуалки (Vagrant + VirtualBox или облако): одну управляющую и две управляемые. Настрой SSH-доступ по ключу с управляющей на обе.<br />
+Напиши <code>inventory/hosts.yml</code> с группами <code>web</code> (одна машина) и <code>db</code> (вторая).<br />
+<strong>Проверка:</strong> <code>ansible all -i inventory/hosts.yml -m ping</code> возвращает <code>pong</code> от обеих машин.</p>
+<label class="task-done"><input type="checkbox" data-task-check="74b335f9f9"> Сделала руками и проверила</label></article><article class="task" data-task="c942a72295"><h3>Задание 2 — роль <code>common</code></h3><p>Напиши роль, которая на всех узлах: создаёт пользователя <code>deploy</code> с твоим публичным ключом и правом sudo без пароля, запрещает вход root и вход по паролю в <code>sshd_config</code> (с хендлером на reload sshd), ставит <code>htop</code>, <code>curl</code>, <code>ufw</code>, включает ufw с разрешённым портом 22, ставит часовой пояс UTC.<br />
+<strong>Проверка:</strong> первый прогон — изменения, <strong>второй прогон — <code>changed=0</code></strong>. Вход <code>ssh root@...</code> отклоняется, <code>ssh deploy@...</code> работает.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c942a72295"> Сделала руками и проверила</label></article><article class="task" data-task="0bed2fe9a7"><h3>Задание 3 — nginx из шаблона</h3><p>Роль <code>nginx</code> для группы <code>web</code>: установка, конфиг из шаблона с переменными <code>server_name</code> и <code>app_port</code>, <code>validate: nginx -t -c %s</code>, хендлер <code>reloaded</code>.<br />
+Поменяй <code>app_port</code> в <code>group_vars/web.yml</code> и запусти с <code>--check --diff</code>.<br />
+<strong>Проверка:</strong> дифф показывает ровно одну изменённую строку конфига; после реального прогона nginx перезагружен, а не перезапущен (<code>systemctl status nginx</code> показывает старое время старта).</p>
+<label class="task-done"><input type="checkbox" data-task-check="0bed2fe9a7"> Сделала руками и проверила</label></article><article class="task" data-task="b6d188c652"><h3>Задание 4 — секрет через Vault</h3><p>Роль <code>postgres</code> для группы <code>db</code>: установка PostgreSQL, создание базы и пользователя с паролем из <code>vault.yml</code> (модули <code>community.postgresql.postgresql_db</code> и <code>postgresql_user</code>).<br />
+<strong>Проверка:</strong> <code>git grep</code> по репозиторию не находит пароль открытым текстом; в выводе прогона пароль не печатается.</p>
+<label class="task-done"><input type="checkbox" data-task-check="b6d188c652"> Сделала руками и проверила</label></article><article class="task" data-task="9a8c8daef7"><h3>Задание 5 — линтер в CI</h3><p>Добавь в репозиторий пайплайн GitLab CI или GitHub Actions, который запускает <code>ansible-lint</code> и <code>ansible-playbook --syntax-check</code>.<br />
+<strong>Проверка:</strong> намеренно замени модуль <code>file</code> на <code>command: mkdir</code> — пайплайн должен упасть на линтере.</p>
+<label class="task-done"><input type="checkbox" data-task-check="9a8c8daef7"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>18</b>/20 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>19</b>/20 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>20</b>/20 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-1.html">1.1 Linux</a> — SSH, sudo, systemd: всё, что Ansible делает за тебя</li>
+<li><a href="../lessons/1-3.html">1.3 Bash</a> — идемпотентность на уровне скриптов</li>
+<li><a href="../lessons/4-1.html">4.1 Compose и Swarm</a> — что запускается на настроенных машинах</li>
+<li><a href="../lessons/4-2.html">4.2 Облако</a> — где живут машины и теги для динамического инвентаря</li>
+<li><a href="../lessons/4-4.html">4.4 Terraform</a> — создание инфраструктуры, которую настраивает Ansible</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — node_exporter в роли <code>common</code></li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a> — подготовка узлов кластера</li>
+<li><a href="../lessons/6-2.html">6.2 DevSecOps</a> — внешние хранилища секретов</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Ansible: https://docs.ansible.com/ansible/latest/</li>
+<li>Ansible best practices: https://docs.ansible.com/ansible/latest/tips_tricks/ansible_tips_tricks.html</li>
+<li>Приоритет переменных: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#understanding-variable-precedence</li>
+<li>ansible-lint: https://ansible.readthedocs.io/projects/lint/</li>
+<li>Molecule: https://ansible.readthedocs.io/projects/molecule/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="4-2.html">← 4.2 Основы облаков</a><a class="lesson-jump" href="4-4.html">4.4 Terraform: инфраструктура как код →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "4-3", "number": "4.3", "title": "Ansible: настройка серверов кодом", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["74b335f9f9", "c942a72295", "0bed2fe9a7", "b6d188c652", "9a8c8daef7"], "quiz": [{"id": "4df5899b11", "q": "Что нужно на управляемой машине, чтобы Ansible мог её настраивать?", "options": ["Агент Ansible", "SSH-доступ и Python", "Docker", "Kubernetes"], "answer": [1], "why": "<p>Ansible безагентный: подключается по SSH, копирует модуль на Python, выполняет и удаляет.<\/p>\n"}, {"id": "cb6fab1ff9", "q": "Плейбук запустили второй раз подряд. Что показывает здоровый результат?", "options": ["<code>changed<\/code> у всех задач", "<code>changed=0<\/code>", "<code>failed=0<\/code> и <code>changed<\/code> у половины задач", "Ошибку"], "answer": [1], "why": "<p>идемпотентный плейбук ничего не меняет, если всё уже в нужном состоянии.<\/p>\n"}, {"id": "f1649bc847", "q": "Чем плох <code>command: mkdir -p /opt/app<\/code> по сравнению с модулем <code>file<\/code>?", "options": ["Он выполняется при каждом прогоне, всегда показывает changed и не работает в режиме <code>--check<\/code>", "Он не создаёт папку", "Он требует root", "Ничем"], "answer": [0], "why": "<p>специализированные модули сначала проверяют состояние и меняют только то, что нужно.<\/p>\n"}, {"id": "537f857df1", "q": "Когда выполняется хендлер?", "options": ["После каждой задачи", "Один раз в конце прогона, если его вызвала задача, которая что-то изменила", "Только при ошибке", "По расписанию"], "answer": [1], "why": "<p>конфиг не менялся — сервис не перезагружается. Менялся несколькими задачами — перезагружается один раз.<\/p>\n"}, {"id": "5213babf0a", "q": "Где хранить пароль от базы в Ansible-проекте?", "options": ["В <code>group_vars/all.yml<\/code> открытым текстом", "В зашифрованном файле Ansible Vault, а задачи с ним помечать <code>no_log: true<\/code>", "В названии хоста", "В README"], "answer": [1], "why": "<p>открытый пароль окажется в истории git, а без <code>no_log<\/code> — ещё и в логе пайплайна.<\/p>\n"}, {"id": "2a5ac8bacb", "q": "Как безопасно применить изменения к 50 продакшен-серверам? Выбери все подходящие шаги.", "options": ["Сначала <code>--check --diff<\/code>", "Прогон на одном узле через <code>--limit<\/code>", "Основной прогон порциями через <code>serial<\/code>", "Сразу на все серверы, чтобы было быстрее"], "answer": [0, 1, 2], "why": "<p>если первая порция сломалась, остальные серверы не тронуты.<\/p>\n"}, {"id": "479ebcc0d7", "q": "Чем Ansible отличается от Terraform по назначению?", "options": ["Ничем", "Terraform создаёт инфраструктуру и хранит её состояние, Ansible настраивает уже созданные машины", "Ansible работает только в облаке", "Terraform умеет только Kubernetes"], "answer": [1], "why": "<p>типовая связка — Terraform создаёт машины, Ansible по их адресам их настраивает.<\/p>\n"}], "cards": [{"id": "31134e6d13", "q": "Чем Ansible отличается от Puppet и Chef?", "a": "<p>Ansible безагентный и работает по модели push: подключается по SSH в момент запуска. Puppet и Chef ставят агент на каждый узел, который сам периодически забирает конфигурацию с сервера (pull). У Ansible ниже порог входа, но нет постоянного контроля дрейфа между прогонами.<\/p>\n"}, {"id": "4d8be05ec3", "q": "Что такое идемпотентность и как её обеспечить в Ansible?", "a": "<p>Повторный запуск не меняет то, что уже в нужном состоянии. Обеспечивается использованием модулей (<code>apt<\/code>, <code>file<\/code>, <code>template<\/code>, <code>service<\/code>), которые сначала проверяют состояние. Если приходится использовать <code>command<\/code>/<code>shell<\/code> — добавляют <code>creates<\/code>, <code>removes<\/code> или <code>changed_when<\/code>. Проверка: второй прогон даёт <code>changed=0<\/code>.<\/p>\n"}, {"id": "67adb0a396", "q": "Что такое хендлер и когда он выполняется?", "a": "<p>Задача, которая запускается только по уведомлению (<code>notify<\/code>) от другой задачи, если та что-то изменила. Выполняется один раз в конце плейбука, сколько бы задач её ни вызвали. Типичный пример — перезагрузка сервиса после изменения конфига.<\/p>\n"}, {"id": "af240132c9", "q": "Чем отличаются <code>defaults<\/code> и <code>vars<\/code> в роли?", "a": "<p><code>defaults/main.yml<\/code> — значения с самым низким приоритетом, их удобно переопределять из инвентаря. <code>vars/main.yml<\/code> — высокий приоритет, перебивает инвентарь; туда кладут то, что менять снаружи не предполагается.<\/p>\n"}, {"id": "88a3d5ef4d", "q": "Как хранить пароли в Ansible-проекте?", "a": "<p>В зашифрованных файлах Ansible Vault (или во внешнем хранилище секретов вроде HashiCorp Vault). Пароль от Vault передаётся через защищённую переменную CI. Задачи, работающие с секретами, помечаются <code>no_log: true<\/code>.<\/p>\n"}, {"id": "8f81cef71d", "q": "Как безопасно применить изменения к 50 продакшен-серверам?", "a": "<p>Сначала <code>--check --diff<\/code>, затем прогон на одном узле через <code>--limit<\/code> или на стейджинге. Для основного прогона — <code>serial<\/code> (порциями) и <code>max_fail_percentage<\/code>, чтобы остановиться при первой ошибке и не положить весь парк.<\/p>\n"}, {"id": "18fd354456", "q": "Чем <code>command<\/code> отличается от <code>shell<\/code>?", "a": "<p><code>command<\/code> запускает программу напрямую, без оболочки: не работают пайпы, перенаправления и переменные окружения. <code>shell<\/code> запускает через <code>/bin/sh<\/code> и всё это поддерживает. <code>command<\/code> безопаснее (нет инъекций через оболочку) и предпочтительнее, если оболочка не нужна.<\/p>\n"}, {"id": "590b6c6664", "q": "Ansible или Terraform для создания VPC и машин?", "a": "<p>Terraform: он хранит состояние и умеет корректно изменять и удалять ресурсы. Ansible — для настройки уже созданных машин. Типовая связка: Terraform создаёт машины и отдаёт их адреса, Ansible по этим адресам их настраивает.<\/p>\n"}, {"id": "78774222b8", "q": "Что делает <code>gather_facts<\/code> и когда его отключают?", "a": "<p>Собирает сведения о системе узла (ОС, IP, память, CPU) в переменные <code>ansible_*<\/code>. Отключают, если факты не используются — это заметно ускоряет прогон на большом числе узлов.<\/p>\n"}, {"id": "ce72d1418d", "q": "Что вернёт <code>ansible all -m ping<\/code> и что он проверяет?", "a": "<p><code>pong<\/code> для каждого доступного узла. Это не ICMP, а проверка, что Ansible может подключиться по SSH и выполнить Python на узле.<\/p>\n"}], "next": "4-4"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M4 — Универсальный Helm-чарт с публикацией — DevOps-маршрут</title>
+<meta name="description" content="Курс от Linux до Kubernetes: теория, практика руками, тесты и карточки к собеседованию">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="project">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+<main class="narrow project" data-project="m4"><div class="page-kicker">cd projects/m4</div><h1>M4 — Универсальный Helm-чарт с публикацией</h1><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Что получится</summary><div class="callout-body"><p>Переиспользуемый Helm-чарт для типового веб-сервиса: Deployment с пробами, Service, Ingress, HPA, PodDisruptionBudget, ServiceMonitor — всё включается и настраивается через values. Чарт проверяется линтерами и тестовой установкой в кластер kind прямо в GitHub Actions и публикуется в OCI-реестр с версией.</p>
+<p>Такой чарт пишут в каждой команде, где больше двух сервисов, — чтобы не копировать манифесты. В портфолио он показывает, что ты разбираешься в шаблонах Helm глубже, чем <code>helm create</code>, и умеешь выпускать инфраструктурный код как продукт с версиями.</p>
+</div></details>
+<p><strong>Когда делать:</strong> после части 5. <strong>Время:</strong> 1–2 выходных.<br />
+<strong>Уроки:</strong> <a href="../lessons/5-1.html">5.1 Kubernetes</a>, <a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>, <a href="../lessons/5-3.html">5.3 Helm и Kustomize</a>.</p>
+<h2>Требования</h2>
+<h3>Чарт</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Deployment: образ, тег, ресурсы, переменные окружения и секреты из values; liveness, readiness и startup-пробы (<a href="../lessons/5-1.html#s-11">5.1 Kubernetes</a>, §11–12).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Включаемые блоки: <code>ingress.enabled</code>, <code>autoscaling.enabled</code>, <code>pdb.enabled</code>, <code>serviceMonitor.enabled</code> (<a href="../lessons/5-2.html">5.2 Kubernetes в работе</a>).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>securityContext</code> по умолчанию: не root, read-only корневая файловая система, без лишних capabilities (<a href="../lessons/6-2.html#s-8">6.2 DevSecOps</a>, §8).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Общие метки и имена через <code>_helpers.tpl</code> (<a href="../lessons/5-3.html#s-12">5.3 Helm и Kustomize</a>, §12).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>values.schema.json</code> — неверный тип значения отклоняется при установке.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>NOTES.txt</code> с подсказкой, как открыть сервис после установки.</li>
+</ul>
+<h3>Проверки и выпуск</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> GitHub Actions: <code>helm lint</code>, <code>kubeconform</code> для отрендеренных манифестов, установка в кластер kind с <code>--wait</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Публикация в GitHub Container Registry как OCI-чарт при теге <code>v*</code> (<a href="../lessons/5-3.html#s-14">5.3 Helm и Kustomize</a>, §14).</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Таблица параметров в README генерируется <code>helm-docs</code>.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Пример: чарт разворачивает <code>shop-api</code> из стартового каркаса.</li>
+</ul>
+<h2>Готово, когда</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> <code>helm install demo oci://ghcr.io/&lt;ты&gt;/charts/web-service --version 0.1.0 --set image.repository=nginx</code> работает на чистом кластере.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Неверный тип в values (<code>replicaCount: &quot;три&quot;</code>) даёт понятную ошибку схемы.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox"> Пайплайн зелёный, в README есть таблица всех параметров.</li>
+</ul>
+<h2>Что рассказать на собеседовании</h2>
+<ul>
+<li>Чем универсальный чарт удобен и где его границы: когда сервису нужен свой.</li>
+<li>Как проверяется чарт до публикации и что ловит <code>kubeconform</code>, чего не ловит <code>helm lint</code>.</li>
+<li>Почему чарт выпускают с версиями и как сервисы обновляются на новую версию чарта.</li>
+</ul>
+
+<details class="callout callout-tip"><summary><span class="callout-icon">💡</span>Связано с</summary><div class="callout-body"><ul>
+<li><a href="../projects/portfolio.html">00_Portfolio</a></li>
+<li><a href="../projects/p3.html">P3-K8s-GitOps</a> — чарт можно взять за основу в P3</li>
+</ul>
+</div></details></div></main>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

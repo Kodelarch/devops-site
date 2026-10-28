@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1.2 Сети: от TCP/IP до nginx — DevOps-маршрут</title>
+<meta name="description" content="Урок 1.2: Сети: от TCP/IP до nginx">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c1)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-1">← 1. Linux и сети</a>
+    <div class="sidebar-art"><svg class="art art-linux" viewBox="0 0 240 140" role="img" aria-label="Сервер и сеть" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<rect x="18" y="22" width="76" height="96" rx="7"/>
+<rect class="dim" x="28" y="34" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="61" width="56" height="18" rx="3"/>
+<rect class="dim" x="28" y="88" width="56" height="18" rx="3"/>
+<circle class="led l1" cx="74" cy="43" r="2.6"/>
+<circle class="led l2" cx="74" cy="70" r="2.6"/>
+<circle class="led l3" cx="74" cy="97" r="2.6"/>
+<path class="dim" d="M35 43 H58 M35 70 H52 M35 97 H62"/>
+<path class="dim" d="M94 70 H160"/>
+<rect class="packet p1" x="96" y="66" width="8" height="8" rx="2"/>
+<rect class="packet p2" x="96" y="66" width="8" height="8" rx="2"/>
+<circle cx="192" cy="70" r="32"/>
+<ellipse class="dim" cx="192" cy="70" rx="13" ry="32"/>
+<path class="dim" d="M160 70 H224 M164 54 H220 M164 86 H220"/>
+<text class="lbl" x="26" y="134">$ ssh prod</text>
+</svg></div>
+    <div class="lesson-number">lesson 1.2 · linux</div>
+    <h1 class="lesson-title">Сети: от TCP/IP до nginx</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Стек TCP/IP и адресация</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">HTTP: методы, коды и заголовки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">HTTPS, TLS и сертификаты</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">DNS — телефонная книга интернета</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Статическая маршрутизация между двумя машинами</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Пропускная способность</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Firewall: ufw, nftables и наследие iptables</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Маршрутизация целой сети</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">DHCP-сервер</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">NAT — SNAT и DNAT</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Nginx — ресепшн перед сервисами</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">SSH-туннели и VPN</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Диагностика: «сайт не открывается»</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Урок <a href="../lessons/1-1.html">1.1 Linux</a> научил работать на одном сервере. Этот урок — про то, как серверы находят друг друга и договариваются, кого пускать: адресация, маршрутизация, firewall, DHCP, NAT, туннели.</p>
+<p>Практический ориентир: в работе DevOps сеть всплывает не как теория, а как вопрос «почему не открывается». Поэтому здесь, кроме основ, разобраны <strong>коды ответов HTTP</strong> (по ним сразу понятно, куда идти разбираться), <strong>сертификаты</strong> (их истечение — самая предсказуемая и самая частая авария) и <strong>алгоритм диагностики</strong> — порядок проверок, отсекающий половину вариантов на каждом шаге.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Порт</strong> — номер конкретного «канала связи» на машине; один IP может держать много сервисов на разных портах (22 — SSH, 80 — HTTP, 443 — HTTPS).</li>
+<li><strong>Маска подсети</strong> — часть адреса, которая говорит, где заканчивается «номер улицы» и начинается «номер дома»; <code>/24</code> значит, что первые 24 бита — это сеть, а последние 8 — адреса хостов внутри неё (256 адресов).</li>
+<li><strong>MAC-адрес</strong> — «серийный номер» конкретной сетевой карты, зашит производителем, не меняется от смены IP.</li>
+<li><strong>Шлюз (gateway)</strong> — адрес устройства, через которое уходит трафик за пределы локальной сети.</li>
+<li><strong>Пакет</strong> — кусок данных с адресом отправителя и получателя, который передаётся по сети.</li>
+<li><strong>Резолв (resolve)</strong> — превращение доменного имени в IP-адрес.</li>
+<li><strong>TTL</strong> — время, на которое ответ разрешено запомнить в кеше.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Стек TCP/IP и адресация</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-addressing.webp" alt="" /><br />
+<em>Аналогия:</em> сеть — это город. Названия улиц — сети и подсети. Номер дома — IP-адрес хоста. Номер квартиры — порт. Письмо (пакет) кладут в конверт с адресом отправителя и получателя — и оно проходит через почтовые отделения (маршрутизаторы) на пути к цели.</p>
+<p>IP-адрес — 32-битное число, которое принято записывать как 4 числа от 0 до 255 через точку (<code>192.168.0.1</code>). Он делится на <strong>адрес сети</strong> и <strong>адрес хоста</strong> — где именно проходит граница, определяет маска подсети (см. словарик).</p>
+<pre><code class="language-bash">sudo apt install -y ipcalc
+ipcalc 10.12.34.56/20      # адрес сети, диапазон хостов, broadcast
+</code></pre>
+<p><strong>Broadcast</strong>-адрес — специальный адрес в конце диапазона подсети, отправка на который значит «это всем в моей сети сразу».</p>
+<p>Пригодится знать:</p>
+<ul>
+<li>Приватные диапазоны (не маршрутизируются в интернете напрямую): <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>.</li>
+<li><code>127.0.0.0/8</code> — весь этот диапазон означает «сам себя» (не только <code>127.0.0.1</code>).</li>
+</ul>
+<p><img loading="lazy" src="../assets/diagrams/do2-tcp-udp.webp" alt="" /></p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>TCP или UDP?</summary><div class="callout-body"><p>Два способа доставки пакетов. <strong>TCP</strong> — как заказное письмо: доставка подтверждается, ничего не теряется, но чуть медленнее. <strong>UDP</strong> — как открытка: отправил и забыл, зато быстро. Загрузка файла или сайт — обычно TCP; видеозвонки — часто UDP, где важнее скорость, чем идеальная точность.</p>
+</div></details>
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Зачем DevOps'у маски подсетей</summary><div class="callout-body"><p>Это не абстракция из учебника: диапазоны придётся задавать руками при настройке облачной сети (VPC), при описании правил firewall и при выделении подсетей под кластер Kubernetes. Минимум, который надо уметь без калькулятора: <code>/24</code> — 256 адресов, <code>/16</code> — 65536, <code>/32</code> — ровно один хост (так записывают правило «только с этого адреса»).</p>
+</div></details></div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>HTTP: методы, коды и заголовки</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-http-codes.svg" alt="" /><br />
+<em>Аналогия:</em> HTTP — это бланк заявления. Метод — что ты просишь сделать, путь — с чем именно, заголовки — служебные пометки на полях, код ответа — резолюция, которую поставили.</p>
+<p><strong>Методы</strong>: <code>GET</code> — отдай данные (ничего не меняет), <code>POST</code> — создай новое, <code>PUT</code>/<code>PATCH</code> — измени существующее целиком или частично, <code>DELETE</code> — удали. <code>HEAD</code> — как GET, но верни только заголовки; им удобно проверять доступность, не скачивая содержимое.</p>
+<pre><code class="language-bash">curl -I https://example.com        # только заголовки ответа
+curl -v https://example.com         # весь диалог, включая установку TLS
+curl -o /dev/null -s -w &quot;%{http_code} %{time_total}s\n&quot; https://example.com
+</code></pre>
+<p>Последняя команда — рабочая привычка: <code>-o /dev/null</code> выбрасывает содержимое, <code>-s</code> убирает индикатор загрузки, <code>-w</code> печатает только то, что нужно — код ответа и время. Ей удобно проверять сервис в скрипте.</p>
+<p><strong>Коды ответов</strong> — главный диагностический сигнал. Логика в первой цифре: <code>2xx</code> — успех, <code>3xx</code> — перенаправление, <code>4xx</code> — виноват клиент, <code>5xx</code> — виноват сервер.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Что значит</th>
+<th>Куда смотреть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>200</code></td>
+<td>всё хорошо</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>301</code> / <code>302</code></td>
+<td>переехало навсегда / временно</td>
+<td>конфиг редиректов</td>
+</tr>
+<tr>
+<td><code>400</code></td>
+<td>клиент прислал некорректный запрос</td>
+<td>сам запрос</td>
+</tr>
+<tr>
+<td><code>401</code> / <code>403</code></td>
+<td>не представился / представился, но нельзя</td>
+<td>авторизация, права</td>
+</tr>
+<tr>
+<td><code>404</code></td>
+<td>такого адреса нет</td>
+<td>маршруты приложения, конфиг nginx</td>
+</tr>
+<tr>
+<td><code>500</code></td>
+<td>приложение упало на своей же ошибке</td>
+<td>логи приложения</td>
+</tr>
+<tr>
+<td><code>502</code></td>
+<td>Bad Gateway — backend не ответил вообще</td>
+<td>жив ли процесс, тот ли порт</td>
+</tr>
+<tr>
+<td><code>503</code></td>
+<td>Service Unavailable — намеренно недоступен</td>
+<td>перегрузка, режим обслуживания</td>
+</tr>
+<tr>
+<td><code>504</code></td>
+<td>Gateway Timeout — backend не успел ответить</td>
+<td>медленный запрос, таймауты в nginx</td>
+</tr>
+</tbody>
+</table></div>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>502 против 504 — обязательный вопрос</summary><div class="callout-body"><p>Оба кода возвращает <strong>не приложение, а сам nginx</strong> — это ключ. <code>502</code> значит, что backend недоступен: процесс не запущен, слушает не тот порт, упал. <code>504</code> значит, что backend жив и соединение установилось, но ответа не пришло за отведённое время — то есть проблема в медленном запросе или в слишком коротком таймауте. Разница между «упал» и «не успел» определяет, куда идти: в первом случае смотреть <code>systemctl status</code>, во втором — профилировать медленный код или поднимать <code>proxy_read_timeout</code>.</p>
+</div></details>
+<p>Из заголовков в работе чаще всего встречаются: <code>Host</code> (какой именно сайт запрашивают — по нему nginx выбирает нужный <code>server</code>), <code>Content-Type</code> (формат тела), <code>Authorization</code> (токен доступа), <code>X-Forwarded-For</code> (реальный IP клиента, когда запрос прошёл через прокси), <code>Cache-Control</code> (можно ли кешировать ответ).</p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>HTTPS, TLS и сертификаты</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-http-https.webp" alt="" /><br />
+<em>Аналогия:</em> HTTP — открытка: текст читает каждый, кто её увидит по пути. HTTPS — то же письмо, но в запечатанном конверте: прочитать может только адресат.</p>
+<p><strong>TLS</strong> (раньше называли SSL) шифрует данные между клиентом и сервером. Замочек в адресной строке означает HTTPS. Но шифрование — только половина дела; вторая половина — <strong>подтверждение, что сервер действительно тот, за кого себя выдаёт</strong>, и за это отвечает сертификат.</p>
+<p>Сертификат выдаёт <strong>удостоверяющий центр</strong> (CA), которому браузер доверяет. Получается цепочка: сертификат сайта подписан промежуточным центром, тот — корневым, а корневой уже лежит в хранилище доверенных на твоей машине. Если хоть одно звено не сходится, браузер ругается.</p>
+<pre><code class="language-bash"># что за сертификат отдаёт сервер и до какого числа он годен
+openssl s_client -connect example.com:443 -servername example.com &lt;/dev/null 2&gt;/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+
+# срок годности локального файла сертификата
+openssl x509 -in /etc/ssl/certs/site.crt -noout -enddate
+</code></pre>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Истёкший сертификат — самая предсказуемая авария в индустрии</summary><div class="callout-body"><p>Сертификаты выдаются на срок (у Let's Encrypt — 90 дней) и просто перестают действовать в известную заранее дату. Сайт при этом не «ломается» — он продолжает работать, но браузеры показывают страшное предупреждение, а другие сервисы отказываются с ним соединяться. Отсюда две обязательные вещи: <strong>автопродление</strong> (<code>certbot</code> ставит таймер сам) и <strong>мониторинг срока</strong> — алерт за две недели до истечения. Вопрос «как вы следите за сроками сертификатов» на собеседовании задают часто, и ответ «смотрим глазами» считается неверным.</p>
+</div></details>
+<p>Бесплатный сертификат от Let's Encrypt для nginx ставится одной командой:</p>
+<pre><code class="language-bash">sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d example.com -d www.example.com
+sudo certbot renew --dry-run     # проверить, что автопродление сработает
+systemctl list-timers | grep certbot   # таймер, который это делает
+</code></pre>
+<p>Certbot не только получает сертификат, но и сам правит конфиг nginx, добавляя редирект с HTTP на HTTPS. Проверка <code>--dry-run</code> прогоняет продление «вхолостую» — так убеждаются, что через три месяца всё пройдёт без участия человека.</p>
+<p><strong>Самоподписанный сертификат</strong> — сделанный своими руками, без удостоверяющего центра. Шифрование он даёт, доверия — нет, поэтому браузер всё равно предупредит. Годится для внутренних сервисов и тестовых стендов, для публичного сайта — нет.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>DNS — телефонная книга интернета</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-dns-resolution.svg" alt="" /><br />
+<em>Аналогия:</em> люди не запоминают номера телефонов — запоминают имена в контактах. DNS — ровно такой контакт-лист для интернета: превращает <code>google.com</code> в реальный IP-адрес.</p>
+<pre><code class="language-bash">dig example.com +short          # компактный ответ
+dig example.com MX               # запись конкретного типа
+dig @1.1.1.1 example.com          # спросить конкретный сервер в обход своего
+dig example.com +trace             # весь путь резолва от корня — видно, где ломается
+resolvectl status                   # какие DNS реально используются в Ubuntu
+resolvectl flush-caches               # сбросить локальный кеш
+cat /etc/hosts                          # локальный блокнот — главнее любого DNS
+</code></pre>
+<p><strong>Типы записей</strong>, которые надо знать: <code>A</code> — имя в адрес IPv4, <code>AAAA</code> — в IPv6, <code>CNAME</code> — псевдоним (имя на другое имя), <code>MX</code> — куда доставлять почту домена, <code>TXT</code> — произвольный текст (проверка владения доменом, SPF для почты), <code>NS</code> — какие серверы авторитетны для зоны, <code>PTR</code> — обратное преобразование адреса в имя.</p>
+<p><strong>TTL</strong> — время, на которое ответ разрешено закешировать. Отсюда главный практический вывод: <strong>смена DNS-записи не действует мгновенно</strong>. Пока не истёк TTL, часть мира продолжает ходить на старый адрес — и это не поломка. Поэтому перед плановым переездом TTL заранее снижают до нескольких минут, а после переезда возвращают обратно.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Ловушка Ubuntu: /etc/resolv.conf врёт</summary><div class="callout-body"><p>Привычка смотреть DNS-серверы в <code>/etc/resolv.conf</code> на современной Ubuntu подводит: этот файл — символическая ссылка на заглушку, и внутри почти всегда написан один и тот же адрес <code>127.0.0.53</code>. Это локальный кеширующий резолвер <code>systemd-resolved</code>, а не настоящий DNS-сервер. Чтобы увидеть, к кому он на самом деле обращается, нужен <code>resolvectl status</code>. Правка <code>/etc/resolv.conf</code> руками при этом бесполезна — её перезатрёт.</p>
+</div></details>
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Лайфхак</summary><div class="callout-body"><p>Если сайт «не грузится», но <code>ping</code> по IP работает — почти всегда проблема именно в DNS. Это первая гипотеза при жалобах «сайт не открывается». Быстрая проверка: <code>dig site.ru +short</code> — пусто или старый адрес говорит сам за себя.</p>
+</div></details>
+<figure class="explain" data-anim="request-journey"><figcaption><span class="explain-tag">▶ схема</span>Путь HTTPS-запроса: DNS → TCP → TLS → HTTP</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Статическая маршрутизация между двумя машинами</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-static-route.webp" alt="" /><br />
+<em>Аналогия:</em> маршрут — это запись «чтобы попасть в соседний район, поверни на этом перекрёстке». Без такой записи компьютер просто не знает, куда слать пакет для чужой сети.</p>
+<p>Статичные адреса задаются в <code>/etc/netplan/00-installer-config.yaml</code>, маршрут можно добавить временно (не переживёт перезагрузку) и постоянно.</p>
+<pre><code class="language-bash">ip a                                        # посмотреть интерфейсы
+ip r                                         # текущая таблица маршрутов
+ip r add 10.50.0.0/16 via 192.168.56.10       # временный маршрут
+</code></pre>
+<p>Команда читается дословно: <code>ip r add</code> (добавить маршрут) <code>10.50.0.0/16</code> (для какой сети) <code>via 192.168.56.10</code> (через какой шлюз). Такой маршрут живёт только до перезагрузки.</p>
+<pre><code class="language-yaml"># .../00-installer-config.yaml — постоянный маршрут
+routes:
+  - to: 10.50.0.0/16
+    via: 192.168.56.10
+</code></pre>
+<pre><code class="language-bash">sudo netplan try      # применить с автооткатом через 120 секунд — безопасно на удалёнке
+sudo netplan apply
+ping -c 4 &lt;адрес-другой-машины&gt;
+</code></pre>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Пропускная способность</h2><div class="prose"><p><em>Аналогия:</em> <code>iperf3</code> — это спидометр для сети: одна машина говорит «поехали», другая измеряет, сколько реально «доехало» за секунду.</p>
+<pre><code class="language-bash"># на первой машине (сервер):
+iperf3 -s
+# на второй (клиент):
+iperf3 -c &lt;IP первой машины&gt;
+</code></pre>
+<p>Единицы измерения путаются часто: <code>8 Mbps = 1 MB/s</code> (в байте 8 бит), <code>1 Gbps = 1000 Mbps</code>. Провайдеры продают мегабиты, файловые менеджеры показывают мегабайты — отсюда вечное «обещали 100, а качается 12».</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~4 мин</span></div><h2>Firewall: ufw, nftables и наследие iptables</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-firewall-stack.svg" alt="" /><br />
+<em>Аналогия:</em> охранник на входе с двумя стилями работы. Один по умолчанию <strong>никого не пускает</strong>, кроме явно разрешённых — так безопаснее. Другой <strong>пускает всех</strong>, кроме явно запрещённых — проще, но рискованнее.</p>
+<p>Первое, что нужно разложить по полкам: <strong>iptables, nftables и ufw — не конкуренты, а разные этажи одной конструкции.</strong></p>
+<ul>
+<li><strong>netfilter</strong> — подсистема ядра, где пакет реально пропускается или отбрасывается.</li>
+<li><strong>nftables</strong> — современный движок правил поверх неё. Начиная с Ubuntu 20.04 и Debian 10 это вариант по умолчанию.</li>
+<li><strong>iptables</strong> — старый инструмент, официально переведённый в режим legacy-поддержки. Команды по-прежнему работают, но через слой совместимости транслируются в nftables.</li>
+<li><strong>ufw</strong> — не файрвол вообще, а удобная обёртка, которая генерирует правила за тебя.</li>
+</ul>
+<p>Отсюда практическая рекомендация: <strong>знать нужно iptables</strong> (его синтаксис во всех старых инструкциях, статьях и чужих скриптах, которые тебе достанутся по наследству), а <strong>настраивать свой сервер — через ufw</strong>.</p>
+<pre><code class="language-bash">sudo ufw default deny incoming     # запрет по умолчанию — единственно верная база
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp                # ОБЯЗАТЕЛЬНО до включения, иначе отрежешь себе SSH
+sudo ufw allow 80,443/tcp
+sudo ufw allow from 10.0.0.0/24 to any port 5432   # доступ к базе только из своей подсети
+sudo ufw enable
+sudo ufw status numbered              # список правил с номерами
+sudo ufw delete 3                       # удалить правило по номеру
+</code></pre>
+<p>Классический синтаксис <code>iptables</code>, который надо уметь прочитать:</p>
+<pre><code class="language-bash">iptables -L -n -v                                   # посмотреть текущие правила
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT        # разрешить SSH
+iptables -A INPUT -p icmp --icmp-type echo-request -j DROP   # не отвечать на ping
+</code></pre>
+<p>Разбор правила <code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code>: <code>-A INPUT</code> (append) — добавить в конец цепочки INPUT, <code>-p tcp</code> — фильтр по протоколу, <code>--dport 22</code> — по порту назначения, <code>-j ACCEPT</code> (jump) — что делать с подошедшим трафиком.</p>
+<p>Правила организованы в <strong>цепочки</strong>: <code>INPUT</code> — входящий к этой машине, <code>OUTPUT</code> — исходящий, <code>FORWARD</code> — транзитный (для роутеров). Цели: <code>ACCEPT</code> — пропустить, <code>DROP</code> — молча отбросить, <code>REJECT</code> — отбросить с уведомлением отправителя. Правила читаются <strong>по порядку</strong>, срабатывает первое подходящее — поэтому разрешающее правило после запрещающего бесполезно.</p>
+<p>Современный эквивалент на nftables:</p>
+<pre><code class="language-bash">sudo nft list ruleset                                        # всё, что есть сейчас
+sudo nft add rule inet filter input tcp dport 22 accept        # разрешить SSH
+</code></pre>
+
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Как отрезать себе доступ к серверу</summary><div class="callout-body"><p>Самая частая авария при работе с firewall: включил запрет по умолчанию, забыв разрешить порт 22 — и связь обрывается вместе с твоей SSH-сессией. Чинить придётся через консоль провайдера, а на железном сервере — ногами.</p>
+<p>Три страховки: <strong>сначала</strong> разреши SSH, <strong>потом</strong> включай; не закрывай текущую сессию, пока не проверил вход из второго окна; на удалённой машине поставь <code>sudo shutdown -r +10</code> перед экспериментом — если отрежешься, через 10 минут сервер перезагрузится с прежними правилами (<code>ufw</code> без <code>enable</code> их не сохранит), а если всё хорошо, отменишь через <code>shutdown -c</code>.</p>
+</div></details>
+<pre><code class="language-bash">nmap -sn &lt;IP&gt;     # даже если ping не проходит, nmap может показать &quot;Host is up&quot;
+</code></pre>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Маршрутизация целой сети</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-routing-topology.webp" alt="" /><br />
+<em>Аналогия:</em> если раньше был один перекрёсток между двумя улицами, то тут — целый район с несколькими перекрёстками (роутерами), через которые нужно проложить путь.</p>
+<p>Роутер — это просто хост с двумя и более сетевыми интерфейсами, который умеет передавать чужой трафик дальше.</p>
+<pre><code class="language-bash">sudo sysctl -w net.ipv4.ip_forward=1     # включить переадресацию временно
+# и навсегда — в /etc/sysctl.conf:
+# net.ipv4.ip_forward = 1
+</code></pre>
+<p>Маршрут по умолчанию (<code>default via &lt;IP роутера&gt;</code>) означает «если не знаешь точный маршрут, отправь пакет сюда, дальше разберутся».</p>
+<pre><code class="language-bash">ip r                                # текущая таблица маршрутов
+traceroute &lt;IP&gt;                      # список маршрутизаторов на пути до цели
+mtr &lt;IP&gt;                              # traceroute + ping в реальном времени, удобнее
+sudo tcpdump -tn -i eth0 port 80       # смотреть трафик на интерфейсе вживую
+</code></pre>
+<p><code>tcpdump</code> перехватывает и печатает реально проходящие пакеты — незаменим, чтобы ответить на вопрос «доходит ли трафик вообще». <code>-i eth0</code> — на каком интерфейсе слушать, <code>-t</code> убирает временные метки, <code>-n</code> не превращает адреса в имена. <code>mtr</code> полезнее обычного <code>traceroute</code> при жалобах на «иногда тормозит»: он гоняет пробы непрерывно и показывает, на каком именно узле теряются пакеты.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>DHCP-сервер</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-dhcp-server.webp" alt="" /><br />
+<em>Аналогия:</em> теперь ты сам ставишь ту самую стойку регистрации из урока 1.1, а не просто получаешь бейджик от неё.</p>
+<pre><code class="language-bash">sudo apt install -y isc-dhcp-server
+</code></pre>
+<pre><code class="language-conf"># /etc/dhcp/dhcpd.conf
+subnet 192.168.50.0 netmask 255.255.255.0 {
+    range 192.168.50.100 192.168.50.200;
+    option routers 192.168.50.1;
+    option domain-name-servers 192.168.50.1, 1.1.1.1;
+    default-lease-time 3600;
+}
+
+# постоянный адрес для принтера по его MAC
+host printer {
+    hardware ethernet 52:54:00:12:34:56;
+    fixed-address 192.168.50.10;
+}
+</code></pre>
+<p>Блок <code>host</code> закрепляет конкретный IP за конкретной сетевой картой по MAC-адресу — машина всегда получает один и тот же адрес, хотя адрес по-прежнему выдаёт DHCP. Так обычно поступают с принтерами, точками доступа и серверами в офисной сети.</p>
+<pre><code class="language-bash">sudo systemctl restart isc-dhcp-server
+journalctl -u isc-dhcp-server -f    # видно, как выдаются адреса
+</code></pre>
+</div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>NAT — SNAT и DNAT</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-nat.webp" alt="" /><br />
+<em>Аналогия:</em> NAT — это ресепшн бизнес-центра. <strong>SNAT</strong> — сотрудники разных офисов выходят наружу, и для внешнего мира все они выглядят как один номер ресепшна. <strong>DNAT</strong> — звонящий набирает номер ресепшна, а его переключают на конкретный внутренний добавочный.</p>
+<pre><code class="language-bash"># SNAT: спрятать внутреннюю сеть за одним внешним адресом роутера
+iptables -t nat -A POSTROUTING -s 192.168.50.0/24 -o eth0 -j MASQUERADE
+
+# DNAT: снаружи на порт 8080 роутера -&gt; внутрь на 80-й порт конкретного сервера
+iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to-destination 192.168.50.20:80
+iptables -A FORWARD -p tcp -d 192.168.50.20 --dport 80 -j ACCEPT
+</code></pre>
+<p>Флаг <code>-t nat</code> переключает работу на отдельную таблицу подмены адресов. В SNAT цепочка <code>POSTROUTING</code> означает «применить прямо перед выходом пакета наружу», <code>-s</code> — фильтр по источнику, <code>-o eth0</code> — через какой интерфейс уходит, <code>-j MASQUERADE</code> — сама подмена адреса источника. В DNAT цепочка <code>PREROUTING</code> означает «применить сразу при получении, до решения о маршрутизации», а <code>--to-destination</code> указывает внутренний адрес и порт.</p>
+<p><code>MASQUERADE</code> — частный случай SNAT для ситуаций, когда внешний IP заранее неизвестен (выдан по DHCP).</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Где ты встретишь NAT дальше</summary><div class="callout-body"><p>Это не только про роутеры: ровно тот же механизм работает в Docker. Когда ты пишешь <code>docker run -p 8080:80</code>, движок создаёт DNAT-правило, пробрасывающее порт хоста внутрь контейнера. Понимание NAT здесь превращает магию <code>-p</code> в понятную операцию — пригодится в <a href="../lessons/3-1.html">3.1 Docker</a>.</p>
+</div></details>
+<pre><code class="language-bash">nc -zv &lt;адрес&gt; &lt;порт&gt;     # проверить, что TCP-соединение реально устанавливается
+</code></pre>
+<p>(<code>telnet</code> для этой проверки тоже годится, но <code>nc</code> есть почти везде и не требует отдельной установки.)</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Nginx — ресепшн перед сервисами</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-nginx.webp" alt="" /><br />
+<em>Аналогия:</em> администратор на ресепшене: посетитель называет, к кому пришёл, а его направляют в нужный кабинет — сам посетитель не знает, где тот кабинет.</p>
+<p>Nginx чаще всего стоит перед реальным приложением и решает, куда направить запрос (<strong>reverse proxy</strong>), а заодно сам отдаёт статичные файлы, не дёргая приложение.</p>
+<pre><code class="language-nginx">server {
+    listen 80;
+    server_name example.com;
+
+    location /static/ {
+        root /var/www;              # отдать файл с диска, не трогая приложение
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 60s;      # после этого времени вернётся 504
+    }
+}
+</code></pre>
+<p>Директивы <code>proxy_set_header</code> здесь не украшение: без них приложение увидит в качестве клиента сам nginx (<code>127.0.0.1</code>) и не сможет отличить пользователей друг от друга — сломаются логи, ограничение частоты запросов и блокировки по адресу. <code>X-Forwarded-For</code> передаёт реальный IP клиента дальше.</p>
+<p>Один nginx обслуживает много сайтов сразу: он выбирает подходящий блок <code>server</code> по заголовку <code>Host</code> из запроса. Это называется виртуальными хостами, и именно поэтому на одном IP живут десятки доменов.</p>
+<pre><code class="language-bash">sudo nginx -t                 # проверить конфиг на ошибки — ВСЕГДА перед перезагрузкой
+sudo systemctl reload nginx     # применить без разрыва соединений
+tail -f /var/log/nginx/error.log  # причина 502 и 504 пишется сюда
+</code></pre>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Привычка, которая избавит от простоя</summary><div class="callout-body"><p><code>nginx -t</code> проверяет синтаксис конфига, ничего не применяя. Без этой проверки опечатка в конфиге приводит к тому, что nginx не поднимется после <code>restart</code> — и сайт ляжет целиком. Правильная последовательность всегда одна: <strong>правка → <code>nginx -t</code> → <code>reload</code></strong>. И именно <code>reload</code>, а не <code>restart</code>: перезагрузка конфига не рвёт существующие соединения (разница разбиралась в <a href="../lessons/1-1.html#s-7">1.1 Linux</a>, §7).</p>
+</div></details></div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>SSH-туннели и VPN</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-ssh-tunnel.webp" alt="" /><br />
+<em>Аналогия:</em> туннель — персональный проход через закрытую дверь: снаружи всё выглядит так же закрыто, но у тебя есть свой ход внутрь.</p>
+<p>Полезно, когда нужный сервис слушает только <code>localhost</code> и снаружи недоступен.</p>
+<pre><code class="language-bash"># Local forwarding: локальный порт 8080 -&gt; удалённый сервис через промежуточный сервер
+ssh -L 8080:localhost:80 user@jump-host
+
+# Remote forwarding: сделать свой локальный сервис доступным с удалённой машины
+ssh -R 9090:localhost:80 user@remote-host
+</code></pre>
+<p><code>-L 8080:localhost:80</code> читается так: «открой на моей машине порт 8080, и всё, что туда придёт, перешли через SSH на <code>localhost:80</code>, но уже с точки зрения <code>jump-host</code>» — то есть <code>localhost</code> здесь означает не твою машину, а ту, к которой ты подключился. Это стандартный способ достучаться до базы данных, которая намеренно слушает только <code>127.0.0.1</code>. <code>-R</code> работает в обратную сторону.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>SSH-туннель или VPN</summary><div class="callout-body"><p>SSH-туннель — дырка на один порт и одно приложение, поднимается за секунды, не требует настройки на сервере. <strong>VPN</strong> — то же самое для сети целиком: после подключения твоя машина как будто оказывается внутри удалённой сети со всеми её хостами и портами. VPN настраивают, когда туннелей на каждый сервис становится слишком много. Из современных вариантов чаще всего встретишь <strong>WireGuard</strong> — он проще и быстрее старого OpenVPN, а конфиг занимает десяток строк.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/19 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~3 мин</span></div><h2>Диагностика: «сайт не открывается»</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do2-net-debug.svg" alt="" /></p>
+<p>Раздел без новых команд — только порядок. Смысл в том, чтобы на каждом шаге отсекать половину вариантов, а не перебирать наугад.</p>
+<p><strong>Шаг 1. Есть ли сеть вообще.</strong></p>
+<pre><code class="language-bash">ip a                # поднят ли интерфейс, есть ли адрес
+ip r                 # есть ли маршрут по умолчанию
+ping -c 3 1.1.1.1     # уходит ли трафик наружу (по IP, минуя DNS)
+</code></pre>
+<p>Не проходит — дело в интерфейсе, маршруте или шлюзе, дальше идти бессмысленно.</p>
+<p><strong>Шаг 2. Резолвится ли имя.</strong></p>
+<pre><code class="language-bash">dig site.ru +short      # получаем ли адрес и тот ли он
+resolvectl status         # какой DNS реально используется
+</code></pre>
+<p>Пусто или старый адрес — проблема в DNS или в ещё не истёкшем TTL.</p>
+<p><strong>Шаг 3. Открывается ли порт.</strong></p>
+<pre><code class="language-bash">nc -zv site.ru 443              # устанавливается ли TCP-соединение
+curl -v https://site.ru          # где именно обрывается: TLS, редирект, ответ
+</code></pre>
+<p>Таймаут означает firewall или что сервис не слушает нужный интерфейс.</p>
+<p><strong>Шаг 4. Что отвечает сам сервис.</strong></p>
+<pre><code class="language-bash">curl -o /dev/null -s -w &quot;%{http_code}\n&quot; https://site.ru
+ss -tlnp | grep :443
+journalctl -u nginx -n 50 --no-pager
+tail -50 /var/log/nginx/error.log
+</code></pre>
+<p>Код ответа сразу указывает направление: <code>502</code>/<code>504</code> — смотреть backend, а не nginx.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Проверяй с двух сторон</summary><div class="callout-body"><p>Отдельный приём, экономящий больше всего времени: выполни <code>curl localhost</code> <strong>на самом сервере</strong> и тот же запрос снаружи. Работает изнутри, но не снаружи — значит дело в firewall или в том, что сервис привязан к <code>127.0.0.1</code> вместо <code>0.0.0.0</code>. Не работает и изнутри — сервис действительно сломан, и сеть тут ни при чём.</p>
+</div></details></div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>15</b>/19 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>IP+порт = дом+квартира; <code>/24</code> — 256 адресов, <code>/32</code> — ровно один хост.</li>
+<li><strong>TCP</strong> — с подтверждением доставки, <strong>UDP</strong> — без, зато быстрее.</li>
+<li>Первая цифра кода ответа: <code>4xx</code> — виноват клиент, <code>5xx</code> — сервер. <code>502</code> — backend не ответил, <code>504</code> — не успел; оба возвращает nginx, а не приложение.</li>
+<li><strong>HTTPS</strong> — не только шифрование, но и подтверждение подлинности сертификатом. Истечение сертификата — предсказуемая авария, лечится автопродлением и мониторингом срока.</li>
+<li><strong>DNS</strong>: типы записей A/CNAME/MX/TXT/NS; смена записи не мгновенна из-за <strong>TTL</strong>. В Ubuntu <code>/etc/resolv.conf</code> показывает заглушку <code>127.0.0.53</code> — смотри <code>resolvectl status</code>.</li>
+<li>Firewall: <strong>ufw</strong> — обёртка, <strong>nftables</strong> — движок, <strong>iptables</strong> — legacy, но знать синтаксис обязательно. Сначала разреши SSH, потом включай.</li>
+<li><strong>SNAT</strong> прячет много адресов за одним, <strong>DNAT</strong> пробрасывает порт внутрь — тот же механизм работает в <code>docker run -p</code>.</li>
+<li><strong>nginx</strong>: всегда <code>nginx -t</code> перед <code>reload</code>; без <code>proxy_set_header</code> приложение не увидит реальный IP клиента.</li>
+<li>Диагностика по слоям: сеть → DNS → порт → ответ сервиса. Проверяй изнутри и снаружи — разница указывает на firewall.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>16</b>/19 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задание 4 (nginx с HTTPS и редиректом) и задание 5 (ufw) — разделы «Сервер» и «Контейнеры» в <a href="../projects/p1.html">P1</a>.</li>
+<li>Задание 6 (SSH-туннель к закрытой базе) — тот же приём, что бастион в <a href="../projects/p2.html">P2</a>.</li>
+</ul>
+</div></details><article class="task" data-task="6320e99d1c"><h3>Задание 1 — разбор адресации</h3><p>Для своей машины выпиши IP, маску, адрес сети, широковещательный адрес, шлюз и DNS. Посчитай вручную, сколько хостов вмещает сеть <code>/26</code>.<br />
+<strong>Проверка:</strong> результаты совпадают с <code>ip a</code>, <code>ip r</code>, <code>resolvectl status</code> и с калькулятором <code>ipcalc 192.168.1.0/26</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="6320e99d1c"> Сделала руками и проверила</label></article><article class="task" data-task="3e1702b84d"><h3>Задание 2 — HTTP руками</h3><p>Через <code>curl -v</code> открой любой сайт по HTTP и HTTPS. Найди в выводе: этап TLS-рукопожатия, код ответа, заголовки <code>Location</code>, <code>Content-Type</code>, <code>Cache-Control</code>.<br />
+<strong>Проверка:</strong> объясняешь, почему HTTP-версия отдаёт 301, и что сервер вернул в цепочке сертификатов (<code>openssl s_client -connect site:443 -servername site</code>).</p>
+<label class="task-done"><input type="checkbox" data-task-check="3e1702b84d"> Сделала руками и проверила</label></article><article class="task" data-task="4cf7c94782"><h3>Задание 3 — две машины и маршрут</h3><p>В VirtualBox подними две машины во внутренней сети, задай статические адреса в разных подсетях и маршрут между ними через третью машину-роутер (<code>net.ipv4.ip_forward=1</code>).<br />
+<strong>Проверка:</strong> <code>ping</code> проходит между крайними машинами, <code>traceroute</code> показывает роутер промежуточным хопом.</p>
+<label class="task-done"><input type="checkbox" data-task-check="4cf7c94782"> Сделала руками и проверила</label></article><article class="task" data-task="50fab511e9"><h3>Задание 4 — nginx и HTTPS</h3><p>Поставь nginx как обратный прокси перед <code>python3 -m http.server 8000</code>. Выпусти самоподписанный сертификат (или Let's Encrypt, если есть домен), включи редирект HTTP → HTTPS.<br />
+<strong>Проверка:</strong> <code>curl -I http://...</code> даёт 301, <code>curl -k https://...</code> отдаёт содержимое Python-сервера, <code>nginx -t</code> проходит.</p>
+<label class="task-done"><input type="checkbox" data-task-check="50fab511e9"> Сделала руками и проверила</label></article><article class="task" data-task="dcf1be030b"><h3>Задание 5 — файрвол без потери доступа</h3><p>Включи ufw с политикой «запретить всё входящее», разрешив 22 и 443. Порт 8000 не должен быть доступен снаружи.<br />
+<strong>Проверка:</strong> вторая SSH-сессия открывается после включения; <code>nc -zv &lt;ip&gt; 8000</code> с другой машины не проходит, а <code>curl https://&lt;ip&gt;</code> проходит.</p>
+<label class="task-done"><input type="checkbox" data-task-check="dcf1be030b"> Сделала руками и проверила</label></article><article class="task" data-task="d5e03f31bb"><h3>Задание 6 — SSH-туннель</h3><p>Закрой порт PostgreSQL от внешнего мира и подключись к нему с ноутбука через <code>ssh -L 5433:localhost:5432 user@server</code>.<br />
+<strong>Проверка:</strong> <code>psql -h localhost -p 5433</code> на ноутбуке открывает удалённую базу, а прямое подключение к 5432 снаружи не работает.</p>
+<label class="task-done"><input type="checkbox" data-task-check="d5e03f31bb"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>17</b>/19 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>18</b>/19 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>19</b>/19 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-1.html">1.1 Linux</a> — порты, ss, systemd</li>
+<li><a href="../lessons/3-1.html">3.1 Docker</a> — NAT и проброс портов в контейнерах</li>
+<li><a href="../lessons/4-5.html">4.5 Наблюдаемость</a> — мониторинг доступности и сроков сертификатов</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>man-страницы: <code>man ufw</code>, <code>man nft</code>, <code>man dig</code>, <code>man curl</code></li>
+<li>Документация nginx: https://nginx.org/ru/docs/</li>
+<li>Let's Encrypt и certbot: https://certbot.eff.org/</li>
+<li>Обзоры требований к DevOps-инженерам 2026 года (Hexlet, Хабр Карьера)</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="1-1.html">← 1.1 Linux: сервер с нуля</a><a class="lesson-jump" href="1-3.html">1.3 Bash-скрипты для администрирования →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "1-2", "number": "1.2", "title": "Сети: от TCP/IP до nginx", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["6320e99d1c", "3e1702b84d", "4cf7c94782", "50fab511e9", "dcf1be030b", "d5e03f31bb"], "quiz": [{"id": "93728503b5", "q": "Сколько адресов в подсети <code>/24<\/code>?", "options": ["24", "128", "256", "65536"], "answer": [2], "why": "<p>из 32 бит адреса 24 отданы под сеть, остаётся 8 бит на хосты: 2⁸ = 256 адресов (из них 254 можно выдать узлам).<\/p>\n"}, {"id": "30647927df", "q": "nginx отвечает <code>502 Bad Gateway<\/code>. Что это значит?", "options": ["nginx не получил корректный ответ от бэкенда: он упал, не слушает порт или слушает не тот", "У клиента нет прав на ресурс", "Бэкенд жив, но не успел ответить за таймаут", "Страница не найдена"], "answer": [0], "why": "<p>502 — бэкенд недоступен, 504 — бэкенд жив, но не успел. Оба кода возвращает сам nginx.<\/p>\n"}, {"id": "fca49b814f", "q": "Какая DNS-запись задаёт псевдоним одного имени для другого?", "options": ["A", "MX", "CNAME", "TXT"], "answer": [2], "why": "<p>A указывает на IPv4-адрес, MX — на почтовый сервер, TXT хранит произвольный текст, CNAME — имя на другое имя.<\/p>\n"}, {"id": "75cecd3bde", "q": "Ты поменяла A-запись домена, но часть пользователей ещё ходит на старый адрес. Почему?", "options": ["DNS сломан", "Ответ закэширован у резолверов до истечения TTL", "Нужно перезапустить nginx", "Браузеры не поддерживают новые адреса"], "answer": [1], "why": "<p>смена записи не мгновенна. Перед переездом TTL заранее снижают, чтобы старые ответы быстро истекли.<\/p>\n"}, {"id": "99fa0a1903", "q": "Что нужно сделать ПЕРЕД <code>ufw enable<\/code> на удалённом сервере?", "options": ["Перезагрузить сервер", "Разрешить SSH: <code>ufw allow 22/tcp<\/code>", "Отключить IPv6", "Удалить iptables"], "answer": [1], "why": "<p>политика по умолчанию запрещает входящие соединения, и без правила для SSH ты отрежешь себе доступ.<\/p>\n"}, {"id": "06c62a158f", "q": "<code>docker run -p 8080:80<\/code> пробрасывает порт в контейнер. Какой механизм для этого используется?", "options": ["SNAT", "DNAT", "DHCP", "VPN"], "answer": [1], "why": "<p>DNAT подменяет адрес назначения: пакет, пришедший на порт 8080 хоста, перенаправляется на порт 80 контейнера.<\/p>\n"}, {"id": "9aa0b6c607", "q": "Сайт открывается командой <code>curl localhost<\/code> на самом сервере, но не снаружи. Где искать причину? Выбери все подходящие.", "options": ["Файрвол или группа безопасности облака", "Сервис слушает только <code>127.0.0.1<\/code>, а не <code>0.0.0.0<\/code>", "Ошибка в коде приложения", "Сломан DNS на сервере"], "answer": [0, 1], "why": "<p>раз изнутри всё работает, приложение исправно. Различие между «изнутри» и «снаружи» — это сеть: файрвол или адрес, на котором слушает сервис.<\/p>\n"}], "cards": [{"id": "2ac714aa06", "q": "Что происходит, когда вводишь в браузере адрес сайта?", "a": "<p>DNS-резолвинг (кэш браузера, ОС, резолвер, рекурсивный запрос к корню, TLD и авторитетному серверу) → TCP-соединение (тройное рукопожатие) → TLS-рукопожатие и проверка сертификата → HTTP-запрос → ответ сервера, часто через балансировщик и обратный прокси → браузер разбирает HTML и делает дополнительные запросы за ресурсами.<\/p>\n"}, {"id": "51e07fa169", "q": "Чем TCP отличается от UDP?", "a": "<p>TCP устанавливает соединение, гарантирует доставку и порядок, управляет скоростью — HTTP, SSH, базы. UDP без соединения и гарантий, зато быстрее и без накладных расходов — DNS, видео, игры, QUIC (HTTP/3 поверх UDP).<\/p>\n"}, {"id": "e02627589d", "q": "Что значат коды 301, 401, 403, 404, 502, 503, 504?", "a": "<p>301 — постоянный редирект; 401 — нужна аутентификация; 403 — аутентифицирован, но нет прав; 404 — не найдено; 502 — прокси получил некорректный ответ от бэкенда (часто бэкенд упал); 503 — сервис временно недоступен; 504 — прокси не дождался ответа бэкенда.<\/p>\n"}, {"id": "0eefd5abc4", "q": "Какие записи DNS знаешь?", "a": "<p>A (IPv4), AAAA (IPv6), CNAME (псевдоним другого имени), MX (почта), TXT (произвольный текст, проверки владения, SPF), NS (авторитетные серверы зоны), PTR (обратная запись). TTL определяет, сколько ответ кэшируется.<\/p>\n"}, {"id": "d0ea16649c", "q": "Что такое NAT и зачем он нужен?", "a": "<p>Трансляция адресов: SNAT подменяет адрес источника, чтобы машины из приватной сети выходили в интернет через один публичный адрес; DNAT подменяет адрес назначения — проброс порта снаружи на внутреннюю машину.<\/p>\n"}, {"id": "258c15766a", "q": "Сайт не открывается. Как будешь искать причину?", "a": "<p>По слоям снизу вверх: резолвится ли имя (<code>dig<\/code>), есть ли маршрут и связь (<code>ping<\/code>, <code>traceroute<\/code>), открыт ли порт (<code>nc -zv<\/code>, <code>ss -tlnp<\/code> на сервере), проходит ли TLS (<code>openssl s_client<\/code>), что отвечает HTTP (<code>curl -v<\/code>), что в логах nginx и приложения. Отдельно — файрвол и группы безопасности.<\/p>\n"}, {"id": "508f9e2fec", "q": "Что делает обратный прокси?", "a": "<p>Принимает запросы клиентов и передаёт их бэкендам: завершает TLS, балансирует нагрузку, кэширует, отдаёт статику, скрывает внутреннюю структуру. Пример — nginx перед приложением.<\/p>\n"}, {"id": "d21a148de2", "q": "Что такое приватные диапазоны адресов?", "a": "<p><code>10.0.0.0/8<\/code>, <code>172.16.0.0/12<\/code>, <code>192.168.0.0/16<\/code> — не маршрутизируются в интернете, используются внутри сетей. Наружу выходят через NAT.<\/p>\n"}, {"id": "043557b654", "q": "Чем отличается <code>ss<\/code> от <code>netstat<\/code>?", "a": "<p>Оба показывают сокеты и соединения; <code>ss<\/code> — современная замена из iproute2, быстрее и есть по умолчанию в новых дистрибутивах. Типовая команда — <code>ss -tlnp<\/code>: слушающие TCP-порты с процессами.<\/p>\n"}, {"id": "a2af9ca4b0", "q": "Как проверить срок действия сертификата?", "a": "<p><code>openssl s_client -connect host:443 -servername host &lt;/dev/null | openssl x509 -noout -dates<\/code>. В продакшене — алерт через blackbox_exporter за 2–3 недели до истечения.<\/p>\n"}], "next": "1-3"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

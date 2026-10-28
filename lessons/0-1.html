@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0.1 Git, командная работа и английский — DevOps-маршрут</title>
+<meta name="description" content="Урок 0.1: Git, командная работа и английский">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c0)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-0">← 0. Инструменты</a>
+    <div class="sidebar-art"><svg class="art art-git" viewBox="0 0 240 140" role="img" aria-label="Ветки git" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path class="dim" d="M18 92 H222"/>
+<path class="flow" d="M64 92 C86 92 86 46 110 46 H158 C182 46 182 92 204 92"/>
+<circle class="node n1" cx="28" cy="92" r="7"/>
+<circle class="node n2" cx="64" cy="92" r="7"/>
+<circle class="node n3" cx="110" cy="46" r="7"/>
+<circle class="node n4" cx="134" cy="92" r="7"/>
+<circle class="node n5" cx="158" cy="46" r="7"/>
+<circle class="node n6 big" cx="204" cy="92" r="10"/>
+<text class="lbl" x="104" y="28">feature/login</text>
+<text class="lbl" x="18" y="122">main</text>
+<text class="lbl" x="176" y="122">merge ✓</text>
+</svg></div>
+    <div class="lesson-number">lesson 0.1 · toolkit</div>
+    <h1 class="lesson-title">Git, командная работа и английский</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Зачем вообще нужна система контроля версий</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Три дерева: рабочая папка, индекс, репозиторий</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">git init и git clone — начало работы</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">git add и git commit — сохраняем снимок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">.gitignore — что не должно попасть в репозиторий</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Смотрим историю: log, diff, show, blame</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Ветки — параллельные линии разработки</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">push, pull и SSH-ключи</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">merge против rebase</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Конфликты слияния</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Отмена изменений: reset, revert, restore</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">stash, cherry-pick и force-with-lease</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Теги и версионирование</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Conventional Commits — когда сообщения читает робот</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Модели ветвления: git flow и trunk-based</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Merge Request и code review</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">Git как источник событий для CI/CD</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-18" data-step="s-18"><span class="step-icon">§</span><span class="step-title">Когда всё сломалось: reflog</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-19" data-step="s-19"><span class="step-icon">§</span><span class="step-title">Английский для IT</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-20" data-step="s-20"><span class="step-icon">§</span><span class="step-title">Agile, Scrum, Kanban и дежурства</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>Этот урок отличается от остальных: он не про конкретную технологию вроде Docker или Kubernetes, а про инструменты, которыми ты будешь пользоваться в каждом следующем уроке независимо от темы. Git — способ сохранять историю изменений так, чтобы можно было безопасно экспериментировать, откатываться назад и работать над одним проектом вместе с другими людьми. Английский — потому что подавляющее большинство документации, сообщений об ошибках и обсуждений происходит на нём, и ждать перевода на практике не вариант. Agile/Scrum — потому что почти любая команда организует работу именно в этих терминах.</p>
+<p>Отдельно про глубину. Разработчику Git нужен, чтобы хранить код. Тебе — чтобы <strong>запускать автоматизацию</strong>: пайплайн стартует от события в Git, версия релиза берётся из тега, право деплоя в прод определяется настройками ветки. Поэтому здесь разобраны вещи, которые в курсах «git для начинающих» обычно опускают: <code>rebase</code>, <code>reset</code>, <code>revert</code>, теги, Conventional Commits. Ровно их и спрашивают на собеседовании.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Репозиторий (repository, «репо»)</strong> — папка проекта, за изменениями в которой следит Git; вся история лежит внутри, в скрытой папке <code>.git</code>.</li>
+<li><strong>Коммит (commit)</strong> — сохранённый снимок состояния файлов в конкретный момент, с сообщением, объясняющим, что изменилось.</li>
+<li><strong>Ветка (branch)</strong> — отдельная линия разработки, существующая параллельно с другими.</li>
+<li><strong>HEAD</strong> — указатель «где я сейчас нахожусь в истории»; обычно указывает на последний коммит текущей ветки.</li>
+<li><strong>Индекс (staging area)</strong> — промежуточная область, куда складываются изменения перед коммитом.</li>
+<li><strong>Хеш коммита</strong> — уникальный идентификатор вида <code>a3f21bc</code>, по которому на коммит можно сослаться.</li>
+<li><strong>Pull Request / Merge Request (PR/MR)</strong> — запрос «прими мои изменения в основную ветку», который команда обсуждает и проверяет.</li>
+<li><strong>Спринт (sprint)</strong> — короткий фиксированный отрезок времени, за который команда обязуется выполнить объём работы.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Зачем вообще нужна система контроля версий</h2><div class="prose"><p><em>Аналогия:</em> представь, что ты пишешь курсовую и сохраняешь файл как <code>курсовая_финал.docx</code>, потом <code>курсовая_финал_2.docx</code>, потом <code>курсовая_ФИНАЛ_точно.docx</code>. Через неделю уже невозможно понять, чем они отличаются, а если понадобится вернуть абзац из позапрошлой версии — придётся сравнивать файлы глазами.</p>
+<p>Git решает ровно эту проблему, но аккуратнее: вместо кучи файлов с похожими именами он хранит один проект и помнит <strong>все</strong> его прошлые состояния внутри скрытой папки <code>.git</code>. В любой момент можно посмотреть, что изменилось между двумя версиями, вернуться к любой прошлой, или узнать, кто и когда изменил конкретную строку. Дополнительно Git умеет то, что вручную почти невозможно: позволяет нескольким людям одновременно работать над одним проектом и потом аккуратно соединять их изменения.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Три дерева: рабочая папка, индекс, репозиторий</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do0-three-trees.svg" alt="" /></p>
+<p>Это самая важная схема урока. Если её понять, перестанут быть загадкой примерно все команды Git — потому что почти каждая из них просто перекладывает изменения между тремя местами.</p>
+<p><strong>Рабочая папка</strong> — файлы, которые ты видишь в проводнике и редактируешь. <strong>Индекс</strong> (он же staging area) — черновик следующего коммита: список изменений, которые ты уже отобрал для сохранения, но ещё не сохранил. <strong>Репозиторий</strong> — папка <code>.git</code>, где коммиты лежат уже навсегда.</p>
+<p>Новичков сбивает с толку именно средний элемент: зачем нужен индекс, если можно было бы коммитить сразу из рабочей папки? Затем, что за один заход работы ты обычно правишь несколько вещей сразу — и почти всегда хочется разложить их по разным коммитам: отдельно исправление бага, отдельно правку документации. Индекс и позволяет отобрать в коммит только часть изменений, оставив остальные на потом.</p>
+
+<figure class="explain" data-anim="git-trees"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: рабочая папка → индекс → коммит</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>git init и git clone — начало работы</h2><div class="prose"><p><em>Аналогия:</em> <code>git init</code> — завести новый ежедневник с нуля. <code>git clone</code> — получить уже заполненный ежедневник от кого-то другого, со всей историей записей с самого начала.</p>
+<pre><code class="language-bash">git init                                     # начать отслеживать историю в текущей папке
+git clone https://gitlab.com/user/repo.git   # скачать существующий репозиторий целиком
+git clone --depth 1 https://.../repo.git     # только последний коммит, без истории
+</code></pre>
+<p><code>git init</code> превращает обычную папку в репозиторий, добавляя служебную папку <code>.git</code>. <code>git clone</code> скачивает существующий репозиторий вместе со всей историей коммитов.</p>
+<p>Третий вариант — то, что тебе понадобится в CI/CD. Флаг <code>--depth 1</code> делает так называемый <strong>shallow clone</strong>: скачивается только последнее состояние, без истории. Для сборки в пайплайне история обычно не нужна, а на большом репозитории это экономит минуты на каждом запуске. Знание этого флага — маленький, но заметный признак того, что человек работал с CI, а не только читал про Git.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>git add и git commit — сохраняем снимок</h2><div class="prose"><pre><code class="language-bash">git status                  # что изменилось с последнего коммита
+git add file.txt            # подготовить конкретный файл
+git add .                   # подготовить все изменённые файлы разом
+git add -p                  # отобрать изменения по кускам, интерактивно
+git commit -m &quot;исправил падение сервера при пустом пароле&quot;
+git commit --amend          # переписать последний коммит (только не отправленный!)
+</code></pre>
+<p>Изменение файла на диске само по себе в историю не попадает. Сначала нужно явно сказать Git, какие изменения включить в следующий снимок — это <code>git add</code>. И только <code>git commit</code> создаёт постоянную запись в истории.</p>
+<p><code>git add -p</code> — недооценённая команда: Git показывает изменения по фрагментам и по каждому спрашивает, включать его или нет. Именно так разбирают «я тут наworkал всего сразу» на аккуратные коммиты.</p>
+<p><code>git commit --amend</code> заменяет последний коммит новым — удобно, когда забыл файл или опечатался в сообщении. Важно: коммит при этом получает <strong>новый хеш</strong>, то есть формально это другой коммит. Если старый уже отправлен на сервер, обычный <code>push</code> будет отвергнут (см. раздел 12).</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Как писать сообщения коммитов</summary><div class="callout-body"><p>Хорошее сообщение объясняет <strong>зачем</strong> было сделано изменение, а не пересказывает <strong>что</strong> видно из кода. Плохо: «поправил файл». Хорошо: «исправил падение сервера при пустом пароле в форме входа». Через полгода только сообщение коммита сможет объяснить исходный мотив.</p>
+</div></details></div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>.gitignore — что не должно попасть в репозиторий</h2><div class="prose"><p>Некоторые файлы в истории не нужны никогда: результаты сборки, зависимости, логи, временные файлы редактора. И отдельная категория — то, что попадать туда <strong>опасно</strong>: пароли, ключи, токены доступа.</p>
+<p>Файл <code>.gitignore</code> в корне репозитория перечисляет шаблоны имён, которые Git должен игнорировать:</p>
+<pre><code class="language-gitignore">node_modules/        # папка зависимостей — восстанавливается командой установки
+*.log                # любые лог-файлы
+.env                 # файл с паролями и токенами — НИКОГДА в репозиторий
+__pycache__/         # кеш Python
+.idea/               # настройки конкретной IDE, у каждого свои
+!important.log       # исключение из правила: этот лог всё-таки отслеживать
+</code></pre>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Главная ошибка, которая стоит дорого</summary><div class="callout-body"><p><code>.gitignore</code> действует только на файлы, которые Git <strong>ещё не отслеживает</strong>. Если ты один раз закоммитил <code>.env</code> с паролем, а потом добавил его в <code>.gitignore</code> — файл останется в истории, и добавление в игнор ничего не изменит. Пароль будет доступен любому, кто склонирует репозиторий, даже если из текущей версии файл удалить.</p>
+<p>Единственно правильная реакция на «закоммитил секрет и отправил на сервер» — <strong>считать секрет скомпрометированным и немедленно его сменить</strong>. Чистка истории (<code>git filter-repo</code>, BFG) делается уже потом и только как уборка. На собеседовании этот вопрос задают часто, и правильный ответ — именно «сменить пароль», а не «почистить историю».</p>
+</div></details></div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Смотрим историю: log, diff, show, blame</h2><div class="prose"><pre><code class="language-bash">git log --oneline --graph --all    # компактная история со схемой ветвления
+git log -5                          # последние 5 коммитов подробно
+git log --author=&quot;Иванов&quot;           # коммиты конкретного человека
+git diff                            # что изменено, но ещё не подготовлено
+git diff --staged                   # что подготовлено, но ещё не закоммичено
+git show a3f21bc                    # что конкретно изменил вот этот коммит
+git blame config.yml                # кто и когда написал каждую строку файла
+</code></pre>
+<p><code>git log --oneline --graph --all</code> стоит завести привычкой — это единственный способ увидеть реальную структуру веток, а не догадываться о ней.</p>
+<p><code>git blame</code> звучит грубо («обвинить»), но используется мирно: когда видишь в конфиге странную строку, blame показывает коммит, где она появилась, а сообщение коммита объясняет зачем. На дежурстве в три часа ночи это иногда экономит час.</p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Ветки — параллельные линии разработки</h2><div class="prose"><p><em>Аналогия:</em> пишешь книгу и хочешь попробовать альтернативную концовку, не трогая основной текст. Ветка — параллельная черновая копия: получилось хорошо — вставишь результат в основную книгу, не получилось — выбросишь черновик.</p>
+<pre><code class="language-bash">git branch                      # список веток
+git switch -c feature_login     # создать ветку и перейти на неё (современный способ)
+git switch main                 # вернуться на main
+git checkout -b feature_login   # то же самое, старый способ — встретишь в статьях
+git branch -d feature_login     # удалить влитую ветку
+</code></pre>
+<p>По умолчанию у репозитория есть основная ветка (<code>main</code>, в старых проектах <code>master</code>) — «официальная», стабильная версия. Для новой задачи создаётся отдельная ветка, изменения в ней идут независимо, пока их не решат объединить с основной.</p>
+<p>Команды <code>switch</code> и <code>restore</code> появились, чтобы разделить обязанности перегруженного <code>checkout</code>: раньше он и ветки переключал, и файлы восстанавливал. В документации и статьях ты встретишь оба варианта — это одно и то же.</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>push, pull и SSH-ключи</h2><div class="prose"><p><em>Аналогия:</em> локальный репозиторий — личный черновик, удалённый (на GitLab/GitHub) — общая папка в облаке. <code>push</code> загружает свои записи туда, <code>pull</code> забирает оттуда чужие.</p>
+<pre><code class="language-bash">git push origin feature_login    # отправить свою ветку на сервер
+git push -u origin feature_login # то же + запомнить связь, дальше можно просто git push
+git pull origin main             # забрать изменения из удалённой main
+git pull --rebase                # забрать и переложить свои коммиты сверху (см. раздел 9)
+git fetch                        # скачать изменения, но НЕ вливать их в свою ветку
+</code></pre>
+<p><code>origin</code> — общепринятое короткое имя для «сервера, откуда репозиторий склонирован».</p>
+<p>Разница между <code>fetch</code> и <code>pull</code> — типовой вопрос на собеседовании. <code>fetch</code> только скачивает новые данные с сервера и обновляет представление о том, что там происходит, не трогая твою рабочую копию. <code>pull</code> — это <code>fetch</code> плюс немедленное вливание изменений в текущую ветку. То есть <code>pull = fetch + merge</code>. Когда хочется сначала посмотреть, что там наделали коллеги, и только потом решить — используют <code>fetch</code>.</p>
+<p><strong>SSH-ключи.</strong> Вводить логин и пароль при каждом обращении к серверу невозможно, а для автоматики — тем более. Поэтому аутентификация идёт по ключам: генерируется пара из закрытого и открытого ключа, открытый загружается в профиль на GitLab/GitHub, закрытый остаётся на машине.</p>
+<pre><code class="language-bash">ssh-keygen -t ed25519 -C &quot;почта@example.com&quot;   # создать пару ключей
+cat ~/.ssh/id_ed25519.pub                       # открытый ключ — его копируем на сервер
+ssh -T git@gitlab.com                           # проверить, что связь работает
+</code></pre>
+<p>Закрытый ключ (<code>id_ed25519</code>, без <code>.pub</code>) не показывают никому и никогда не коммитят. Подробнее про SSH как таковой — в <a href="../lessons/1-1.html">1.1 Linux</a>, раздел 11.</p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>merge против rebase</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do0-merge-vs-rebase.svg" alt="" /></p>
+<p>Это вопрос №1 по Git на собеседованиях. Обе команды решают одну задачу — перенести изменения из одной ветки в другую — и дают одинаковый результат в файлах. Разница в том, что происходит с <strong>историей</strong>.</p>
+<pre><code class="language-bash">git switch main &amp;&amp; git merge feature_login   # влить feature_login в main
+git switch feature_login &amp;&amp; git rebase main  # переложить свои коммиты поверх свежей main
+</code></pre>
+<p><strong><code>merge</code></strong> создаёт новый коммит слияния, у которого два родителя. История сохраняет правду: было ответвление, в нём велась работа, потом её влили обратно. Минус — при большом количестве веток история превращается в плетёнку, в которой трудно что-то найти.</p>
+<p><strong><code>rebase</code></strong> делает вид, что ветвления не было: берёт твои коммиты, откладывает в сторону, подтягивает свежее состояние основной ветки и накладывает твои коммиты сверху заново. История получается линейной и читаемой. Ключевое слово — <strong>заново</strong>: это не те же самые коммиты, а новые, с другими хешами. Старые отбрасываются.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Золотое правило rebase</summary><div class="callout-body"><p><strong>Никогда не делай rebase того, что уже отправлено в общую ветку.</strong> Раз коммиты пересоздаются с новыми хешами, у всех, кто уже забрал старые, история разойдётся с твоей. Разгребать это придётся всей команде.</p>
+<p>Формулировка для собеседования: «rebase — для своих локальных веток, чтобы причесать историю перед отправкой; merge — для вливания в общие ветки».</p>
+</div></details></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Конфликты слияния</h2><div class="prose"><p><em>Аналогия:</em> два человека редактируют один абзац бумажного документа, каждый в своей копии, а потом пытаются склеить копии воедино. Если оба поменяли одну фразу по-разному — непонятно, чей вариант оставить.</p>
+<p>Git прекрасно объединяет изменения автоматически, если они в разных местах файла. Но если два человека изменили одну и ту же строку по-разному, угадать он не может и сообщает о <strong>конфликте слияния</strong>. Прямо в файле появляются маркеры:</p>
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+твоя версия строки
+=======
+чужая версия строки
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature_login
+</code></pre>
+<p>Нужно вручную решить, какую версию оставить (или написать третью, объединяющую обе), удалить сами маркеры <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>, затем <code>git add</code> файл и завершить операцию:</p>
+<pre><code class="language-bash">git add config.yml
+git commit              # при merge
+git rebase --continue   # при rebase
+git merge --abort       # передумал — откатить всё в исходное состояние
+</code></pre>
+<p>Пара <code>--abort</code> — это страховка, о которой почти никто не помнит: если в процессе слияния стало ясно, что всё пошло не так, необязательно героически доразруливать. Можно вернуться к состоянию «до» одной командой.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Отмена изменений: reset, revert, restore</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do0-reset-vs-revert.svg" alt="" /></p>
+<p>Второй по частоте вопрос на собеседовании — «чем <code>reset</code> отличается от <code>revert</code>».</p>
+<pre><code class="language-bash">git restore file.txt              # выбросить правки файла, вернуть как в последнем коммите
+git restore --staged file.txt     # убрать файл из индекса, правки оставить
+git reset --soft HEAD~1           # отменить последний коммит, изменения оставить в индексе
+git reset --mixed HEAD~1          # то же, но изменения станут неподготовленными
+git reset --hard HEAD~1           # отменить коммит И стереть изменения (данные пропадут)
+git revert a3f21bc                # создать новый коммит, отменяющий указанный
+</code></pre>
+<p><strong><code>reset</code></strong> переписывает историю: сдвигает указатель ветки назад, и «отменённые» коммиты просто исчезают из неё. Работает только для того, что ещё не отправлено на сервер, — иначе понадобится <code>push --force</code> со всеми вытекающими.</p>
+<p><strong><code>revert</code></strong> историю не трогает: он добавляет <strong>сверху</strong> новый коммит, который содержит изменения, обратные отменяемому. Ничего не пропадает, <code>push</code> обычный.</p>
+<p>Отсюда прямое практическое следствие, ради которого это и спрашивают: <strong>на общей ветке отменяют через <code>revert</code>, на своей локальной — можно <code>reset</code>.</strong> Если в проде обнаружился сломанный коммит, правильный ответ — <code>git revert</code>, потому что он не ломает историю остальным и сам факт отмены остаётся задокументированным.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>stash, cherry-pick и force-with-lease</h2><div class="prose"><pre><code class="language-bash">git stash                    # спрятать незаконченные правки, вернуть чистую папку
+git stash list               # список припрятанного
+git stash pop                # достать обратно последнее и удалить из списка
+git cherry-pick a3f21bc      # перенести к себе один конкретный коммит из другой ветки
+git push --force-with-lease  # переписать удалённую ветку, но безопасно
+</code></pre>
+<p><strong><code>stash</code></strong> — карман. Классическая ситуация: правишь задачу, а тут срочный баг в проде. Коммитить полуготовое не хочется — <code>git stash</code> убирает правки в сторону, папка становится чистой, можно спокойно переключиться. Разобрался с багом — <code>git stash pop</code> возвращает всё назад.</p>
+<p><strong><code>cherry-pick</code></strong> переносит не всю ветку, а один конкретный коммит. Типичное применение как раз DevOps'ное: в <code>main</code> починили критичный баг, а в релизной ветке <code>release/1.4</code>, которая уже ушла в прод, он остался. Тащить туда всю <code>main</code> нельзя — там куча нового и непроверенного. Забирают ровно один коммит с исправлением.</p>
+<p><strong><code>--force-with-lease</code></strong> — то, что отличает аккуратного инженера от неаккуратного. Обычный <code>--force</code> затирает удалённую ветку безусловно, в том числе чужие коммиты, о которых ты не знал. Версия <code>--with-lease</code> сначала проверяет, что на сервере ровно то состояние, которое ты последний раз видел, и отказывается работать, если кто-то успел что-то отправить. Привычка всегда писать <code>--force-with-lease</code> вместо <code>--force</code> стоит ноль усилий и однажды спасёт чужой рабочий день.</p>
+</div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Теги и версионирование</h2><div class="prose"><p>Ветка движется вперёд с каждым коммитом, а <strong>тег</strong> — неподвижная метка на конкретном коммите. Ими помечают релизы.</p>
+<pre><code class="language-bash">git tag -a v1.4.2 -m &quot;Релиз 1.4.2&quot;   # аннотированный тег на текущем коммите
+git tag                               # список тегов
+git push origin v1.4.2                # теги НЕ отправляются обычным push — только явно
+git push origin --tags                # отправить все теги сразу
+</code></pre>
+<p>Номера версий обычно пишут по схеме <strong>семантического версионирования</strong> — <code>МАЖОРНАЯ.МИНОРНАЯ.ПАТЧ</code>, например <code>2.5.1</code>:</p>
+<ul>
+<li><strong>патч</strong> (<code>2.5.1 → 2.5.2</code>) — исправление ошибки, поведение не изменилось;</li>
+<li><strong>минорная</strong> (<code>2.5.1 → 2.6.0</code>) — добавили новое, старое продолжает работать;</li>
+<li><strong>мажорная</strong> (<code>2.5.1 → 3.0.0</code>) — сломали обратную совместимость, при обновлении что-то придётся переделать.</li>
+</ul>
+<p>Для тебя это не формальность: тег <code>v1.4.2</code> в репозитории обычно и есть спусковой крючок сборки релиза, а его номер попадает в имя Docker-образа. Схема «увидел тег — собрал <code>myapp:1.4.2</code> — выкатил» встречается в каждом втором пайплайне.</p>
+</div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Conventional Commits — когда сообщения читает робот</h2><div class="prose"><p>Мы уже говорили, что сообщение коммита пишут для человека. Но во многих командах его читает ещё и автоматика — чтобы самой посчитать новый номер версии и собрать список изменений для релиза. Для этого сообщениям задают формат:</p>
+<pre><code>feat(auth): добавить вход через корпоративный SSO
+fix(api): не падать при пустом теле запроса
+docs(readme): описать переменные окружения
+chore(deps): обновить nginx до 1.27
+refactor(db): вынести подключение в отдельный модуль
+</code></pre>
+<p>Слово в начале — тип изменения. Правило простое: <code>fix</code> повышает патч-версию, <code>feat</code> — минорную, а пометка <code>BREAKING CHANGE</code> в тексте — мажорную. Дальше инструменты вроде semantic-release сами проставляют тег и генерируют changelog, и никто не считает версии руками.</p>
+<p>Даже если в команде автоматики нет, формат полезен: <code>git log --oneline</code> становится осмысленным списком, где сразу видно, где новая функциональность, а где починка.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Модели ветвления: git flow и trunk-based</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do0-branching-models.svg" alt="" /></p>
+<p><em>Аналогия:</em> стройка, где одновременно работают бригады над фундаментом, электрикой и отделкой. Модель ветвления — договорённость о том, кто где работает, чтобы бригады не мешали друг другу.</p>
+<p><strong>Git flow</strong> — классическая схема: <code>main</code> со стабильным кодом, <code>develop</code> с готовым, но не выпущенным, плюс ветки <code>feature/*</code>, <code>release/*</code>, <code>hotfix/*</code>. Придумана в эпоху, когда релизы выпускали раз в квартал коробками. Работает, но у неё есть системная проблема: ветка живёт неделями, за это время <code>main</code> уходит далеко вперёд, и слияние в конце превращается в отдельный проект.</p>
+<p><strong>Trunk-based development</strong> — современная альтернатива и то, что подразумевают под CI/CD. Одна долгоживущая ветка (<code>main</code>), ветки под задачи живут часы или день-два и вливаются мелкими порциями. Конфликты просто не успевают вырасти. Незаконченную функциональность прячут не в долгой ветке, а за <strong>фиче-флагом</strong> — условием в коде, которое включает её только там, где нужно.</p>
+
+<details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Почему это важно именно для DevOps</summary><div class="callout-body"><p>Непрерывная интеграция буквально означает «интегрировать непрерывно». Если ветка живёт две недели, никакой непрерывности нет, сколько бы пайплайнов ни было настроено. Поэтому в вакансиях 2026 года всё чаще упоминают именно trunk-based, а на собеседовании могут спросить, почему git flow плохо сочетается с CI/CD. Ответ: он поощряет долгие ветки, а долгие ветки — это отложенная интеграция и большие конфликты.</p>
+</div></details></div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Merge Request и code review</h2><div class="prose"><p><em>Аналогия:</em> вписать свои правки прямо в общую официальную рукопись без чьего-либо ведома — рискованно: вдруг закралась ошибка, а никто не заметил.</p>
+<p>Технической разницы между Pull Request (GitHub) и Merge Request (GitLab) нет — два названия одной идеи. Процесс: разработчик заканчивает работу в ветке, отправляет её <code>push</code>, создаёт MR с указанием «влить эту ветку в main». Коллеги видят diff, оставляют комментарии, просят поправить или одобряют — и только после одобрения ветка вливается.</p>
+<p>Со стороны инфраструктуры MR подкрепляют <strong>защитой веток</strong> (protected branches) — настройкой на стороне GitLab/GitHub, а не Git. Типичный набор для <code>main</code>: прямой <code>push</code> запрещён, изменения только через MR; нужно хотя бы одно одобрение; пайплайн должен быть зелёным; <code>push --force</code> запрещён. Именно эти настройки обычно и делает DevOps-инженер, а не разработчик.</p>
+<p>При вливании MR предлагают выбрать стратегию: обычный <strong>merge</strong> (сохраняет все коммиты ветки плюс коммит слияния), <strong>squash</strong> (склеивает всю ветку в один коммит — удобно, когда в ветке двадцать коммитов вида «фикс», «ещё фикс») и <strong>rebase/fast-forward</strong> (линейная история без коммита слияния).</p>
+</div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Git как источник событий для CI/CD</h2><div class="prose"><p><img loading="lazy" src="../assets/diagrams/do0-git-in-cicd.svg" alt="" /></p>
+<p>Здесь Git перестаёт быть «хранилищем кода» и становится тем, вокруг чего построена вся автоматизация. Пайплайн не запускается сам по себе — его запускает <strong>событие в репозитории</strong>, и от типа события зависит, что именно произойдёт:</p>
+<ul>
+<li><strong>push в любую ветку</strong> → быстрые проверки: линтер, юнит-тесты;</li>
+<li><strong>открыт MR</strong> → полный прогон тестов, сборка образа, сканер уязвимостей;</li>
+<li><strong>merge в <code>main</code></strong> → автоматический деплой на тестовый стенд;</li>
+<li><strong>поставлен тег <code>v1.4.2</code></strong> → сборка релиза и деплой в прод.</li>
+</ul>
+<p>Отсюда следует то, что стоит осознать заранее: <strong>имя ветки, текст коммита и тег — это входные данные для автоматики, а не украшение.</strong> Правило в пайплайне может звучать как «ветки <code>feature/*</code> собирать, но не деплоить», а версия образа — браться прямо из тега. Поэтому договорённости об именовании в командах жёсткие: их нарушение ломает не эстетику, а сборку.</p>
+</div></section><section class="step" id="s-18" data-kind="theory"><div class="step-kicker">// шаг <b>19</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Когда всё сломалось: reflog</h2><div class="prose"><p>Существует убеждение, что неудачным <code>git reset --hard</code> можно безвозвратно потерять работу. Почти всегда это не так — и знание, почему, отличает уверенного пользователя от боящегося.</p>
+<pre><code class="language-bash">git reflog                        # журнал всех перемещений HEAD за последние ~90 дней
+git reset --hard HEAD@{2}         # вернуться к состоянию, которое было два шага назад
+</code></pre>
+<p><code>reflog</code> — локальный журнал, куда Git записывает каждое перемещение указателя: коммиты, переключения веток, ресеты, ребейзы. Даже если коммит больше не принадлежит ни одной ветке, он физически лежит в репозитории (Git удалит его лишь при сборке мусора, по умолчанию месяца через три). Поэтому «потерянные» после <code>reset --hard</code> или неудачного <code>rebase</code> коммиты в подавляющем большинстве случаев восстанавливаются.</p>
+<p>Важная оговорка: <code>reflog</code> знает только про то, что <strong>было закоммичено</strong>. Изменения, которые лежали в рабочей папке и не попали ни в один коммит, <code>git reset --hard</code> уничтожает без следа. Отсюда практическое правило: перед рискованной операцией сделай коммит, пусть даже мусорный, — тогда откатиться можно всегда.</p>
+</div></section><section class="step" id="s-19" data-kind="theory"><div class="step-kicker">// шаг <b>20</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Английский для IT</h2><div class="prose"><p>Большая часть документации, сообщений об ошибках и обсуждений на Stack Overflow написана на английском, и ждать перевода означает узнавать решение позже всех. Для удалённой работы на зарубежную компанию язык вообще входит в требования наравне с Linux.</p>
+<p>Хорошая новость: техническая документация использует ограниченный, предсказуемый набор конструкций — гораздо более простой, чем художественный текст. Слова, которые встречаются почти в любой документации:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Слово</th>
+<th>Значение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deprecated</td>
+<td>устаревшее, скоро уберут — использовать не стоит</td>
+</tr>
+<tr>
+<td>flag / option</td>
+<td>флаг, опция команды</td>
+</tr>
+<tr>
+<td>default</td>
+<td>значение по умолчанию</td>
+</tr>
+<tr>
+<td>required / optional</td>
+<td>обязательный / необязательный параметр</td>
+</tr>
+<tr>
+<td>to override</td>
+<td>переопределить, задать своё вместо стандартного</td>
+</tr>
+<tr>
+<td>to deploy</td>
+<td>развернуть, выложить в рабочее окружение</td>
+</tr>
+<tr>
+<td>to troubleshoot</td>
+<td>диагностировать и устранить проблему</td>
+</tr>
+<tr>
+<td>known issue</td>
+<td>известная задокументированная проблема</td>
+</tr>
+<tr>
+<td>workaround</td>
+<td>обходной путь, временное решение</td>
+</tr>
+<tr>
+<td>breaking change</td>
+<td>изменение, ломающее совместимость</td>
+</tr>
+<tr>
+<td>rollback</td>
+<td>откат к предыдущей версии</td>
+</tr>
+<tr>
+<td>downtime</td>
+<td>время простоя сервиса</td>
+</tr>
+<tr>
+<td>root cause</td>
+<td>первопричина проблемы</td>
+</tr>
+<tr>
+<td>to reproduce</td>
+<td>воспроизвести проблему</td>
+</tr>
+</tbody>
+</table></div>
+<p>Отдельно — навык, который нужен именно на удалёнке: <strong>писать</strong>. Комментарии в MR, описания задач, сообщения в чате, постмортемы после инцидентов — всё это письменный английский, и его достаточно освоить на уровне коротких ясных предложений. Говорить нужно меньше, чем кажется: типичный дейли-стендап — это три фразы про вчера, сегодня и блокеры.</p>
+
+<details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>Лайфхак</summary><div class="callout-body"><p>Не обязательно понимать каждое слово, чтобы пользоваться документацией — важнее быстро находить нужный раздел и читать примеры кода, которые часто говорят больше окружающего текста. Автоперевод годится как костыль на первое время, но переведённые термины иногда искажаются и сбивают сильнее, чем помогают: увидев «толчок» вместо «push», ты потеряешь больше времени, чем сэкономил.</p>
+</div></details></div></section><section class="step" id="s-20" data-kind="theory"><div class="step-kicker">// шаг <b>21</b>/26 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Agile, Scrum, Kanban и дежурства</h2><div class="prose"><p><em>Аналогия:</em> Agile — не набор строгих правил, а философия: лучше делать работу маленькими проверяемыми кусочками и часто получать обратную связь, чем полгода писать в одиночестве и узнать, что нужно было другое.</p>
+<p><strong>Scrum</strong> — самый известный набор практик:</p>
+<ul>
+<li><strong>Спринт</strong> — фиксированный отрезок (обычно 1–2 недели), за который команда обязуется выполнить согласованный объём работы.</li>
+<li><strong>Беклог</strong> — общий список задач, отсортированный по важности; из него на спринт берётся часть.</li>
+<li><strong>Стендап (daily)</strong> — короткая ежедневная встреча: что сделал вчера, что планирую сегодня, что мешает.</li>
+<li><strong>Ретроспектива</strong> — встреча в конце спринта про то, что стоит улучшить в самом процессе работы.</li>
+</ul>
+<p><strong>Kanban</strong> — вторая модель, и для инфраструктурных команд она встречается даже чаще Scrum. Спринтов нет, есть доска с колонками («в очереди», «в работе», «на проверке», «готово») и ограничение на количество задач в работе одновременно. Причина проста: работа DevOps-команды плохо планируется на две недели вперёд — прилетают инциденты, запросы от разработчиков, срочные обновления безопасности. Kanban с этим живёт органично, Scrum — с трудом.</p>
+<p>Термины, которые встретятся именно в эксплуатации:</p>
+<ul>
+<li><strong>Дежурство (on-call)</strong> — график, по которому кто-то из команды отвечает на ночные срабатывания алертов.</li>
+<li><strong>Инцидент</strong> — незапланированное нарушение работы сервиса; у него есть severity — уровень критичности.</li>
+<li><strong>Постмортем (postmortem)</strong> — разбор после инцидента: что случилось, почему, что делаем, чтобы не повторилось. Ключевой принцип — <strong>blameless</strong>, без поиска виноватого: ищут дефект процесса, а не человека. Смысл прагматичный: если за ошибки наказывают, о них перестают рассказывать, и организация теряет способность учиться.</li>
+<li><strong>SLA / SLO</strong> — договорённости об уровне обслуживания: например, доступность 99.9% в месяц (это, кстати, ~43 минуты простоя). Подробнее — в <a href="../lessons/4-5.html">4.5 Наблюдаемость</a> и <a href="../lessons/1-4.html">1.4 Метрики и логи</a>.</li>
+</ul>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>22</b>/26 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>Три дерева — рабочая папка, индекс, репозиторий; почти любая команда Git просто двигает изменения между ними.</li>
+<li><code>git add</code> готовит изменения, <code>git commit</code> создаёт запись в истории; <code>add -p</code> позволяет разложить работу по осмысленным коммитам.</li>
+<li><code>.gitignore</code> не действует задним числом: закоммиченный пароль считается скомпрометированным и подлежит смене, а не чистке.</li>
+<li><code>merge</code> сохраняет ветвление, <code>rebase</code> делает историю линейной, пересоздавая коммиты. Не делай rebase того, что уже отправлено в общую ветку.</li>
+<li><code>reset</code> переписывает историю (только своё, неотправленное), <code>revert</code> дописывает отменяющий коммит (безопасно для общих веток).</li>
+<li><code>fetch</code> только скачивает, <code>pull</code> = <code>fetch</code> + <code>merge</code>.</li>
+<li><code>stash</code> прячет незаконченное, <code>cherry-pick</code> переносит один коммит, <code>--force-with-lease</code> вместо <code>--force</code> всегда.</li>
+<li>Теги помечают релизы и обычно запускают сборку; версии — по схеме мажорная.минорная.патч.</li>
+<li>Trunk-based даёт настоящий CI; долгие ветки git flow означают отложенную интеграцию.</li>
+<li>Событие в Git запускает пайплайн — имя ветки, текст коммита и тег читает автоматика.</li>
+<li><code>reflog</code> возвращает почти всё потерянное, но только то, что было закоммичено.</li>
+<li>На удалёнке важнее письменный английский, чем разговорный; в эксплуатации Kanban встречается чаще Scrum.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>23</b>/26 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 1–2 — это репозиторий, в котором будут жить все твои проекты, начиная с <a href="../projects/p1.html">P1</a>. Привычка к Conventional Commits из задания 1 сразу видна в истории каждого проекта.</li>
+<li>Задание 6 (merge request с описанием) — формат, в котором стоит вести изменения во всех проектах, даже если работаешь одна.</li>
+</ul>
+</div></details><article class="task" data-task="d4372f06cf"><h3>Задание 1 — репозиторий с нуля</h3><p>Создай репозиторий для своих конфигов и скриптов, настрой <code>user.name</code>, <code>user.email</code>, <code>.gitignore</code> (исключи <code>.env</code>, <code>*.log</code>, <code>__pycache__/</code>). Сделай три коммита в формате Conventional Commits.<br />
+<strong>Проверка:</strong> <code>git log --oneline</code> показывает три осмысленных сообщения вида <code>feat: ...</code>, <code>git status</code> чистый, <code>.env</code> не попал в историю (<code>git log --all -- .env</code> пуст).</p>
+<label class="task-done"><input type="checkbox" data-task-check="d4372f06cf"> Сделала руками и проверила</label></article><article class="task" data-task="6a4d045b62"><h3>Задание 2 — SSH-ключ и удалённый репозиторий</h3><p>Сгенерируй ключ ed25519, добавь его в GitLab или GitHub, создай удалённый репозиторий и запушь.<br />
+<strong>Проверка:</strong> <code>ssh -T git@gitlab.com</code> приветствует тебя по имени, <code>git push</code> работает без пароля.</p>
+<label class="task-done"><input type="checkbox" data-task-check="6a4d045b62"> Сделала руками и проверила</label></article><article class="task" data-task="1dd8b4dc9a"><h3>Задание 3 — конфликт руками</h3><p>Создай ветку <code>feature/a</code>, измени строку в файле. Вернись в <code>main</code>, измени ту же строку иначе и закоммить. Слей ветку.<br />
+<strong>Проверка:</strong> получен конфликт, разрешён вручную, в истории есть merge-коммит. Повтори через <code>rebase</code> и сравни историю в <code>git log --graph</code>.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1dd8b4dc9a"> Сделала руками и проверила</label></article><article class="task" data-task="1dfad05f22"><h3>Задание 4 — отмена изменений</h3><p>Сделай коммит с ошибкой и запушь его. Отмени через <code>git revert</code>. Затем локально сделай два коммита и убери их через <code>git reset --soft HEAD~2</code>, собрав в один.<br />
+<strong>Проверка:</strong> в удалённой истории ошибочный коммит и его отмена видны оба; локально вместо двух коммитов один.</p>
+<label class="task-done"><input type="checkbox" data-task-check="1dfad05f22"> Сделала руками и проверила</label></article><article class="task" data-task="c0cc253acb"><h3>Задание 5 — спасение через reflog</h3><p>Сделай <code>git reset --hard HEAD~3</code> и «потеряй» три коммита.<br />
+<strong>Проверка:</strong> находишь их в <code>git reflog</code> и возвращаешь ветку на нужный коммит.</p>
+<label class="task-done"><input type="checkbox" data-task-check="c0cc253acb"> Сделала руками и проверила</label></article><article class="task" data-task="f2cb89324e"><h3>Задание 6 — Merge Request</h3><p>Открой MR из фичеветки в <code>main</code> с описанием на английском: что сделано, зачем, как проверить.<br />
+<strong>Проверка:</strong> описание читается без контекста человеком, который не видел задачу; в MR есть хотя бы один комментарий-ревью и ответ на него.</p>
+<label class="task-done"><input type="checkbox" data-task-check="f2cb89324e"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>24</b>/26 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>25</b>/26 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>26</b>/26 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/1-1.html">1.1 Linux</a> — SSH, права доступа, работа в терминале</li>
+<li><a href="../lessons/3-2.html">3.2 CI-CD</a> — пайплайны, которые запускаются событиями отсюда</li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a> — продвинутые сценарии сборки и релизов</li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Официальная документация Git: https://git-scm.com/doc</li>
+<li>Trunk Based Development: https://trunkbaseddevelopment.com/</li>
+<li>Conventional Commits: https://www.conventionalcommits.org/ru/</li>
+<li>Semantic Versioning: https://semver.org/lang/ru/</li>
+<li>Требования вакансий сверены с обзорами рынка за 2026 год (Hexlet, Хабр)</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><span></span><a class="lesson-jump" href="1-1.html">1.1 Linux: сервер с нуля →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "0-1", "number": "0.1", "title": "Git, командная работа и английский", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "s-18", "kind": "theory"}, {"id": "s-19", "kind": "theory"}, {"id": "s-20", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["d4372f06cf", "6a4d045b62", "1dd8b4dc9a", "1dfad05f22", "c0cc253acb", "f2cb89324e"], "quiz": [{"id": "5df803e87e", "q": "Какая команда переносит изменения из рабочей папки в индекс (staging)?", "options": ["<code>git commit<\/code>", "<code>git add<\/code>", "<code>git push<\/code>", "<code>git stash<\/code>"], "answer": [1], "why": "<p><code>git add<\/code> кладёт изменения в индекс, <code>git commit<\/code> сохраняет содержимое индекса в историю, <code>git push<\/code> отправляет коммиты на сервер.<\/p>\n"}, {"id": "90b9ba645d", "q": "Коммит с ошибкой уже запушен в общую ветку. Как его правильно отменить?", "options": ["<code>git reset --hard HEAD~1<\/code> и <code>git push --force<\/code>", "<code>git revert &lt;хеш&gt;<\/code> и обычный <code>git push<\/code>", "Удалить файл и закоммитить заново", "<code>git checkout HEAD~1<\/code>"], "answer": [1], "why": "<p><code>revert<\/code> создаёт новый коммит, отменяющий изменения, и не переписывает историю, которую уже забрали коллеги. <code>reset<\/code> с принудительным пушем ломает историю у всех остальных.<\/p>\n"}, {"id": "f5c40281bd", "q": "Чем rebase отличается от merge?", "options": ["rebase создаёт merge-коммит, merge — нет", "rebase переносит коммиты поверх другой ветки и меняет их хеши, merge сохраняет историю и добавляет merge-коммит", "Ничем, это синонимы", "merge работает только с удалённым репозиторием"], "answer": [1], "why": "<p>rebase переписывает коммиты (новые хеши), поэтому его не делают с ветками, которые уже опубликованы и используются другими.<\/p>\n"}, {"id": "53049771ff", "q": "Какие файлы должны попасть в <code>.gitignore<\/code>? Выбери все подходящие.", "options": ["<code>.env<\/code> с паролями", "каталог виртуального окружения <code>.venv/<\/code>", "<code>requirements.txt<\/code>", "логи <code>*.log<\/code>", "<code>README.md<\/code>"], "answer": [0, 1, 3], "why": "<p>в репозиторий не кладут секреты, локальные окружения и генерируемые файлы. Список зависимостей и документация, наоборот, нужны всем.<\/p>\n"}, {"id": "2480bdb756", "q": "Чем <code>git push --force-with-lease<\/code> безопаснее, чем <code>--force<\/code>?", "options": ["Он пушит медленнее, но надёжнее", "Он откажется перезаписывать ветку, если на сервере появились коммиты, которых ты не видела", "Он автоматически делает резервную копию ветки", "Он работает только для защищённых веток"], "answer": [1], "why": "<p><code>--force-with-lease<\/code> проверяет, что удалённая ветка находится там, где ты её последний раз видела, и не затирает чужую работу.<\/p>\n"}, {"id": "acc041b0f8", "q": "Ты сделала <code>git reset --hard<\/code> и «потеряла» три коммита. Где их искать?", "options": ["Они удалены безвозвратно", "В <code>git stash list<\/code>", "В <code>git reflog<\/code>", "В <code>.gitignore<\/code>"], "answer": [2], "why": "<p><code>reflog<\/code> хранит историю перемещений HEAD, и по хешу из него можно вернуть ветку на «потерянный» коммит.<\/p>\n"}, {"id": "63f98806d0", "q": "Какое сообщение коммита соответствует Conventional Commits?", "options": ["<code>fixed stuff<\/code>", "<code>Исправления 2<\/code>", "<code>fix(auth): handle expired tokens<\/code>", "<code>FINAL VERSION<\/code>"], "answer": [2], "why": "<p>формат <code>тип(область): описание<\/code> позволяет автоматически собирать changelog и вычислять следующую версию.<\/p>\n"}], "cards": [{"id": "02c3ca8cda", "q": "Чем merge отличается от rebase?", "a": "<p>Merge объединяет ветки, создавая merge-коммит и сохраняя историю как есть. Rebase переносит коммиты ветки поверх другой, переписывая их — история линейная, но меняются хеши. Rebase не делают с ветками, которые уже опубликованы и используются другими.<\/p>\n"}, {"id": "d513c97e09", "q": "Чем reset отличается от revert?", "a": "<p><code>reset<\/code> передвигает указатель ветки назад, «стирая» коммиты из истории ветки (soft — оставляет изменения в индексе, mixed — в рабочей папке, hard — удаляет). <code>revert<\/code> создаёт новый коммит, отменяющий изменения. Для опубликованной истории — только revert.<\/p>\n"}, {"id": "b55e203128", "q": "Что такое три дерева git?", "a": "<p>Рабочая папка (файлы на диске), индекс (staging, то, что войдёт в следующий коммит) и репозиторий (история коммитов). <code>add<\/code> переносит из рабочей папки в индекс, <code>commit<\/code> — из индекса в репозиторий.<\/p>\n"}, {"id": "2f3fd302a5", "q": "Что делать, если закоммитил пароль?", "a": "<p>Сначала отозвать и сменить секрет, потому что он уже скомпрометирован. Потом удалить из истории (<code>git filter-repo<\/code>) и принудительно запушить, предупредив команду. Добавить проверку секретов в pre-commit и CI.<\/p>\n"}, {"id": "f4d54a5d21", "q": "Что такое <code>git push --force-with-lease<\/code> и чем он лучше <code>--force<\/code>?", "a": "<p>Принудительный пуш, который отказывается перезаписывать удалённую ветку, если в ней появились коммиты, которых ты не видел. Защищает от затирания чужой работы.<\/p>\n"}, {"id": "00a8b9a8ad", "q": "Git flow или trunk-based?", "a": "<p>Git flow — долгие ветки develop/release/hotfix, подходит для редких релизов по версиям. Trunk-based — короткие ветки и частое слияние в main, фичи прячутся за флагами; лучше сочетается с CI/CD и частыми деплоями. Сейчас в большинстве команд — trunk-based или близкий к нему GitHub flow.<\/p>\n"}, {"id": "f1ff425fe6", "q": "Как найти коммит, который сломал функциональность?", "a": "<p><code>git bisect<\/code>: отмечаешь заведомо хороший и плохой коммиты, git делит историю пополам, ты проверяешь каждую середину. Можно автоматизировать скриптом-тестом через <code>git bisect run<\/code>.<\/p>\n"}, {"id": "b5a01fb316", "q": "Tell me about yourself (в двух минутах на английском).", "a": "<p>Структура: кто ты сейчас и что изучаешь; один-два проекта с конкретикой (что сделала, какими инструментами, какой результат); почему DevOps и почему эта компания. Подготовить текст заранее и проговорить вслух несколько раз.<\/p>\n"}, {"id": "6b431dc5d4", "q": "Что такое Conventional Commits и зачем?", "a": "<p>Соглашение о формате сообщений (<code>feat:<\/code>, <code>fix:<\/code>, <code>chore:<\/code>, <code>BREAKING CHANGE<\/code>). Позволяет автоматически генерировать changelog и вычислять следующую версию по semver.<\/p>\n"}], "next": "1-1"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>

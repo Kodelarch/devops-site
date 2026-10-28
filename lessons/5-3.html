@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5.3 Helm и Kustomize — DevOps-маршрут</title>
+<meta name="description" content="Урок 5.3: Helm и Kustomize">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070b'/><text x='14' y='68' font-family='monospace' font-weight='800' font-size='52' fill='%2339ff88'>&gt;_</text></svg>">
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("devops-course-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link rel="stylesheet" href="../static/style.css?v=5261b884a0">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#05070b">
+<link rel="apple-touch-icon" href="../static/icons/apple-touch-icon.png">
+
+</head>
+<body data-page="lesson">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-prompt">~/</span><span class="brand-text">devops-route</span><span class="brand-cursor"></span></a>
+  <nav class="topnav">
+    <a href="../index.html" data-nav="index lesson">курс</a>
+    <a href="../roadmap.html" data-nav="roadmap">карта</a>
+    <a href="../cards.html" data-nav="cards">карточки</a>
+    <a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint">лаборатория</a>
+    <a href="../projects/portfolio.html" data-nav="project">портфолио</a>
+    <a href="../profile.html" data-nav="profile resume">профиль</a>
+  </nav>
+  <div class="stats" id="stats">
+    <span class="stat" title="Серия дней подряд"><svg class="ic flame" aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-flame"/></svg> <b id="streak">0</b></span>
+    <span class="stat" title="Опыт">XP <b id="xp">0</b></span>
+    <a class="level-pill" href="../profile.html" id="level" title="Уровень">LVL 1</a>
+    <button class="theme-toggle search-open" id="search-open" title="Поиск по курсу (Ctrl+K)" aria-label="Поиск по курсу"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-search"/></svg></button>
+    <button class="theme-toggle" id="theme-toggle" title="Тема" aria-label="Переключить тему">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout" style="--c: var(--c5)">
+  <aside class="sidebar" id="sidebar">
+    <a class="back" href="../index.html#part-5">← 5. Kubernetes и GitOps</a>
+    <div class="sidebar-art"><svg class="art art-k8s" viewBox="0 0 240 140" role="img" aria-label="Кластер Kubernetes" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g class="spin"><polygon points="120.0,26.0 151.3,41.1 159.0,74.9 137.4,102.0 102.6,102.0 81.0,74.9 88.7,41.1"/><path class="dim" d="M120 66 L120.0,32.0 M120 66 L146.6,44.8 M120 66 L153.1,73.6 M120 66 L134.8,96.6 M120 66 L105.2,96.6 M120 66 L86.9,73.6 M120 66 L93.4,44.8"/></g>
+<circle cx="120" cy="66" r="9"/>
+<rect class="pod d0" x="149.3" y="11.5" width="12" height="12" rx="3"/><rect class="pod d1" x="171.1" y="78.5" width="12" height="12" rx="3"/><rect class="pod d2" x="114.0" y="120.0" width="12" height="12" rx="3"/><rect class="pod d3" x="56.9" y="78.5" width="12" height="12" rx="3"/><rect class="pod d4" x="78.7" y="11.5" width="12" height="12" rx="3"/>
+<text class="lbl" x="18" y="134">kubectl get pods</text>
+</svg></div>
+    <div class="lesson-number">lesson 5.3 · k8s</div>
+    <h1 class="lesson-title">Helm и Kustomize</h1>
+    <div class="progress"><div class="progress-bar" id="lesson-progress"></div></div>
+    <div class="progress-label" id="lesson-progress-label"></div>
+    <ol class="step-list"><li><a class="step-link" href="#intro" data-step="intro"><span class="step-icon">§</span><span class="step-title">О чём урок</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-1" data-step="s-1"><span class="step-icon">§</span><span class="step-title">Проблема: зачем вообще нужен Helm или Kustomize</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-2" data-step="s-2"><span class="step-icon">§</span><span class="step-title">Kustomize: патчинг вместо шаблонов</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-3" data-step="s-3"><span class="step-icon">§</span><span class="step-title">Структура base + overlays</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-4" data-step="s-4"><span class="step-icon">§</span><span class="step-title">kustomization.yaml: что объявляет конфигурация</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-5" data-step="s-5"><span class="step-icon">§</span><span class="step-title">Оверлей production: генераторы ConfigMap и Secret</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-6" data-step="s-6"><span class="step-icon">§</span><span class="step-title">Патч: точечное изменение количества реплик</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-7" data-step="s-7"><span class="step-icon">§</span><span class="step-title">Сборка итогового конфига и применение</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-8" data-step="s-8"><span class="step-icon">§</span><span class="step-title">Helm chart: структура пакета</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-9" data-step="s-9"><span class="step-icon">§</span><span class="step-title">values.yaml и шаблонизация</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-10" data-step="s-10"><span class="step-icon">§</span><span class="step-title">Жизненный цикл релиза: package, install, upgrade</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-11" data-step="s-11"><span class="step-icon">§</span><span class="step-title">Откуда берутся значения и как проверить результат заранее</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-12" data-step="s-12"><span class="step-icon">§</span><span class="step-title">Шаблоны всерьёз: условия, циклы и вспомогательные шаблоны</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-13" data-step="s-13"><span class="step-icon">§</span><span class="step-title">Зависимости: чарт внутри чарта</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-14" data-step="s-14"><span class="step-icon">§</span><span class="step-title">Репозитории чартов и OCI</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-15" data-step="s-15"><span class="step-icon">§</span><span class="step-title">Установка и обновление в CI/CD: флаги, которые меняют всё</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-16" data-step="s-16"><span class="step-icon">§</span><span class="step-title">Где Helm ломается: четыре вещи, которые надо знать заранее</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#s-17" data-step="s-17"><span class="step-icon">§</span><span class="step-title">Helm или Kustomize: как выбирать</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#summary" data-step="summary"><span class="step-icon">★</span><span class="step-title">Если запомнить только главное</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#practice" data-step="practice"><span class="step-icon">⚒</span><span class="step-title">Практика</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#quiz" data-step="quiz"><span class="step-icon">?</span><span class="step-title">Тест</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#cards" data-step="cards"><span class="step-icon">⧉</span><span class="step-title">Вопросы с собеседований</span><span class="step-check">✓</span></a></li><li><a class="step-link" href="#materials" data-step="materials"><span class="step-icon">↗</span><span class="step-title">Связи и источники</span><span class="step-check">✓</span></a></li></ol>
+  </aside>
+  <main class="lesson-main">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰ Шаги урока</button>
+    <section class="step" id="intro" data-kind="theory"><div class="step-kicker">// шаг <b>1</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>О чём урок</h2><div class="prose"><details class="callout callout-info" open><summary><span class="callout-icon">ℹ️</span>Зачем это нужно</summary><div class="callout-body"><p>В уроке 5.1 и 5.2 манифесты применялись через <code>kubectl apply -f</code> вручную, по одному файлу. Это нормально для разового разворачивания, но если приложение нужно разворачивать снова и снова — в разных окружениях, с разными настройками — вручную редактировать и отправлять одни и те же файлы становится утомительно и чревато ошибками. Kustomize и Helm — два разных инструмента, решающих именно эту проблему, но по-разному устроенных: полезно понимать оба, потому что в реальных проектах встречается и то, и другое.</p>
+</div></details>
+<details class="callout callout-note" open><summary><span class="callout-icon">📘</span>Словарик на будущее</summary><div class="callout-body"><ul>
+<li><strong>Kustomize</strong> — инструмент, который не создаёт новые манифесты, а патчит («накладывает изменения» на) уже существующие, без шаблонного языка.</li>
+<li><strong>Base / overlay</strong> — базовая конфигурация и её вариации для конкретных окружений (production, staging и т.д.).</li>
+<li><strong>Helm chart</strong> — пакет с шаблонами манифестов Kubernetes и файлом настроек, аналог пакета в apt или npm, но для Kubernetes.</li>
+<li><strong>values.yaml</strong> — файл с конкретными значениями, которые подставляются в шаблоны Helm-чарта.</li>
+<li><strong>Release</strong> — конкретный установленный в кластер экземпляр Helm-чарта с определённым именем.</li>
+</ul>
+</div></details></div></section><section class="step" id="s-1" data-kind="theory"><div class="step-kicker">// шаг <b>2</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Проблема: зачем вообще нужен Helm или Kustomize</h2><div class="prose"><p><em>Аналогия:</em> разворачивание приложения через отдельные kubectl apply — как каждый раз вручную переписывать один и тот же типовой договор от руки, меняя в нём пару цифр. Рано или поздно где-нибудь опечатаешься или забудешь поменять нужное поле.</p>
+<p>Любое чуть более сложное приложение в Kubernetes — это не один манифест, а сразу несколько: Deployment, Service, ConfigMap, Secret, Ingress и так далее. Развернуть их один раз — не проблема, но при повторных развёртываниях (обновление версии, разные окружения, разные клиенты) приходится либо руками менять значения в каждом манифесте, либо городить собственные скрипты. Helm и Kustomize решают эту задачу — но принципиально разными способами, и понимание разницы важно.</p>
+</div></section><section class="step" id="s-2" data-kind="theory"><div class="step-kicker">// шаг <b>3</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Kustomize: патчинг вместо шаблонов</h2><div class="prose"><p><em>Аналогия:</em> если Helm — это бланк договора с пропусками для заполнения (шаблон), то Kustomize — это готовый подписанный договор плюс отдельный лист с поправками, приложенный сверху: сам оригинал никто не трогает.</p>
+<pre><code class="language-bash">kustomize version
+kubectl version --client -o yaml | grep kustomize
+</code></pre>
+<p>Ключевое отличие Kustomize от Helm — он не использует шаблонизацию (<code>{{ }}</code>) внутри самих манифестов. Вместо этого он берёт уже готовые, обычные YAML-манифесты и применяет к ним декларативные патчи: меняет namespace, добавляет метки, генерирует Secret и ConfigMap, меняет отдельные поля — всё это описывается отдельно, а исходные файлы остаются нетронутыми.</p>
+<p><img loading="lazy" src="../assets/diagrams/do12-kustomize.webp" alt="" /></p>
+</div></section><section class="step" id="s-3" data-kind="theory"><div class="step-kicker">// шаг <b>4</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Структура base + overlays</h2><div class="prose"><p><em>Аналогия:</em> base — это типовой чертёж здания, единый для всех филиалов компании. overlay — это лист поправок для конкретного филиала: «в этом городе добавить пандус для инвалидов, а в оффлайне поставить другой цвет вывески» — сам чертёж при этом не меняется.</p>
+<pre><code>├── base
+│   ├── deployment.yaml
+│   ├── kustomization.yaml
+│   ├── service.yaml
+│   └── ...
+├── overlays
+│   └── production
+│       ├── kustomization.yaml
+│       ├── configMap.yaml
+│       ├── secret.yaml
+│       └── ...
+├── kustomization.yaml
+└── ...
+</code></pre>
+<p><code>base/</code> содержит общие для всех окружений манифесты — то, что не зависит от того, продакшн это или тестовый стенд. <code>overlays/production/</code> содержит только то, что отличается именно для продакшна: конкретные значения ConfigMap, конкретные секреты, точечные патчи поверх базовых манифестов.</p>
+</div></section><section class="step" id="s-4" data-kind="theory"><div class="step-kicker">// шаг <b>5</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>kustomization.yaml: что объявляет конфигурация</h2><div class="prose"><p><em>Аналогия:</em> kustomization.yaml — оглавление и список изменений одновременно: какие файлы вообще участвуют в сборке и что именно с ними нужно сделать.</p>
+<pre><code class="language-yaml">apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+</code></pre>
+<p>Файл <code>kustomization.yaml</code> в <code>base/</code> перечисляет, какие манифесты входят в базовую конфигурацию (<code>resources</code>). У overlay свой <code>kustomization.yaml</code>, который ссылается на <code>base/</code> как на источник и добавляет к нему свои патчи и генераторы — то есть overlay не копирует манифесты, а именно наслаивается поверх base.</p>
+</div></section><section class="step" id="s-5" data-kind="theory"><div class="step-kicker">// шаг <b>6</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Оверлей production: генераторы ConfigMap и Secret</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы вручную прописывать ConfigMap в base (общий для всех окружений чертёж), Kustomize сам генерирует его из простого списка пар ключ-значение — конкретного для этого окружения.</p>
+<pre><code class="language-yaml">apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: app-config
+    literals:
+      - DB_HOST=postgres-prod
+      - DB_PORT=5432
+
+secretGenerator:
+  - name: db-secret
+    literals:
+      - password=supersecret-prod
+</code></pre>
+<p><code>configMapGenerator</code> и <code>secretGenerator</code> в overlay создают ConfigMap и Secret прямо из списка значений, без отдельного YAML-файла для каждого — и, что важно, разные overlay (production, staging) могут генерировать разные значения из одного и того же base.</p>
+</div></section><section class="step" id="s-6" data-kind="theory"><div class="step-kicker">// шаг <b>7</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Патч: точечное изменение количества реплик</h2><div class="prose"><p><em>Аналогия:</em> вместо того чтобы переписывать весь чертёж здания ради одного изменения — «добавить два этажа» — к нему просто прикладывается отдельный лист: «изменить этажность объекта X на значение Y».</p>
+<pre><code class="language-yaml"># overlays/production/replicas-patch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-api
+spec:
+  replicas: 3
+</code></pre>
+<pre><code class="language-yaml"># overlays/production/kustomization.yaml
+patches:
+  - path: replicas-patch.yaml
+    target:
+      kind: Deployment
+      name: shop-api
+</code></pre>
+<p>Патч — это частичный манифест: указывается только то, что нужно изменить (в данном случае — <code>replicas: 3</code>), а не переписывается весь Deployment целиком. Kustomize сам находит нужный объект по <code>target</code> и подменяет в нём только указанное поле.</p>
+<p><img loading="lazy" src="../assets/diagrams/do12-patch.webp" alt="" /></p>
+</div></section><section class="step" id="s-7" data-kind="theory"><div class="step-kicker">// шаг <b>8</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Сборка итогового конфига и применение</h2><div class="prose"><p><em>Аналогия:</em> Kustomize сначала «печатает» итоговый документ со всеми внесёнными поправками (можно прочитать перед подписанием), и только потом, если всё устраивает, подаёт его на подпись (в кластер).</p>
+<pre><code class="language-bash">kubectl kustomize overlays/production
+kubectl apply -k overlays/production
+</code></pre>
+<p><code>kubectl kustomize</code> показывает итоговый результат сборки base + overlay + патчи в виде обычного YAML, без применения к кластеру — удобно для проверки перед реальным деплоем. <code>kubectl apply -k</code> делает то же самое, но сразу применяет результат к кластеру. После разворачивания, как и в предыдущих уроках, стоит прогнать функциональные тесты Postman, чтобы убедиться, что приложение действительно работает, а не просто «манифесты применились без ошибок».</p>
+</div></section><section class="step" id="s-8" data-kind="theory"><div class="step-kicker">// шаг <b>9</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Helm chart: структура пакета</h2><div class="prose"><p><em>Аналогия:</em> если Kustomize работает с готовыми чертежами и поправками к ним, то Helm chart — это конструктор мебели с инструкцией и списком деталей: подставляешь свои размеры (values), и на выходе получаешь собранный, готовый к использованию манифест.</p>
+<pre><code class="language-bash">helm create mychart
+</code></pre>
+<pre><code>mychart/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    └── ingress.yaml
+</code></pre>
+<p>Команда <code>helm create</code> создаёт готовый скелет чарта: <code>Chart.yaml</code> с метаданными (имя, версия), <code>values.yaml</code> с настройками по умолчанию и <code>templates/</code> с шаблонами манифестов для Deployment, Service, Ingress и других объектов.</p>
+<p><img loading="lazy" src="../assets/diagrams/do12-helmchart.webp" alt="" /></p>
+</div></section><section class="step" id="s-9" data-kind="theory"><div class="step-kicker">// шаг <b>10</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>values.yaml и шаблонизация</h2><div class="prose"><p><em>Аналогия:</em> шаблон манифеста — это письмо с пропусками вида «Уважаем___ [Имя]___», а values.yaml — конкретные данные, которыми эти пропуски заполняются при печати письма.</p>
+<pre><code class="language-yaml"># values.yaml
+replicaCount: 2
+image:
+  repository: username/shop-api
+  tag: &quot;1.0&quot;
+service:
+  port: 8080
+</code></pre>
+<pre><code class="language-yaml"># templates/deployment.yaml (фрагмент)
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    spec:
+      containers:
+        - name: shop-api
+          image: &quot;{{ .Values.image.repository }}:{{ .Values.image.tag }}&quot;
+          ports:
+            - containerPort: {{ .Values.service.port }}
+</code></pre>
+<p>В отличие от Kustomize, шаблоны Helm содержат настоящий язык шаблонизации (<code>{{ .Values.xxx }}</code>) — при установке чарта Helm подставляет в шаблон реальные значения из <code>values.yaml</code> (или переопределённые через <code>--set</code> при установке) и только затем отправляет получившиеся манифесты в кластер.</p>
+
+<figure class="explain" data-anim="helm-template"><figcaption><span class="explain-tag">▶ схема</span>Попробуй сама: values + шаблон = манифест</figcaption><div class="explain-stage"><p class="explain-fallback">Интерактивная схема загружается…</p></div></figure></div></section><section class="step" id="s-10" data-kind="theory"><div class="step-kicker">// шаг <b>11</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Жизненный цикл релиза: package, install, upgrade</h2><div class="prose"><p><em>Аналогия:</em> package — упаковать готовую мебель в коробку для доставки; install — впервые собрать и поставить её в конкретной комнате под своим названием; upgrade — заменить отдельные детали в уже собранной мебели, не разбирая её с нуля.</p>
+<pre><code class="language-bash">helm package mychart
+# создаёт mychart-0.1.0.tgz
+
+helm install my-release ./mychart-0.1.0.tgz --namespace production --create-namespace
+
+kubectl get all -n production
+
+# меняем что-то в values.yaml, например replicaCount: 3
+helm upgrade my-release ./mychart-0.1.0.tgz --namespace production
+</code></pre>
+<p><code>helm package</code> упаковывает чарт в архив <code>.tgz</code> — удобный формат для хранения и передачи версии чарта. <code>helm install</code> разворачивает чарт в кластер под конкретным именем релиза (<code>my-release</code>) и в конкретном namespace — один и тот же чарт можно установить несколько раз под разными именами (например, для разных клиентов). <code>helm upgrade</code> применяет изменения к уже существующему релизу, не удаляя и не пересоздавая его с нуля — Helm сам вычисляет разницу и обновляет только изменившиеся объекты. После обновления, как и в Kustomize-варианте, стоит прогнать функциональные тесты Postman на живом приложении.</p>
+<p>Помимо install/upgrade, у Helm есть встроенная история версий релиза — это одно из главных преимуществ Helm перед голым <code>kubectl apply</code>:</p>
+<pre><code class="language-bash">helm history my-release --namespace production
+helm rollback my-release 2 --namespace production
+</code></pre>
+<p>Каждый <code>helm upgrade</code> не стирает предыдущую версию, а сохраняет её в истории релиза как отдельную ревизию. <code>helm history</code> показывает список всех прошлых ревизий с номерами. <code>helm rollback my-release 2</code> в одну команду возвращает релиз к состоянию ревизии №2 — без ручного поиска, какие именно манифесты были раньше, и без необходимости заново собирать и накатывать старую версию чарта вручную. У Kustomize такого встроенного механизма нет — откат через него означает применить старую версию манифестов заново через <code>git checkout</code> и <code>kubectl apply -k</code>.</p>
+</div></section><section class="step" id="s-11" data-kind="theory"><div class="step-kicker">// шаг <b>12</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Откуда берутся значения и как проверить результат заранее</h2><div class="prose"><p><em>Аналогия:</em> значения в Helm накладываются как слои краски — каждый следующий перекрывает предыдущий, и видно только верхний. Знать порядок слоёв важнее, чем знать сами цвета.</p>
+<p><img loading="lazy" src="../assets/diagrams/do12-helm-render.svg" alt="" /></p>
+<p>Значения приходят из трёх мест, и каждое следующее перекрывает предыдущее:</p>
+<pre><code class="language-bash"># самый слабый слой — values.yaml внутри чарта
+helm install app ./mychart
+
+# свой файл значений перекрывает встроенный
+helm install app ./mychart -f values-prod.yaml
+
+# несколько файлов: каждый следующий сильнее предыдущего
+helm install app ./mychart -f values-base.yaml -f values-prod.yaml
+
+# --set перекрывает всё
+helm install app ./mychart -f values-prod.yaml --set image.tag=1.4.2
+</code></pre>
+<p>Отсюда типичная схема в реальных проектах: общий <code>values.yaml</code> в репозитории, файл на окружение (<code>values-staging.yaml</code>, <code>values-prod.yaml</code>), а <code>--set</code> — только для тега образа, который подставляет CI/CD.</p>
+<p>Перед установкой чарт стоит проверить, и для этого есть три разные команды:</p>
+<pre><code class="language-bash">helm lint ./mychart                       # структура чарта и синтаксис шаблонов
+helm template app ./mychart -f prod.yaml  # напечатать итоговый YAML, не трогая кластер
+helm install app ./mychart --dry-run --debug   # то же + проверка манифестов API-сервером
+</code></pre>
+<p><code>helm template</code> — главная команда при разборе чужого чарта. Прежде чем ставить в кластер что-то из интернета, её вывод читают глазами: там видно, какие права запрашиваются, какие образы тянутся и какие тома монтируются.</p>
+</div></section><section class="step" id="s-12" data-kind="theory"><div class="step-kicker">// шаг <b>13</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Шаблоны всерьёз: условия, циклы и вспомогательные шаблоны</h2><div class="prose"><p><em>Аналогия:</em> <code>values.yaml</code> из §9 — бланк с пропусками. Здесь начинается настоящий текст договора с оговорками «если сторона А, то пункт 5 не применяется».</p>
+<p>Условие — чтобы Ingress создавался только там, где он нужен:</p>
+<pre><code class="language-yaml">{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include &quot;mychart.fullname&quot; . }}
+spec:
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+  {{- end }}
+{{- end }}
+</code></pre>
+<p>Три конструкции, без которых не читается ни один реальный чарт:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Запись</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{{- if ... }}</code> … <code>{{- end }}</code></td>
+<td>Включает кусок манифеста по условию</td>
+</tr>
+<tr>
+<td><code>{{- range ... }}</code></td>
+<td>Повторяет блок для каждого элемента списка</td>
+</tr>
+<tr>
+<td><code>{{ include &quot;имя&quot; . }}</code></td>
+<td>Вставляет именованный шаблон из <code>_helpers.tpl</code></td>
+</tr>
+<tr>
+<td><code>{{ .Release.Name }}</code></td>
+<td>Имя релиза — доступно всегда, даже без values</td>
+</tr>
+<tr>
+<td><code>{{- toYaml .Values.resources | nindent 12 }}</code></td>
+<td>Вставляет целый блок YAML с нужным отступом</td>
+</tr>
+</tbody>
+</table></div>
+<p>Дефис в <code>{{-</code> убирает лишний перевод строки — без него в готовом YAML появляются пустые строки, которые ломают структуру.</p>
+<p>Файл <code>templates/_helpers.tpl</code> — место для повторяющихся кусков. Классический пример: имя релиза и набор меток, которые нужны в каждом манифесте.</p>
+<pre><code>{{- define &quot;mychart.labels&quot; -}}
+app.kubernetes.io/name: {{ .Chart.Name }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion }}
+{{- end }}
+</code></pre>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Отступы — главный источник боли в Helm</summary><div class="callout-body"><p>Helm не понимает YAML, он работает с текстом. Строка <code>{{ toYaml .Values.resources }}</code> вставит блок без отступа и сломает манифест. Правильно — <code>{{- toYaml .Values.resources | nindent 12 }}</code>: функция <code>nindent</code> добавляет перевод строки и отступ в 12 пробелов.</p>
+<p>Отлаживать это глазами бесполезно — надо смотреть <code>helm template</code> и считать пробелы в выводе.</p>
+</div></details></div></section><section class="step" id="s-13" data-kind="theory"><div class="step-kicker">// шаг <b>14</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Зависимости: чарт внутри чарта</h2><div class="prose"><p><em>Аналогия:</em> приложению нужна база и кеш — вместо того, чтобы описывать их с нуля, чарт объявляет их как зависимости, ровно как <code>requirements.txt</code> в Python из урока 2.1.</p>
+<pre><code class="language-yaml"># Chart.yaml
+apiVersion: v2
+name: mychart
+version: 0.1.0
+dependencies:
+  - name: postgresql
+    version: &quot;16.x.x&quot;
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+</code></pre>
+<pre><code class="language-bash">helm dependency update ./mychart   # скачивает зависимости в charts/
+</code></pre>
+<p>Значения подчарта переопределяются из родительского <code>values.yaml</code> под ключом с его именем:</p>
+<pre><code class="language-yaml">postgresql:
+  enabled: true
+  auth:
+    database: myapp
+  primary:
+    persistence:
+      size: 20Gi
+</code></pre>
+<p>Поле <code>condition</code> позволяет отключать зависимость целиком: в проде базу берут управляемую у облака, а подчарт с PostgreSQL включают только на тестовом контуре.</p>
+
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Bitnami уже не тот</summary><div class="callout-body"><p>Чарты Bitnami годами были стандартом «по умолчанию», поэтому они в каждом втором туториале. С августа 2025 года Broadcom перевёл бесплатный каталог на платную модель: версионированные образы уехали в <code>bitnamilegacy</code> и <strong>больше не получают обновлений безопасности</strong>, а чарты по умолчанию ссылаются на эти старые образы. Пример выше показывает механизм зависимостей, но в новых проектах для PostgreSQL бери оператор <strong>CloudNativePG</strong> или управляемую базу облака, а для остального — официальные чарты самих проектов.</p>
+</div></details></div></section><section class="step" id="s-14" data-kind="theory"><div class="step-kicker">// шаг <b>15</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Репозитории чартов и OCI</h2><div class="prose"><p><em>Аналогия:</em> обычный репозиторий чартов — сайт со списком пакетов, как apt-репозиторий. OCI — хранение чарта прямо в реестре образов, рядом с самим образом приложения.</p>
+<pre><code class="language-bash">helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm search repo kube-prometheus-stack
+helm show values prometheus-community/kube-prometheus-stack | less   # какие параметры вообще есть
+</code></pre>
+<p>Современный способ — хранить чарт в том же реестре, что и образ:</p>
+<pre><code class="language-bash">helm push mychart-0.1.0.tgz oci://registry.example.com/charts
+helm install app oci://registry.example.com/charts/mychart --version 0.1.0
+</code></pre>
+<p>Преимущество очевидно: чарт версии <code>0.1.0</code> и образ версии <code>1.4.2</code> лежат в одном месте, с одинаковыми правами доступа и одинаковым сканированием на уязвимости. Отдельный сервер репозитория чартов больше не нужен.</p>
+<p>Команда <code>helm show values</code> — обязательный первый шаг при работе с чужим чартом. Она печатает все доступные параметры с их значениями по умолчанию, и без неё настройка превращается в угадывание.</p>
+</div></section><section class="step" id="s-15" data-kind="theory"><div class="step-kicker">// шаг <b>16</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Установка и обновление в CI/CD: флаги, которые меняют всё</h2><div class="prose"><p><em>Аналогия:</em> <code>helm install</code> без флагов — как отправить грузовик и не спросить, доехал ли он. Флаги ниже превращают команду в проверяемую операцию с гарантированным исходом.</p>
+<pre><code class="language-bash">helm upgrade --install app ./mychart \
+  -f values-prod.yaml \
+  --set image.tag=1.4.2 \
+  --namespace production --create-namespace \
+  --atomic --timeout 5m
+</code></pre>
+<p>Разбор по флагам:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Флаг</th>
+<th>Зачем нужен</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>upgrade --install</code></td>
+<td>Ставит, если релиза нет, обновляет, если есть. Одна команда для любого состояния — идемпотентность, как в Ansible из урока 4.3</td>
+</tr>
+<tr>
+<td><code>--atomic</code></td>
+<td>При неудаче <strong>автоматически откатывает</strong> релиз к прошлой ревизии. Без него неудачное обновление оставляет кластер в промежуточном состоянии</td>
+</tr>
+<tr>
+<td><code>--timeout 5m</code></td>
+<td>Сколько ждать готовности. Работает вместе с <code>--atomic</code></td>
+</tr>
+<tr>
+<td><code>--wait</code></td>
+<td>Ждать, пока поды станут готовыми (<code>--atomic</code> включает его сам)</td>
+</tr>
+<tr>
+<td><code>--create-namespace</code></td>
+<td>Создать пространство имён, если его нет</td>
+</tr>
+</tbody>
+</table></div>
+<p>Сочетание <code>upgrade --install</code> с <code>--atomic</code> — стандартный способ выкладки из конвейера. Оно даёт ровно то, чего мы добивались вручную в уроке 3.2: либо новая версия работает, либо всё вернулось как было, и промежуточных состояний не бывает.</p>
+<p><code>--wait</code> при этом опирается на пробы из урока 5.1: без настроенных <code>readinessProbe</code> Helm считает под готовым сразу после запуска и рапортует об успехе, даже если приложение не поднялось.</p>
+</div></section><section class="step" id="s-16" data-kind="theory"><div class="step-kicker">// шаг <b>17</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Где Helm ломается: четыре вещи, которые надо знать заранее</h2><div class="prose"><details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>Откат не возвращает данные</summary><div class="callout-body"><p><code>helm rollback</code> откатывает манифесты, но не содержимое дисков. Если обновление приложения выполнило миграцию базы, откат чарта вернёт старый код, работающий с новой схемой данных, — и станет только хуже. Миграции надо делать обратимо совместимыми: сначала схема, которая работает и со старым, и с новым кодом, потом код.</p>
+</div></details>
+<details class="callout callout-danger" open><summary><span class="callout-icon">🛑</span>CRD не обновляются</summary><div class="callout-body"><p>Helm устанавливает содержимое папки <code>crds/</code> при первой установке и <strong>никогда не трогает его при <code>helm upgrade</code></strong>. Обновление оператора, у которого поменялись определения ресурсов, требует применить CRD вручную. Симптом — поля из новой версии молча игнорируются.</p>
+</div></details>
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span><code>--reuse-values</code> игнорирует изменения в чарте</summary><div class="callout-body"><p>Флаг берёт значения предыдущего релиза и накладывает поверх только то, что передано в этой команде. Новые параметры, появившиеся в <code>values.yaml</code> чарта, не применятся вовсе. Правильная привычка — всегда передавать полный набор через <code>-f</code>, а состояние хранить в git, а не в релизе.</p>
+</div></details>
+<details class="callout callout-warning" open><summary><span class="callout-icon">⚠️</span>Релиз хранится в кластере</summary><div class="callout-body"><p>Helm держит состояние релиза в Secret'ах внутри пространства имён (<code>sh.helm.release.v1.*</code>). Удалили пространство имён — потеряли историю релиза и возможность отката. Смотреть это можно так:</p>
+<pre><code class="language-bash">kubectl get secret -n production -l owner=helm
+helm get values app -n production      # с какими значениями стоит сейчас
+helm get manifest app -n production    # что реально применено в кластер
+</code></pre>
+<p>Команда <code>helm get manifest</code> — лучший ответ на вопрос «а что вообще сейчас развёрнуто».</p>
+</div></details></div></section><section class="step" id="s-17" data-kind="theory"><div class="step-kicker">// шаг <b>18</b>/23 · теория · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~1 мин</span></div><h2>Helm или Kustomize: как выбирать</h2><div class="prose"><p>Оба инструмента живые, и спор между ними на собеседовании — проверка на здравый смысл, а не на знание фактов.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Ситуация</th>
+<th>Что выбрать</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Раздаёте приложение другим людям или командам</td>
+<td>Helm — параметры, версии, один архив</td>
+</tr>
+<tr>
+<td>Ставите чужое ПО (Prometheus, Ingress, cert-manager)</td>
+<td>Helm — других вариантов почти нет</td>
+</tr>
+<tr>
+<td>Свои манифесты, два-три окружения с мелкими отличиями</td>
+<td>Kustomize — проще, без шаблонного языка</td>
+</tr>
+<tr>
+<td>Нужен откат одной командой</td>
+<td>Helm — у Kustomize встроенного механизма нет</td>
+</tr>
+<tr>
+<td>Хотите читать манифесты глазами без рендеринга</td>
+<td>Kustomize — это обычный YAML</td>
+</tr>
+<tr>
+<td>GitOps через ArgoCD</td>
+<td>Работают оба; ArgoCD сам рендерит и то, и другое</td>
+</tr>
+</tbody>
+</table></div>
+<p>Правдивый ответ, который ценится: <em>«Чужое ставим Helm'ом, потому что чарты уже написаны. Своё — по ситуации: если конфигурация раздаётся наружу и параметризуется, Helm; если это наши манифесты для наших же окружений, Kustomize читается легче и не превращает YAML в программу».</em></p>
+<p>Существует и распространённый гибрид: Helm рендерит чарт, а Kustomize патчит результат — так дотягивают чужой чарт до своих требований, не форкая его.</p>
+</div></section><section class="step" id="summary" data-kind="summary"><div class="step-kicker">// шаг <b>19</b>/23 · итоги · <span class="step-time"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-clock"/></svg> ~2 мин</span></div><h2>Если запомнить только главное</h2><div class="prose"><ul>
+<li>И Helm, и Kustomize решают одну проблему — не повторять развёртывание манифестов вручную снова и снова — но разными способами.</li>
+<li>Kustomize патчит уже существующие обычные манифесты без шаблонного языка; Helm использует настоящие шаблоны с плейсхолдерами.</li>
+<li>base/overlays в Kustomize — общая конфигурация плюс точечные различия для конкретного окружения.</li>
+<li>configMapGenerator/secretGenerator в overlay создают ConfigMap/Secret прямо из списка значений.</li>
+<li>Патч меняет только указанное поле объекта, не переписывая весь манифест целиком.</li>
+<li>Helm chart — пакет с Chart.yaml, values.yaml и templates/, созданный командой helm create.</li>
+<li>values.yaml задаёт значения, которые Helm подставляет в шаблоны при установке чарта.</li>
+<li>helm install создаёт именованный релиз в конкретном namespace; helm upgrade обновляет уже существующий релиз без полного пересоздания.</li>
+<li>helm history/helm rollback позволяют откатиться к любой прошлой ревизии релиза одной командой — у Kustomize встроенного аналога нет.</li>
+<li><strong>Порядок значений:</strong> <code>values.yaml</code> чарта → свои файлы <code>-f</code> (правый сильнее) → <code>--set</code>. Побеждает самый правый.</li>
+<li>Перед установкой: <code>helm lint</code>, <code>helm template</code> (напечатать итоговый YAML без кластера), <code>--dry-run</code>. <strong>Чужой чарт всегда сначала прогоняют через <code>helm template</code> и читают вывод.</strong></li>
+<li><code>helm show values &lt;чарт&gt;</code> печатает все доступные параметры — первый шаг при работе с любым чужим чартом.</li>
+<li>Отступы в шаблонах: только <code>{{- toYaml ... | nindent N }}</code>. Helm работает с текстом, а не с YAML, и сам отступы не выровняет.</li>
+<li>Стандартная команда выкладки из CI: <strong><code>helm upgrade --install ... --atomic --timeout 5m</code></strong> — идемпотентно и с автоматическим откатом при неудаче.</li>
+<li><code>--atomic</code> и <code>--wait</code> опираются на <code>readinessProbe</code>: без проб Helm рапортует об успехе, даже если приложение не поднялось.</li>
+<li><strong><code>helm rollback</code> не возвращает данные</strong> — только манифесты. Откат после миграции базы делает хуже, а не лучше.</li>
+<li><strong>CRD не обновляются при <code>helm upgrade</code></strong> — только при первой установке. Обновление оператора требует применить их вручную.</li>
+<li>Состояние релиза лежит в Secret'ах кластера. <code>helm get manifest</code> показывает, что реально развёрнуто; <code>helm get values</code> — с какими значениями.</li>
+<li>Выбор: чужое ПО — Helm, свои манифесты для своих окружений — обычно Kustomize. Гибрид (Helm рендерит, Kustomize патчит) — нормальная практика.</li>
+</ul>
+</div></section><section class="step" id="practice" data-kind="practice"><div class="step-kicker">// шаг <b>20</b>/23 · практика</div><h2>Практика</h2><div class="prose"><p class="lead">Задания делаются на своей машине или в облаке. Отметь задание, когда выполнила проверку из его описания, — за каждое начисляется опыт.</p><details class="callout callout-tip" open><summary><span class="callout-icon">💡</span>В портфолио</summary><div class="callout-body"><ul>
+<li>Задания 2–5 — чарт приложения в <a href="../projects/p3.html">P3</a>.</li>
+<li>Задание 5 (публикация чарта в OCI-реестр) — финальный шаг <a href="../projects/m4.html">M4</a>.</li>
+</ul>
+</div></details><article class="task" data-task="ac1127cba8"><h3>Задание 1 — Kustomize</h3><p>Сделай base с Deployment и Service и оверлеи dev и prod: разное число реплик, разные ConfigMap через генератор, общие метки.<br />
+<strong>Проверка:</strong> <code>kubectl kustomize overlays/prod</code> выдаёт итоговые манифесты; изменение ConfigMap меняет хеш в имени и перезапускает поды.</p>
+<label class="task-done"><input type="checkbox" data-task-check="ac1127cba8"> Сделала руками и проверила</label></article><article class="task" data-task="5fef7df4dc"><h3>Задание 2 — свой чарт</h3><p>Создай чарт приложения: шаблоны Deployment, Service, Ingress (включаемый через <code>ingress.enabled</code>), helper для меток в <code>_helpers.tpl</code>.<br />
+<strong>Проверка:</strong> <code>helm lint</code> проходит; <code>helm template . --set ingress.enabled=false</code> не содержит Ingress.</p>
+<label class="task-done"><input type="checkbox" data-task-check="5fef7df4dc"> Сделала руками и проверила</label></article><article class="task" data-task="50cc00baa6"><h3>Задание 3 — релиз и откат</h3><p>Установи чарт, обнови с другим тегом образа через <code>helm upgrade --install --atomic --wait</code>, затем откати.<br />
+<strong>Проверка:</strong> <code>helm history</code> показывает ревизии; неудачный upgrade с битым образом с <code>--atomic</code> откатывается сам.</p>
+<label class="task-done"><input type="checkbox" data-task-check="50cc00baa6"> Сделала руками и проверила</label></article><article class="task" data-task="2381aba1e5"><h3>Задание 4 — зависимость</h3><p>Добавь PostgreSQL как зависимость чарта (Bitnami или CloudNativePG) и передай ему параметры через values.<br />
+<strong>Проверка:</strong> <code>helm dependency update</code> скачивает зависимость, одна команда <code>helm install</code> поднимает приложение с базой.</p>
+<label class="task-done"><input type="checkbox" data-task-check="2381aba1e5"> Сделала руками и проверила</label></article><article class="task" data-task="a1119b6a4c"><h3>Задание 5 — публикация</h3><p>Упакуй чарт и опубликуй в OCI-реестр GitLab или GitHub.<br />
+<strong>Проверка:</strong> <code>helm install</code> из <code>oci://...</code> на чистом кластере работает.</p>
+<label class="task-done"><input type="checkbox" data-task-check="a1119b6a4c"> Сделала руками и проверила</label></article></div></section><section class="step" id="quiz" data-kind="quiz"><div class="step-kicker">// шаг <b>21</b>/23 · тест</div><h2>Тест</h2><div class="prose"><div class="quiz" id="quiz-box"></div></div></section><section class="step" id="cards" data-kind="cards"><div class="step-kicker">// шаг <b>22</b>/23 · собеседование</div><h2>Вопросы с собеседований</h2><div class="prose"><div class="flashcards" id="flashcards"></div></div></section><section class="step" id="materials" data-kind="materials"><div class="step-kicker">// шаг <b>23</b>/23 · материалы</div><h2>Связи и источники</h2><div class="prose"><h3>Связано с</h3><ul>
+<li><a href="../index.html">карта курса</a></li>
+<li><a href="../lessons/5-1.html">5.1 Kubernetes</a></li>
+<li><a href="../lessons/5-2.html">5.2 Kubernetes в работе</a></li>
+<li><a href="../lessons/5-4.html">5.4 GitOps и Argo CD</a></li>
+<li><a href="../lessons/6-1.html">6.1 CI-CD в Kubernetes</a></li>
+</ul>
+<h3>Источники</h3><ul>
+<li>Документация Helm: https://helm.sh/docs/</li>
+<li>Kustomize: https://kubectl.docs.kubernetes.io/references/kustomize/</li>
+<li>Kubernetes: управление объектами через Kustomize — https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/</li>
+</ul>
+</div></section>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="prev-step">← Назад</button>
+      <button class="btn btn-primary" id="next-step">Дальше →</button>
+    </div>
+    <div class="lesson-nav"><a class="lesson-jump" href="5-2.html">← 5.2 Kubernetes в работе: кластер, HTTPS, хранилище</a><a class="lesson-jump" href="5-4.html">5.4 GitOps и Argo CD →</a></div>
+  </main>
+</div>
+<nav class="bottomnav" aria-label="Разделы"><a href="../index.html" data-nav="index lesson"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-course"/></svg><span>курс</span></a><a href="../roadmap.html" data-nav="roadmap"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-map"/></svg><span>карта</span></a><a href="../cards.html" data-nav="cards"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-cards"/></svg><span>карточки</span></a><a href="../lab.html" data-nav="lab sql python games terminal cluster incident interview lint"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-lab"/></svg><span>лаб</span></a><a href="../profile.html" data-nav="profile resume project"><svg class="ic " aria-hidden="true"><use href="../static/icons.svg?v=5261b884a0#i-profile"/></svg><span>профиль</span></a></nav>
+<div class="toasts" id="toasts"></div>
+<script id="page-data" type="application/json">{"lesson": "5-3", "number": "5.3", "title": "Helm и Kustomize", "steps": [{"id": "intro", "kind": "theory"}, {"id": "s-1", "kind": "theory"}, {"id": "s-2", "kind": "theory"}, {"id": "s-3", "kind": "theory"}, {"id": "s-4", "kind": "theory"}, {"id": "s-5", "kind": "theory"}, {"id": "s-6", "kind": "theory"}, {"id": "s-7", "kind": "theory"}, {"id": "s-8", "kind": "theory"}, {"id": "s-9", "kind": "theory"}, {"id": "s-10", "kind": "theory"}, {"id": "s-11", "kind": "theory"}, {"id": "s-12", "kind": "theory"}, {"id": "s-13", "kind": "theory"}, {"id": "s-14", "kind": "theory"}, {"id": "s-15", "kind": "theory"}, {"id": "s-16", "kind": "theory"}, {"id": "s-17", "kind": "theory"}, {"id": "summary", "kind": "summary"}, {"id": "practice", "kind": "practice"}, {"id": "quiz", "kind": "quiz"}, {"id": "cards", "kind": "cards"}, {"id": "materials", "kind": "materials"}], "practice": ["ac1127cba8", "5fef7df4dc", "50cc00baa6", "2381aba1e5", "a1119b6a4c"], "quiz": [{"id": "96b36de0be", "q": "Чем Helm отличается от Kustomize?", "options": ["Helm — шаблоны, values и релизы с историей; Kustomize — патчи поверх обычных YAML без шаблонов", "Kustomize умеет откатывать релизы, Helm нет", "Это одно и то же", "Helm работает только в облаке"], "answer": [0], "why": "<p>Helm удобнее для распространяемых пакетов, Kustomize — для своих манифестов с небольшими различиями окружений.<\/p>\n"}, {"id": "5fa900a024", "q": "Что делает <code>helm upgrade --install --atomic --wait<\/code>?", "options": ["Удаляет релиз и ставит заново", "Ставит или обновляет релиз, ждёт готовности и при неудаче сам откатывается к прошлой ревизии", "Только проверяет чарт", "Обновляет Helm"], "answer": [1], "why": "<p><code>--wait<\/code> опирается на readinessProbe. Без проб Helm посчитает под готовым сразу после запуска.<\/p>\n"}, {"id": "5527ab4d68", "q": "Как посмотреть, какие манифесты применит Helm, до установки? Выбери все.", "options": ["<code>helm template<\/code>", "<code>helm upgrade --dry-run --debug<\/code>", "плагин <code>helm diff<\/code>", "<code>helm uninstall<\/code>"], "answer": [0, 1, 2], "why": "<p>так ошибки в шаблонах видны до того, как они попали в кластер.<\/p>\n"}, {"id": "b5dda7ca18", "q": "Где Helm хранит историю релизов?", "options": ["В локальной папке <code>~/.helm<\/code>", "В Secret'ах в namespace релиза", "В git", "Нигде"], "answer": [1], "why": "<p>поэтому удаление namespace стирает и историю релизов.<\/p>\n"}, {"id": "a3fa667830", "q": "Зачем генератор ConfigMap в Kustomize добавляет хеш к имени?", "options": ["Для красоты", "Чтобы изменение конфигурации меняло спецификацию пода и запускало rolling update", "Чтобы ConfigMap нельзя было удалить", "Для шифрования"], "answer": [1], "why": "<p>обычный ConfigMap при изменении не перезапускает поды, и они продолжают работать со старыми настройками.<\/p>\n"}, {"id": "8bcc8fea2a", "q": "Где в чарте задаются параметры, которые различаются между окружениями?", "options": ["В <code>Chart.yaml<\/code>", "В <code>values.yaml<\/code> и файлах вроде <code>values-prod.yaml<\/code>", "В <code>_helpers.tpl<\/code>", "В <code>.helmignore<\/code>"], "answer": [1], "why": "<p>шаблоны общие, а число реплик, домены и ресурсы приходят из values.<\/p>\n"}, {"id": "74d5943a37", "q": "Зачем фиксировать версию зависимости в <code>Chart.yaml<\/code>?", "options": ["Иначе чарт не соберётся", "Чтобы обновление стороннего чарта не попало в релиз неожиданно", "Чтобы уменьшить размер чарта", "Для совместимости с Kustomize"], "answer": [1], "why": "<p>обновление зависимости должно быть осознанным изменением, которое видно на ревью.<\/p>\n"}], "cards": [{"id": "0335301dcd", "q": "Чем Helm отличается от Kustomize?", "a": "<p>Helm — шаблонизатор и пакетный менеджер: параметризация через values, релизы с историей и откатом, зависимости, репозитории. Kustomize — патчинг обычных YAML без шаблонов, встроен в kubectl. Helm удобнее для распространяемых пакетов, Kustomize — для своих манифестов с небольшими различиями окружений.<\/p>\n"}, {"id": "f41451e943", "q": "Что делает <code>helm upgrade --install --atomic<\/code>?", "a": "<p>Устанавливает релиз, если его нет, или обновляет существующий; при ошибке автоматически откатывает изменения к предыдущей ревизии.<\/p>\n"}, {"id": "db3bb2e6b6", "q": "Как посмотреть, что Helm применит, до установки?", "a": "<p><code>helm template<\/code> — отрендерить манифесты локально; <code>helm upgrade --dry-run --debug<\/code> — с проверкой на кластере; плагин <code>helm diff<\/code> — разница с текущим релизом.<\/p>\n"}, {"id": "68dfc3d098", "q": "Где Helm хранит историю релизов?", "a": "<p>В Secret'ах в namespace релиза. Поэтому удаление namespace удаляет и историю.<\/p>\n"}, {"id": "826f9d2728", "q": "Почему меняется хеш в имени ConfigMap при использовании генератора Kustomize?", "a": "<p>Чтобы изменение конфигурации меняло спецификацию пода и запускало rolling update; обычный ConfigMap при изменении не перезапускает поды.<\/p>\n"}], "next": "5-4"}</script>
+<script defer src="../course.js?v=5261b884a0"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="../static/fx.js?v=5261b884a0"></script>
+<script defer src="../static/explain.js?v=5261b884a0"></script>
+<script defer src="../static/app.js?v=5261b884a0"></script>
+<script defer src="../static/sqlbox.js?v=5261b884a0"></script>
+<script defer src="../static/pybox.js?v=5261b884a0"></script>
+<script defer src="../static/roadmap.js?v=5261b884a0"></script>
+<script defer src="../static/games.js?v=5261b884a0"></script>
+<script defer src="../static/search.js?v=5261b884a0"></script>
+<script defer src="../static/term.js?v=5261b884a0"></script>
+<script defer src="../static/cluster.js?v=5261b884a0"></script>
+<script defer src="../static/incident.js?v=5261b884a0"></script>
+<script defer src="../static/interview.js?v=5261b884a0"></script>
+<script defer src="../static/lint.js?v=5261b884a0"></script>
+<script defer src="../static/resume.js?v=5261b884a0"></script>
+<script defer src="../static/reader.js?v=5261b884a0"></script>
+<script defer src="../static/tour.js?v=5261b884a0"></script>
+</body>
+</html>
